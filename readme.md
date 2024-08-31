@@ -12,7 +12,7 @@ python3.9 -m venv taxocomplete
 ```
 - Second, install pytorch and dgl via the following command:
 ``` bash
-pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio==0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
+pip install torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2+cu118 -f https://download.pytorch.org/whl/torch_stable.html
 conda install -c dglteam dgl-cuda11.1
 ```
 - Finally, all remaining required packages could be installed with the requirements file:
