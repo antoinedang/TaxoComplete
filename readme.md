@@ -28,11 +28,11 @@ This repository is organized as follows:
     - SemEval-Noun
     - SemEval-Verb
 - config_files: we specify for each dataset the hyperparameters used to train TaxoComplete.
-- config_files_evaluate: we provide config files to evaluate on MAG-PSY-Wiki in case one has a trained model.
+- config_files_evaluate: we provide config files to evaluate on MAG-PSY in case one has a trained model.
 - src: contains the source code of TaxoComplete
 
 ### Running the code
-- For the sake of reproducibility, we specify all hyperparameters in the config_files folder. For instance, to train and evaluate TaxoComplete on the MAG-PSY-Wiki dataset, use the following command:
+- For the sake of reproducibility, we specify all hyperparameters in the config_files folder. For instance, to train and evaluate TaxoComplete on the MAG-PSY dataset, use the following command:
 ``` bash
 python ./src/train.py --config ./config_files/psy/config_clst20_s47.json
 ```
