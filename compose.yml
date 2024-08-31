@@ -1,0 +1,13 @@
+services:
+  mujoco:
+    volumes:
+      - ./:/root/TaxoComplete
+    image: "taxocomplete:latest"
+    command: bash -c "tail -f /dev/null"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
