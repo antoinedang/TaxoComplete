@@ -126,8 +126,8 @@ def compute_prediction_optimized(
 
             # now that we have the hits and scores, calculate the scores for edge direction (i.e. is the query the parent or the child?)
             scores_arr = np.array(scores)
-            print("hits.shape")
-            print(hits.shape)
+            print("len(hits)")
+            print(len(hits))
             print("parents.shape")
             print(parents.shape)
             print("children.shape")
