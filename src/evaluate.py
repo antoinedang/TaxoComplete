@@ -16,8 +16,14 @@ from model.utils import PPRPowerIteration
 torch.manual_seed(0)
 args = argparse.ArgumentParser(description='Training taxonomy expansion model')
 args.add_argument('-c', '--config', default=None, type=str, help='config file path (default: None)')
+args.add_argument('-o', '--opt', action="store_true", help='config file path (default: None)')
 config = ConfigParser(args)
 args = args.parse_args()
+
+if args.opt:
+    ms.compute_prediction = ms.compute_prediction_optimized
+else:
+    ms.compute_prediction = ms.compute_prediction_original
 
 saving_path = config['saving_path']
 name = config['name']

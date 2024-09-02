@@ -28,7 +28,7 @@ def save_results(saving_path,all_targets, all_predictions,name_file):
     return line_metric,line
 
 
-def compute_prediction(edges,leaf_node, queries,corpus_embeddings,model,node_list,node2positions,corpusId2nodeId):
+def compute_prediction_original(edges,leaf_node, queries,corpus_embeddings,model,node_list,node2positions,corpusId2nodeId):
     top_k = len(corpus_embeddings)
     all_targets = []
     all_predictions = []
