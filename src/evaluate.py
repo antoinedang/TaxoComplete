@@ -3,6 +3,7 @@ import math
 import argparse
 import torch
 import numpy as np
+import time
 
 from torch.utils.data import DataLoader
 import data_process.split_data as st
@@ -65,14 +66,21 @@ model = SentenceTransformer.SentenceTransformer(config['model_path'])
 corpus_embeddings = model.encode(data_prep.corpus, convert_to_tensor=True, show_progress_bar=True)
 preds = propagation(corpus_embeddings,torch.tensor(range(len(nodeIdsCorpus)),device=target_device))
 
+start_evaluate_time = time.time()
 
 all_targets_val, all_predictions_val, all_scores_val, edges_predictions_val, all_edges_scores_val = ms.compute_prediction(data_prep.core_subgraph.edges,data_prep.pseudo_leaf_node, data_prep.valid_queries,corpus_embeddings,model,data_prep.valid_node_list,data_prep.valid_node2pos,data_prep.corpusId2nodeId)
-ms.save_results(str(config.save_dir)+'/',all_targets_val, edges_predictions_val,"eval_val")
-all_targets_test, all_predictions, all_scores_test, edges_predictions_test, all_edges_scores_test  = ms.compute_prediction(data_prep.core_subgraph.edges, data_prep.pseudo_leaf_node, data_prep.test_queries,corpus_embeddings,model,data_prep.test_node_list,data_prep.test_node2pos,data_prep.corpusId2nodeId)
-ms.save_results(str(config.save_dir)+'/',all_targets_test, edges_predictions_test,"eval_test")
 
+all_targets_test, all_predictions, all_scores_test, edges_predictions_test, all_edges_scores_test  = ms.compute_prediction(data_prep.core_subgraph.edges, data_prep.pseudo_leaf_node, data_prep.test_queries,corpus_embeddings,model,data_prep.test_node_list,data_prep.test_node2pos,data_prep.corpusId2nodeId)
 
 all_targets_val_ppr, all_predictions_val_ppr, all_scores_val_ppr, edges_predictions_val_ppr, all_edges_scores_val_ppr = ms.compute_prediction(data_prep.core_subgraph.edges,data_prep.pseudo_leaf_node, data_prep.valid_queries,preds,model,data_prep.valid_node_list,data_prep.valid_node2pos,data_prep.corpusId2nodeId)
-ms.save_results(str(config.save_dir)+'/',all_targets_val_ppr, edges_predictions_val_ppr,"eval_val_ppr")
+
 all_targets_test_ppr, all_predictions_ppr, all_scores_test_ppr, edges_predictions_test_ppr, all_edges_scores_test_ppr  = ms.compute_prediction(data_prep.core_subgraph.edges, data_prep.pseudo_leaf_node, data_prep.test_queries,preds,model,data_prep.test_node_list,data_prep.test_node2pos,data_prep.corpusId2nodeId)
+
+end_evaluate_time = time.time()
+
+print(">>>>>>>>>>>>>> TIME TAKEN FOR 4 EVALUATIONS: {} seconds".format(end_evaluate_time-start_evaluate_time))
+
+ms.save_results(str(config.save_dir)+'/',all_targets_val, edges_predictions_val,"eval_val")
+ms.save_results(str(config.save_dir)+'/',all_targets_test, edges_predictions_test,"eval_test")
+ms.save_results(str(config.save_dir)+'/',all_targets_val_ppr, edges_predictions_val_ppr,"eval_val_ppr")
 ms.save_results(str(config.save_dir)+'/',all_targets_test_ppr, edges_predictions_test_ppr,"eval_test_ppr")
