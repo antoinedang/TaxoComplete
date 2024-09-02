@@ -1,4 +1,4 @@
-#code from https://github.com/UKPLab/sentence-transformers
+# code from https://github.com/UKPLab/sentence-transformers
 import math
 import pdb
 
@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import List
+
 
 class SparseDropout(nn.Module):
     def __init__(self, p):
@@ -39,12 +40,12 @@ class MixedLinear(nn.Module):
         if bias:
             self.bias = nn.Parameter(torch.Tensor(out_features))
         else:
-            self.register_parameter('bias', None)
+            self.register_parameter("bias", None)
         self.reset_parameters()
 
     def reset_parameters(self):
         # Our fan_in is interpreted by PyTorch as fan_out (swapped dimensions)
-        nn.init.kaiming_uniform_(self.weight, mode='fan_out', a=math.sqrt(5))
+        nn.init.kaiming_uniform_(self.weight, mode="fan_out", a=math.sqrt(5))
         if self.bias is not None:
             _, fan_out = nn.init._calculate_fan_in_and_fan_out(self.weight)
             bound = 1 / math.sqrt(fan_out)
@@ -58,23 +59,25 @@ class MixedLinear(nn.Module):
                 res = input.matmul(self.weight)
         else:
             if input.is_sparse:
-                res = torch.sparse.addmm(self.bias.expand(input.shape[0], -1), input, self.weight)
+                res = torch.sparse.addmm(
+                    self.bias.expand(input.shape[0], -1), input, self.weight
+                )
             else:
                 res = torch.addmm(self.bias, input, self.weight)
         return res
 
     def extra_repr(self):
-        return 'in_features={}, out_features={}, bias={}'.format(
-                self.in_features, self.out_features, self.bias is not None)
+        return "in_features={}, out_features={}, bias={}".format(
+            self.in_features, self.out_features, self.bias is not None
+        )
 
 
 def sparse_matrix_to_torch(X):
     coo = X.tocoo()
     indices = np.array([coo.row, coo.col])
     return torch.sparse.FloatTensor(
-            torch.LongTensor(indices),
-            torch.FloatTensor(coo.data),
-            coo.shape)
+        torch.LongTensor(indices), torch.FloatTensor(coo.data), coo.shape
+    )
 
 
 def matrix_to_torch(X):
@@ -82,6 +85,7 @@ def matrix_to_torch(X):
         return sparse_matrix_to_torch(X)
     else:
         return torch.FloatTensor(X)
+
 
 def calc_A_hat(adj_matrix: sp.spmatrix) -> sp.spmatrix:
     nnodes = adj_matrix.shape[0]
@@ -97,6 +101,8 @@ def calc_ppr_exact(adj_matrix: sp.spmatrix, alpha: float) -> np.ndarray:
     M = calc_A_hat(adj_matrix)
     A_inner = sp.eye(nnodes) - (1 - alpha) * M
     return alpha * np.linalg.inv(A_inner.toarray())
+
+
 #
 # class PPRPowerIteration(nn.Module):
 #     def __init__(self, adj_matrix: sp.spmatrix, alpha: float, niter: int, drop_prob: float = None):
@@ -120,8 +126,11 @@ def calc_ppr_exact(adj_matrix: sp.spmatrix, alpha: float) -> np.ndarray:
 #             preds = intermediate_A_drop[cand_idx_adj] + self.alpha * local_preds
 #         return preds
 
+
 class PPRPowerIteration(nn.Module):
-    def __init__(self, adj_matrix: sp.spmatrix, alpha: float, niter: int, drop_prob: float = None):
+    def __init__(
+        self, adj_matrix: sp.spmatrix, alpha: float, niter: int, drop_prob: float = None
+    ):
         super().__init__()
         self.alpha = alpha
         self.niter = niter
@@ -129,7 +138,7 @@ class PPRPowerIteration(nn.Module):
         self.device = torch.device(device)
 
         M = calc_A_hat(adj_matrix)
-        self.register_buffer('A_hat', sparse_matrix_to_torch((1 - alpha) * M))
+        self.register_buffer("A_hat", sparse_matrix_to_torch((1 - alpha) * M))
 
         if drop_prob is None or drop_prob == 0:
             self.dropout = lambda x: x
@@ -144,12 +153,13 @@ class PPRPowerIteration(nn.Module):
             preds = A_drop @ preds + self.alpha * local_preds
         return preds[idx]
 
+
 class PPRExact(nn.Module):
     def __init__(self, adj_matrix: sp.spmatrix, alpha: float, drop_prob: float = None):
         super().__init__()
 
         ppr_mat = calc_ppr_exact(adj_matrix, alpha)
-        self.register_buffer('mat', torch.FloatTensor(ppr_mat))
+        self.register_buffer("mat", torch.FloatTensor(ppr_mat))
 
         if drop_prob is None or drop_prob == 0:
             self.dropout = lambda x: x

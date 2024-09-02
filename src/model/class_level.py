@@ -1,4 +1,4 @@
-#code from https://github.com/UKPLab/sentence-transformers
+# code from https://github.com/UKPLab/sentence-transformers
 import torch
 import numpy as np
 from torch import nn
@@ -15,13 +15,21 @@ import json
 
 
 class LevelClass(nn.Module):
-    def __init__(self, input_size: int, nclasses: int, hiddenunits: List[int], drop_prob: float, propagation, bias=False):
+    def __init__(
+        self,
+        input_size: int,
+        nclasses: int,
+        hiddenunits: List[int],
+        drop_prob: float,
+        propagation,
+        bias=False,
+    ):
         super(LevelClass, self).__init__()
 
         self.input_size = input_size
         self.nclasses = nclasses
-        self.hiddenunits =hiddenunits
-        self.drop_prob =drop_prob
+        self.hiddenunits = hiddenunits
+        self.drop_prob = drop_prob
         self.bias = bias
         fcs = [MixedLinear(input_size, hiddenunits[0], bias=bias)]
         for i in range(1, len(hiddenunits)):
@@ -45,29 +53,46 @@ class LevelClass(nn.Module):
         return res
 
     def forward(self, features: Dict[str, Tensor]):
-        #first model
-        features.update({'sentence_embedding': self._transform_features(features['sentence_embedding'])})
-        features.update({'sentence_embedding': self.propagation(features['sentence_embedding'])})
+        # first model
+        features.update(
+            {
+                "sentence_embedding": self._transform_features(
+                    features["sentence_embedding"]
+                )
+            }
+        )
+        features.update(
+            {"sentence_embedding": self.propagation(features["sentence_embedding"])}
+        )
         return features
 
     def get_word_embedding_dimension(self) -> int:
         return self.embeddings_dimension
 
     def save(self, output_path: str):
-        with open(os.path.join(output_path, 'level_class_config.json'), 'w') as fOut:
+        with open(os.path.join(output_path, "level_class_config.json"), "w") as fOut:
             json.dump(self.get_config_dict(), fOut, indent=2)
 
-        torch.save(self.state_dict(), os.path.join(output_path, 'pytorch_model.bin'))
+        torch.save(self.state_dict(), os.path.join(output_path, "pytorch_model.bin"))
 
     def get_config_dict(self):
-        return {'input_size': self.input_size, 'nclasses': self.nclasses, 'hiddenunits':self.hiddenunits, 'bias': self.bias, 'drop_prob': self.drop_prob}
+        return {
+            "input_size": self.input_size,
+            "nclasses": self.nclasses,
+            "hiddenunits": self.hiddenunits,
+            "bias": self.bias,
+            "drop_prob": self.drop_prob,
+        }
 
     @staticmethod
     def load(input_path: str):
-        with open(os.path.join(input_path, 'level_class_config.json'), 'r') as fIn:
+        with open(os.path.join(input_path, "level_class_config.json"), "r") as fIn:
             config = json.load(fIn)
 
-        weights = torch.load(os.path.join(input_path, 'pytorch_model.bin'), map_location=torch.device('cpu'))
+        weights = torch.load(
+            os.path.join(input_path, "pytorch_model.bin"),
+            map_location=torch.device("cpu"),
+        )
         model = LevelClass(**config)
         model.load_state_dict(weights)
         return model

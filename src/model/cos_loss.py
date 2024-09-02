@@ -8,12 +8,28 @@ from operator import itemgetter
 from model.utils import MixedLinear, MixedDropout
 from model.sbert import SentenceTransformer
 import pdb
+
 EPSILON = 1e10
 
-#taken from https://github.com/UKPLab/sentence-transformers/blob/46a149433fe9af0851f7fa6f9bf37b5ffa2c891c/sentence_transformers/losses/CosineSimilarityLoss.py
-#changed the transformer model to nn.Sequential model
+
+# taken from https://github.com/UKPLab/sentence-transformers/blob/46a149433fe9af0851f7fa6f9bf37b5ffa2c891c/sentence_transformers/losses/CosineSimilarityLoss.py
+# changed the transformer model to nn.Sequential model
 class HierarchySimilarityLoss(nn.Module):
-    def __init__(self, loss_strategy:int, input_size: int, nclasses: int, hiddenunits: List[int], drop_prob: float, propagation: nn.Module, model: SentenceTransformer, nodes_list: List, trainInputLevel: Dict, loss_fct = nn.MSELoss(), cos_score_transformation=nn.Identity(), bias=False):
+    def __init__(
+        self,
+        loss_strategy: int,
+        input_size: int,
+        nclasses: int,
+        hiddenunits: List[int],
+        drop_prob: float,
+        propagation: nn.Module,
+        model: SentenceTransformer,
+        nodes_list: List,
+        trainInputLevel: Dict,
+        loss_fct=nn.MSELoss(),
+        cos_score_transformation=nn.Identity(),
+        bias=False,
+    ):
         super(HierarchySimilarityLoss, self).__init__()
         self.loss_strategy = loss_strategy
         self.model = model
@@ -46,37 +62,57 @@ class HierarchySimilarityLoss(nn.Module):
         res = self.fcs[-1](self.dropout(layer_inner))
         return res
 
-    def get_node_indices(self,indices):
+    def get_node_indices(self, indices):
         queries_id = []
         cand_id = []
         for idx in indices:
-            query_idx = int(idx.split('_')[0])
-            can_idx = int(idx.split('_')[1])
+            query_idx = int(idx.split("_")[0])
+            can_idx = int(idx.split("_")[1])
             queries_id.append(query_idx)
             cand_id.append(can_idx)
-        query_idx_adj = self.sorter[np.searchsorted(self.nodes_list, queries_id, sorter=self.sorter)]
-        cand_idx_adj = self.sorter[np.searchsorted(self.nodes_list, cand_id, sorter=self.sorter)]
-        return query_idx_adj,cand_idx_adj
+        query_idx_adj = self.sorter[
+            np.searchsorted(self.nodes_list, queries_id, sorter=self.sorter)
+        ]
+        cand_idx_adj = self.sorter[
+            np.searchsorted(self.nodes_list, cand_id, sorter=self.sorter)
+        ]
+        return query_idx_adj, cand_idx_adj
 
-    def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: Tensor, indices: List):
+    def forward(
+        self,
+        sentence_features: Iterable[Dict[str, Tensor]],
+        labels: Tensor,
+        indices: List,
+    ):
         loss = 0
         # m = nn.Sigmoid()
         if self.loss_strategy == 0:
-            embeddings = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
-            output = self.cos_score_transformation(torch.cosine_similarity(embeddings[0], embeddings[1]))
-            loss = self.loss_fct(output, labels[:,0].view(-1))
+            embeddings = [
+                self.model(sentence_feature)["sentence_embedding"]
+                for sentence_feature in sentence_features
+            ]
+            output = self.cos_score_transformation(
+                torch.cosine_similarity(embeddings[0], embeddings[1])
+            )
+            loss = self.loss_fct(output, labels[:, 0].view(-1))
             pdb.set_trace()
         elif self.loss_strategy == 1:
-            embeddings = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
+            embeddings = [
+                self.model(sentence_feature)["sentence_embedding"]
+                for sentence_feature in sentence_features
+            ]
             query_idx_adj, cand_idx_adj = self.get_node_indices(indices)
             # e1_l = self.propagation(embeddings[0], query_idx_adj, cand_idx_adj)
             # e2_l = self.propagation(embeddings[1], cand_idx_adj, query_idx_adj)
-            output = self.cos_score_transformation(torch.cosine_similarity(embeddings[0], embeddings[1]))
+            output = self.cos_score_transformation(
+                torch.cosine_similarity(embeddings[0], embeddings[1])
+            )
             # pdb.set_trace()
             output_2 = self.propagation(output, query_idx_adj, cand_idx_adj)
             # pdb.set_trace()
-            loss = self.loss_fct(output_2, labels[:,0].view(-1))
+            loss = self.loss_fct(output_2, labels[:, 0].view(-1))
         return loss
+
     # def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: Tensor, indices: List):
     #     embeddings = [self.model(sentence_feature)['sentence_embedding'] for sentence_feature in sentence_features]
     #     output = self.cos_score_transformation(torch.cosine_similarity(embeddings[0], embeddings[1]))

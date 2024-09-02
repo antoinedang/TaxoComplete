@@ -8,6 +8,7 @@ import scipy.sparse as sp
 
 data_dir = Path(__file__).parent
 
+
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)

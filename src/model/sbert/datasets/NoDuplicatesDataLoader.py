@@ -1,6 +1,7 @@
-#code from https://github.com/UKPLab/sentence-transformers
+# code from https://github.com/UKPLab/sentence-transformers
 import random
 import math
+
 
 class NoDuplicatesDataLoader:
 

@@ -20,12 +20,14 @@ from packaging import version
 
 logger = logging.getLogger(__name__)
 
+
 def pytorch_cos_sim(a: Tensor, b: Tensor):
     """
     Computes the cosine similarity cos_sim(a[i], b[j]) for all i and j.
     :return: Matrix with res[i][j]  = cos_sim(a[i], b[j])
     """
     return cos_sim(a, b)
+
 
 def cos_sim(a: Tensor, b: Tensor):
     """
@@ -71,9 +73,9 @@ def dot_score(a: Tensor, b: Tensor):
 
 def pairwise_dot_score(a: Tensor, b: Tensor):
     """
-   Computes the pairwise dot-product dot_prod(a[i], b[i])
-   :return: Vector with res[i] = dot_prod(a[i], b[i])
-   """
+    Computes the pairwise dot-product dot_prod(a[i], b[i])
+    :return: Vector with res[i] = dot_prod(a[i], b[i])
+    """
     if not isinstance(a, torch.Tensor):
         a = torch.tensor(a)
 
@@ -85,9 +87,9 @@ def pairwise_dot_score(a: Tensor, b: Tensor):
 
 def pairwise_cos_sim(a: Tensor, b: Tensor):
     """
-   Computes the pairwise cossim cos_sim(a[i], b[i])
-   :return: Vector with res[i] = cos_sim(a[i], b[i])
-   """
+    Computes the pairwise cossim cos_sim(a[i], b[i])
+    :return: Vector with res[i] = cos_sim(a[i], b[i])
+    """
     if not isinstance(a, torch.Tensor):
         a = torch.tensor(a)
 
@@ -104,12 +106,14 @@ def normalize_embeddings(embeddings: Tensor):
     return torch.nn.functional.normalize(embeddings, p=2, dim=1)
 
 
-def paraphrase_mining(model,
-                      sentences: List[str],
-                      show_progress_bar: bool = False,
-                      batch_size:int = 32,
-                      *args,
-                      **kwargs):
+def paraphrase_mining(
+    model,
+    sentences: List[str],
+    show_progress_bar: bool = False,
+    batch_size: int = 32,
+    *args,
+    **kwargs
+):
     """
     Given a list of sentences / texts, this function performs paraphrase mining. It compares all sentences against all
     other sentences and returns a list with the pairs that have the highest cosine similarity score.
@@ -127,17 +131,24 @@ def paraphrase_mining(model,
     """
 
     # Compute embedding for the sentences
-    embeddings = model.encode(sentences, show_progress_bar=show_progress_bar, batch_size=batch_size, convert_to_tensor=True)
+    embeddings = model.encode(
+        sentences,
+        show_progress_bar=show_progress_bar,
+        batch_size=batch_size,
+        convert_to_tensor=True,
+    )
 
     return paraphrase_mining_embeddings(embeddings, *args, **kwargs)
 
 
-def paraphrase_mining_embeddings(embeddings: Tensor,
-                      query_chunk_size: int = 5000,
-                      corpus_chunk_size: int = 100000,
-                      max_pairs: int = 500000,
-                      top_k: int = 100,
-                      score_function: Callable[[Tensor, Tensor], Tensor] = cos_sim):
+def paraphrase_mining_embeddings(
+    embeddings: Tensor,
+    query_chunk_size: int = 5000,
+    corpus_chunk_size: int = 100000,
+    max_pairs: int = 500000,
+    top_k: int = 100,
+    score_function: Callable[[Tensor, Tensor], Tensor] = cos_sim,
+):
     """
     Given a list of sentences / texts, this function performs paraphrase mining. It compares all sentences against all
     other sentences and returns a list with the pairs that have the highest cosine similarity score.
@@ -160,9 +171,14 @@ def paraphrase_mining_embeddings(embeddings: Tensor,
 
     for corpus_start_idx in range(0, len(embeddings), corpus_chunk_size):
         for query_start_idx in range(0, len(embeddings), query_chunk_size):
-            scores = score_function(embeddings[query_start_idx:query_start_idx+query_chunk_size], embeddings[corpus_start_idx:corpus_start_idx+corpus_chunk_size])
+            scores = score_function(
+                embeddings[query_start_idx : query_start_idx + query_chunk_size],
+                embeddings[corpus_start_idx : corpus_start_idx + corpus_chunk_size],
+            )
 
-            scores_top_k_values, scores_top_k_idx = torch.topk(scores, min(top_k, len(scores[0])), dim=1, largest=True, sorted=False)
+            scores_top_k_values, scores_top_k_idx = torch.topk(
+                scores, min(top_k, len(scores[0])), dim=1, largest=True, sorted=False
+            )
             scores_top_k_values = scores_top_k_values.cpu().tolist()
             scores_top_k_idx = scores_top_k_idx.cpu().tolist()
 
@@ -200,12 +216,14 @@ def information_retrieval(*args, **kwargs):
     return semantic_search(*args, **kwargs)
 
 
-def semantic_search(query_embeddings: Tensor,
-                    corpus_embeddings: Tensor,
-                    query_chunk_size: int = 100,
-                    corpus_chunk_size: int = 500000,
-                    top_k: int = 10,
-                    score_function: Callable[[Tensor, Tensor], Tensor] = cos_sim):
+def semantic_search(
+    query_embeddings: Tensor,
+    corpus_embeddings: Tensor,
+    query_chunk_size: int = 100,
+    corpus_chunk_size: int = 500000,
+    top_k: int = 10,
+    score_function: Callable[[Tensor, Tensor], Tensor] = cos_sim,
+):
     """
     This function performs a cosine similarity search between a list of query embeddings  and a list of corpus embeddings.
     It can be used for Information Retrieval / Semantic Search for corpora up to about 1 Million entries.
@@ -232,8 +250,7 @@ def semantic_search(query_embeddings: Tensor,
     elif isinstance(corpus_embeddings, list):
         corpus_embeddings = torch.stack(corpus_embeddings)
 
-
-    #Check that corpus and queries are on the same device
+    # Check that corpus and queries are on the same device
     if corpus_embeddings.device != query_embeddings.device:
         query_embeddings = query_embeddings.to(corpus_embeddings.device)
 
@@ -243,22 +260,39 @@ def semantic_search(query_embeddings: Tensor,
         # Iterate over chunks of the corpus
         for corpus_start_idx in range(0, len(corpus_embeddings), corpus_chunk_size):
             # Compute cosine similarities
-            cos_scores = score_function(query_embeddings[query_start_idx:query_start_idx+query_chunk_size], corpus_embeddings[corpus_start_idx:corpus_start_idx+corpus_chunk_size])
+            cos_scores = score_function(
+                query_embeddings[query_start_idx : query_start_idx + query_chunk_size],
+                corpus_embeddings[
+                    corpus_start_idx : corpus_start_idx + corpus_chunk_size
+                ],
+            )
 
             # Get top-k scores
-            cos_scores_top_k_values, cos_scores_top_k_idx = torch.topk(cos_scores, min(top_k, len(cos_scores[0])), dim=1, largest=True, sorted=False)
+            cos_scores_top_k_values, cos_scores_top_k_idx = torch.topk(
+                cos_scores,
+                min(top_k, len(cos_scores[0])),
+                dim=1,
+                largest=True,
+                sorted=False,
+            )
             cos_scores_top_k_values = cos_scores_top_k_values.cpu().tolist()
             cos_scores_top_k_idx = cos_scores_top_k_idx.cpu().tolist()
 
             for query_itr in range(len(cos_scores)):
-                for sub_corpus_id, score in zip(cos_scores_top_k_idx[query_itr], cos_scores_top_k_values[query_itr]):
+                for sub_corpus_id, score in zip(
+                    cos_scores_top_k_idx[query_itr], cos_scores_top_k_values[query_itr]
+                ):
                     corpus_id = corpus_start_idx + sub_corpus_id
                     query_id = query_start_idx + query_itr
-                    queries_result_list[query_id].append({'corpus_id': corpus_id, 'score': score})
+                    queries_result_list[query_id].append(
+                        {"corpus_id": corpus_id, "score": score}
+                    )
 
-    #Sort and strip to top_k results
+    # Sort and strip to top_k results
     for idx in range(len(queries_result_list)):
-        queries_result_list[idx] = sorted(queries_result_list[idx], key=lambda x: x['score'], reverse=True)
+        queries_result_list[idx] = sorted(
+            queries_result_list[idx], key=lambda x: x["score"], reverse=True
+        )
         queries_result_list[idx] = queries_result_list[idx][0:top_k]
 
     return queries_result_list
@@ -268,22 +302,27 @@ def http_get(url, path):
     """
     Downloads a URL to a given path on disc
     """
-    if os.path.dirname(path) != '':
+    if os.path.dirname(path) != "":
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
     req = requests.get(url, stream=True)
     if req.status_code != 200:
-        print("Exception when trying to download {}. Response {}".format(url, req.status_code), file=sys.stderr)
+        print(
+            "Exception when trying to download {}. Response {}".format(
+                url, req.status_code
+            ),
+            file=sys.stderr,
+        )
         req.raise_for_status()
         return
 
-    download_filepath = path+"_part"
+    download_filepath = path + "_part"
     with open(download_filepath, "wb") as file_binary:
-        content_length = req.headers.get('Content-Length')
+        content_length = req.headers.get("Content-Length")
         total = int(content_length) if content_length is not None else None
         progress = tqdm(unit="B", total=total, unit_scale=True)
         for chunk in req.iter_content(chunk_size=1024):
-            if chunk: # filter out keep-alive new chunks
+            if chunk:  # filter out keep-alive new chunks
                 progress.update(len(chunk))
                 file_binary.write(chunk)
 
@@ -301,18 +340,18 @@ def batch_to_device(batch, target_device: device):
     return batch
 
 
-
 def fullname(o):
-  """
-  Gives a full name (package_name.class_name) for a class / object in Python. Will
-  be used to load the correct classes from JSON files
-  """
+    """
+    Gives a full name (package_name.class_name) for a class / object in Python. Will
+    be used to load the correct classes from JSON files
+    """
 
-  module = o.__class__.__module__
-  if module is None or module == str.__class__.__module__:
-    return o.__class__.__name__  # Avoid reporting __builtin__
-  else:
-    return module + '.' + o.__class__.__name__
+    module = o.__class__.__module__
+    if module is None or module == str.__class__.__module__:
+        return o.__class__.__name__  # Avoid reporting __builtin__
+    else:
+        return module + "." + o.__class__.__name__
+
 
 def import_from_string(dotted_path):
     """
@@ -320,7 +359,7 @@ def import_from_string(dotted_path):
     last name in the path. Raise ImportError if the import failed.
     """
     try:
-        module_path, class_name = dotted_path.rsplit('.', 1)
+        module_path, class_name = dotted_path.rsplit(".", 1)
     except ValueError:
         msg = "%s doesn't look like a module path" % dotted_path
         raise ImportError(msg)
@@ -333,11 +372,16 @@ def import_from_string(dotted_path):
     try:
         return getattr(module, class_name)
     except AttributeError:
-        msg = 'Module "%s" does not define a "%s" attribute/class' % (module_path, class_name)
+        msg = 'Module "%s" does not define a "%s" attribute/class' % (
+            module_path,
+            class_name,
+        )
         raise ImportError(msg)
 
 
-def community_detection(embeddings, threshold=0.75, min_community_size=10, batch_size=1024):
+def community_detection(
+    embeddings, threshold=0.75, min_community_size=10, batch_size=1024
+):
     """
     Function for Fast Community Detection
     Finds in the embeddings all communities, i.e. embeddings that are close (closer than threshold).
@@ -357,7 +401,7 @@ def community_detection(embeddings, threshold=0.75, min_community_size=10, batch
 
     for start_idx in range(0, len(embeddings), batch_size):
         # Compute cosine similarity scores
-        cos_scores = cos_sim(embeddings[start_idx:start_idx + batch_size], embeddings)
+        cos_scores = cos_sim(embeddings[start_idx : start_idx + batch_size], embeddings)
 
         # Minimum size for a community
         top_k_values, _ = cos_scores.topk(k=min_community_size, largest=True)
@@ -368,12 +412,16 @@ def community_detection(embeddings, threshold=0.75, min_community_size=10, batch
                 new_cluster = []
 
                 # Only check top k most similar entries
-                top_val_large, top_idx_large = cos_scores[i].topk(k=sort_max_size, largest=True)
+                top_val_large, top_idx_large = cos_scores[i].topk(
+                    k=sort_max_size, largest=True
+                )
 
                 # Check if we need to increase sort_max_size
                 while top_val_large[-1] > threshold and sort_max_size < len(embeddings):
                     sort_max_size = min(2 * sort_max_size, len(embeddings))
-                    top_val_large, top_idx_large = cos_scores[i].topk(k=sort_max_size, largest=True)
+                    top_val_large, top_idx_large = cos_scores[i].topk(
+                        k=sort_max_size, largest=True
+                    )
 
                 for idx, val in zip(top_idx_large.tolist(), top_val_large):
                     if val < threshold:
@@ -386,7 +434,9 @@ def community_detection(embeddings, threshold=0.75, min_community_size=10, batch
         del cos_scores
 
     # Largest cluster first
-    extracted_communities = sorted(extracted_communities, key=lambda x: len(x), reverse=True)
+    extracted_communities = sorted(
+        extracted_communities, key=lambda x: len(x), reverse=True
+    )
 
     # Step 2) Remove overlapping communities
     unique_communities = []
@@ -413,7 +463,6 @@ def community_detection(embeddings, threshold=0.75, min_community_size=10, batch
 ######################
 
 
-
 def snapshot_download(
     repo_id: str,
     revision: Optional[str] = None,
@@ -422,7 +471,7 @@ def snapshot_download(
     library_version: Optional[str] = None,
     user_agent: Union[Dict, str, None] = None,
     ignore_files: Optional[List[str]] = None,
-    use_auth_token: Union[bool, str, None] = None
+    use_auth_token: Union[bool, str, None] = None,
 ) -> str:
     """
     Method derived from huggingface_hub.
@@ -434,21 +483,19 @@ def snapshot_download(
         cache_dir = str(cache_dir)
 
     _api = HfApi()
-    
-    token = None 
+
+    token = None
     if isinstance(use_auth_token, str):
         token = use_auth_token
     elif use_auth_token:
         token = HfFolder.get_token()
-        
+
     model_info = _api.model_info(repo_id=repo_id, revision=revision, token=token)
 
-    storage_folder = os.path.join(
-        cache_dir, repo_id.replace("/", "_")
-    )
+    storage_folder = os.path.join(cache_dir, repo_id.replace("/", "_"))
 
     all_files = model_info.siblings
-    #Download modules.json as the last file
+    # Download modules.json as the last file
     for idx, repofile in enumerate(all_files):
         if repofile.rfilename == "modules.json":
             del all_files[idx]
@@ -477,18 +524,20 @@ def snapshot_download(
         )
         os.makedirs(nested_dirname, exist_ok=True)
 
-        cached_download_args = {'url': url,
-            'cache_dir': storage_folder,
-            'force_filename': relative_filepath,
-            'library_name': library_name,
-            'library_version': library_version,
-            'user_agent': user_agent,
-            'use_auth_token': use_auth_token}
+        cached_download_args = {
+            "url": url,
+            "cache_dir": storage_folder,
+            "force_filename": relative_filepath,
+            "library_name": library_name,
+            "library_version": library_version,
+            "user_agent": user_agent,
+            "use_auth_token": use_auth_token,
+        }
 
         if version.parse(huggingface_hub.__version__) >= version.parse("0.8.1"):
             # huggingface_hub v0.8.1 introduces a new cache layout. We sill use a manual layout
             # And need to pass legacy_cache_layout=True to avoid that a warning will be printed
-            cached_download_args['legacy_cache_layout'] = True
+            cached_download_args["legacy_cache_layout"] = True
 
         path = cached_download(**cached_download_args)
 
