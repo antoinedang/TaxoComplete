@@ -101,7 +101,7 @@ def compute_prediction_optimized(
     corpusId2nodeId,
 ):
     top_k = len(corpus_embeddings)
-    all_targets = node2positions[node_list]
+    all_targets = [node2positions[node] for node in node_list]
     all_predictions, all_scores, edges_prediction, all_edges_scores = [], [], [], []
     edges_2darray = np.array([*list(edges)])
     parents = edges_2darray[:, 0]
