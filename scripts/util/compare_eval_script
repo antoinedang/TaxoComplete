@@ -17,4 +17,6 @@ conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
 echo "GOT HERE"
 python ./src/evaluate.py --config ./config_files_evaluate/psy/config_clst20_s49.json
-echo "EVAL: $?"
+echo "EVAL ORIGINAL: $?"
+python ./src/evaluate.py --opt --config ./config_files_evaluate/psy/config_clst20_s49.json
+echo "EVAL OPTIMIZED: $?"
