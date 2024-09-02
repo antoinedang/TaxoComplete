@@ -105,7 +105,9 @@ def compute_prediction_optimized(
     all_predictions, all_scores, edges_prediction, all_edges_scores = [], [], [], []
     edges_2darray = np.array([*list(edges)])
     parents = edges_2darray[:, 0]
+    parents = parents[:, None]
     children = edges_2darray[:, 1]
+    children = children[:, None]
 
     question_embeddings = model.encode(queries, convert_to_tensor=True)
     hits_scores = util.semantic_search(
@@ -124,8 +126,14 @@ def compute_prediction_optimized(
 
             # now that we have the hits and scores, calculate the scores for edge direction (i.e. is the query the parent or the child?)
             scores_arr = np.array(scores)
-            ind_parent = np.where(hits == parents[:, None])[1]
-            ind_child = np.where(hits == children[:, None])[1]
+            print("hits.shape")
+            print(hits.shape)
+            print("parents.shape")
+            print(parents.shape)
+            print("children.shape")
+            print(children.shape)
+            ind_parent = np.where(hits == parents)[1]
+            ind_child = np.where(hits == children)[1]
             scores_2darray = np.append(
                 [scores_arr[ind_parent]], [scores_arr[ind_child]], axis=0
             ).T
