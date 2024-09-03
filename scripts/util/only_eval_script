@@ -16,5 +16,5 @@ pip install torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2+cu118
 conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
 echo "GOT HERE"
-python ./src/evaluate.py --config ./config_files_evaluate/psy/config_clst20_s49.json --opt
+python ./src/evaluate.py --config ./config_files_evaluate/psy/config_clst20_s49.json
 echo "EVAL: $?"

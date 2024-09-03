@@ -1,0 +1,13 @@
+>>>>>>>>>>>>>> TIME TAKEN FOR 4 EVALUATIONS: 2706.467658996582 seconds
+
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.217,0.082,0.047,0.217,0.411,0.469,1426.037,30.221
+
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.228,0.081,0.046,0.228,0.405,0.460,1313.670,30.810
+
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.292,0.119,0.069,0.292,0.594,0.689,187.557,42.260
+
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.291,0.116,0.067,0.291,0.578,0.673,197.950,41.388
