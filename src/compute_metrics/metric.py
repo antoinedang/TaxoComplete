@@ -161,7 +161,8 @@ def compute_prediction_optimized(
             all_edges_scores.append(scores_mean[sorting_args])
             all_predictions.append(hits)
             all_scores.append(scores)
-        except:
+        except Exception as e:
+            print("ERROR: {}".format(e))
             pdb.set_trace()
     return all_targets, all_predictions, all_scores, edges_prediction, all_edges_scores
 
