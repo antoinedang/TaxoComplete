@@ -19,16 +19,8 @@ args = argparse.ArgumentParser(description="Training taxonomy expansion model")
 args.add_argument(
     "-c", "--config", default=None, type=str, help="config file path (default: None)"
 )
-args.add_argument(
-    "-o", "--opt", action="store_true", help="config file path (default: None)"
-)
 config = ConfigParser(args)
 args = args.parse_args()
-
-if args.opt:
-    ms.compute_prediction = ms.compute_prediction_optimized
-else:
-    ms.compute_prediction = ms.compute_prediction_original
 
 saving_path = config["saving_path"]
 name = config["name"]
@@ -77,8 +69,6 @@ corpus_embeddings = model.encode(
 preds = propagation(
     corpus_embeddings, torch.tensor(range(len(nodeIdsCorpus)), device=target_device)
 )
-
-start_evaluate_time = time.time()
 
 (
     all_targets_val,
@@ -146,14 +136,6 @@ start_evaluate_time = time.time()
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
-)
-
-end_evaluate_time = time.time()
-
-print(
-    ">>>>>>>>>>>>>> TIME TAKEN FOR 4 EVALUATIONS: {} seconds".format(
-        end_evaluate_time - start_evaluate_time
-    )
 )
 
 ms.save_results(

@@ -37,61 +37,7 @@ def save_results(saving_path, all_targets, all_predictions, name_file):
     return line_metric, line
 
 
-def compute_prediction_original(
-    edges,
-    leaf_node,
-    queries,
-    corpus_embeddings,
-    model,
-    node_list,
-    node2positions,
-    corpusId2nodeId,
-):
-    top_k = len(corpus_embeddings)
-    all_targets = []
-    all_predictions = []
-    all_scores = []
-    all_edges_scores, edges_prediction = [], []
-    edges_2darray = np.array([*list(edges)])
-    parent = edges_2darray[:, 0]
-    children = edges_2darray[:, 1]
-    for idx, query in enumerate(queries):
-        try:
-            query_id = node_list[idx]
-            target_positions = node2positions[query_id]
-            all_targets.append(target_positions)
-            question_embedding = model.encode(query, convert_to_tensor=True)
-            hits_score = util.semantic_search(
-                question_embedding, corpus_embeddings, top_k=top_k
-            )
-            hits = [
-                corpusId2nodeId[hit["corpus_id"]] for hit in hits_score[0]
-            ]  # Get the hits for the first query
-            scores = [hit["score"] for hit in hits_score[0]]
-            hits.append(leaf_node)
-            scores.append(2)
-            scores_arr = np.array(scores)
-            ind_parents = np.where(hits == parent[:, None])[1]
-            ind_child = np.where(hits == children[:, None])[1]
-            scores_2darray = np.append(
-                [scores_arr[ind_parents]], [scores_arr[ind_child]], axis=0
-            ).T
-            args_leaf = np.where(scores_2darray[:, 1] == 2)
-            scores_2darray[args_leaf, 1] = scores_2darray[args_leaf, 0]
-            # for id_x,x in enumerate(query_pred):
-            #     scores_2darray[np.where(edges_2darray==x)]=scores_pred[id_x]
-            scores_mean = scores_2darray.mean(axis=1)
-            sorting_args = np.argsort(scores_mean)[::-1]
-            edges_prediction.append(edges_2darray[sorting_args, :])
-            all_edges_scores.append(scores_mean[sorting_args])
-            all_predictions.append(hits)
-            all_scores.append(scores)
-        except:
-            pdb.set_trace()
-    return all_targets, all_predictions, all_scores, edges_prediction, all_edges_scores
-
-
-def compute_prediction_optimized(
+def compute_prediction(
     edges,
     leaf_node,
     queries,
@@ -157,9 +103,6 @@ def compute_prediction_optimized(
             print("ERROR: {}".format(e))
             pdb.set_trace()
     return all_targets, all_predictions, all_scores, edges_prediction, all_edges_scores
-
-
-compute_prediction = compute_prediction_optimized
 
 
 def get_relevance(all_target, pred_pos):
