@@ -132,8 +132,20 @@ def compute_prediction_optimized(
             print(parents.shape)
             print("children.shape")
             print(children.shape)
+            print("(hits == parents).shape")
+            print((hits == parents).shape)
+            print("(hits == children).shape")
+            print((hits == children).shape)
+            print("np.where(hits == parents).shape")
+            print(np.where(hits == parents).shape)
+            print("np.where(hits == children).shape")
+            print(np.where(hits == children).shape)
             ind_parent = np.where(hits == parents)[1]
             ind_child = np.where(hits == children)[1]
+            print("ind_parent.shape")
+            print(ind_parent.shape)
+            print("ind_child.shape")
+            print(ind_child.shape)
             scores_2darray = np.append(
                 [scores_arr[ind_parent]], [scores_arr[ind_child]], axis=0
             ).T
