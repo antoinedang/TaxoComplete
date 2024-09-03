@@ -107,7 +107,7 @@ def compute_prediction_optimized(
     edges_2darray = np.array([*list(edges)])
     parents = edges_2darray[:, 0]
     parents = parents[:, None]
-    parent = cp.array(parent)
+    parents = cp.array(parents)
     children = edges_2darray[:, 1]
     children = children[:, None]
     children = cp.array(children)
