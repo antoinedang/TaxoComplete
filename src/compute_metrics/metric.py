@@ -5,6 +5,7 @@ import numpy as np
 import itertools
 import re
 from sentence_transformers import util
+import cupy as cp
 
 from pathlib import Path
 
@@ -106,8 +107,10 @@ def compute_prediction_optimized(
     edges_2darray = np.array([*list(edges)])
     parents = edges_2darray[:, 0]
     parents = parents[:, None]
+    parent = cp.array(parent)
     children = edges_2darray[:, 1]
     children = children[:, None]
+    children = cp.array(children)
 
     question_embeddings = model.encode(queries, convert_to_tensor=True)
     hits_scores = util.semantic_search(
@@ -120,32 +123,21 @@ def compute_prediction_optimized(
                 corpusId2nodeId[hit["corpus_id"]] for hit in hits_score
             ]  # Get the hits for the first query
             hits.append(leaf_node)
+            hits_cp = cp.array(hits)
 
             scores = [hit["score"] for hit in hits_score]
             scores.append(2)
 
             # now that we have the hits and scores, calculate the scores for edge direction (i.e. is the query the parent or the child?)
             scores_arr = np.array(scores)
-            print("len(hits)")
-            print(len(hits))
-            print("parents.shape")
-            print(parents.shape)
-            print("children.shape")
-            print(children.shape)
-            print("(hits == parents).shape")
-            print((hits == parents).shape)
-            print("(hits == children).shape")
-            print((hits == children).shape)
-            print("np.where(hits == parents).shape")
-            print(np.where(hits == parents).shape)
-            print("np.where(hits == children).shape")
-            print(np.where(hits == children).shape)
-            ind_parent = np.where(hits == parents)[1]
-            ind_child = np.where(hits == children)[1]
-            print("ind_parent.shape")
-            print(ind_parent.shape)
-            print("ind_child.shape")
-            print(ind_child.shape)
+            ind_parent = cp.asnumpy(cp.where(hits_cp == parents)[1])
+            ind_child = cp.asnumpy(cp.where(hits_cp == children)[1])
+            # ind_parent_or_child = np.where(
+            #     (hits_np == parents) | (hits_np == children)
+            # )[1]
+            # # For each index, check if it corresponds to the parent or child condition
+            # ind_parent = ind_parent_or_child[hits_np[ind_parent] == parents]
+            # ind_child = ind_parent_or_child[hits_np[ind_child] == children]
             scores_2darray = np.append(
                 [scores_arr[ind_parent]], [scores_arr[ind_child]], axis=0
             ).T
