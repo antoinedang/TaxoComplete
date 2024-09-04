@@ -104,11 +104,11 @@ preds = propagation(
     data_prep.corpusId2nodeId,
 )
 
-assert OG_all_targets_val == all_targets_val
-assert OG_all_predictions_val == all_predictions_val
-assert OG_all_scores_val == all_scores_val
-assert OG_edges_predictions_val == edges_predictions_val
-assert OG_all_edges_scores_val == all_edges_scores_val
+assert OG_all_targets_val == all_targets_val, "all_targets_val"
+assert OG_all_predictions_val == all_predictions_val, "all_predictions_val"
+assert OG_all_scores_val == all_scores_val, "all_scores_val"
+assert OG_edges_predictions_val == edges_predictions_val, "edges_predictions_val"
+assert OG_all_edges_scores_val == all_edges_scores_val, "all_edges_scores_val"
 
 (
     all_targets_test,
@@ -144,11 +144,11 @@ assert OG_all_edges_scores_val == all_edges_scores_val
     data_prep.corpusId2nodeId,
 )
 
-assert OG_all_targets_test == all_targets_test
-assert OG_all_predictions_test == all_predictions
-assert OG_all_scores_test == all_scores_test
-assert OG_edges_predictions_test == edges_predictions_test
-assert OG_all_edges_scores_test == all_edges_scores_test
+assert OG_all_targets_test == all_targets_test, "all_targets_test"
+assert OG_all_predictions_test == all_predictions, "all_predictions"
+assert OG_all_scores_test == all_scores_test, "all_scores_test"
+assert OG_edges_predictions_test == edges_predictions_test, "edges_predictions_test"
+assert OG_all_edges_scores_test == all_edges_scores_test, "all_edges_scores_test"
 
 (
     all_targets_val_ppr,
@@ -184,11 +184,15 @@ assert OG_all_edges_scores_test == all_edges_scores_test
     data_prep.corpusId2nodeId,
 )
 
-assert OG_all_targets_val_ppr == all_targets_val_ppr
-assert OG_all_predictions_val_ppr == all_predictions_val_ppr
-assert OG_all_scores_val_ppr == all_scores_val_ppr
-assert OG_edges_predictions_val_ppr == edges_predictions_val_ppr
-assert OG_all_edges_scores_val_ppr == all_edges_scores_val_ppr
+assert OG_all_targets_val_ppr == all_targets_val_ppr, "all_targets_val_ppr"
+assert OG_all_predictions_val_ppr == all_predictions_val_ppr, "all_predictions_val_ppr"
+assert OG_all_scores_val_ppr == all_scores_val_ppr, "all_scores_val_ppr"
+assert (
+    OG_edges_predictions_val_ppr == edges_predictions_val_ppr
+), "edges_predictions_val_ppr"
+assert (
+    OG_all_edges_scores_val_ppr == all_edges_scores_val_ppr
+), "all_edges_scores_val_ppr"
 
 (
     all_targets_test_ppr,
@@ -224,11 +228,15 @@ assert OG_all_edges_scores_val_ppr == all_edges_scores_val_ppr
     data_prep.corpusId2nodeId,
 )
 
-assert all_targets_test_ppr == OG_all_targets_test_ppr
-assert all_predictions_ppr == OG_all_predictions_ppr
-assert all_scores_test_ppr == OG_all_scores_test_ppr
-assert edges_predictions_test_ppr == OG_edges_predictions_test_ppr
-assert all_edges_scores_test_ppr == OG_all_edges_scores_test_ppr
+assert all_targets_test_ppr == OG_all_targets_test_ppr, "all_targets_test_ppr"
+assert all_predictions_ppr == OG_all_predictions_ppr, "all_predictions_ppr"
+assert all_scores_test_ppr == OG_all_scores_test_ppr, "all_scores_test_ppr"
+assert (
+    edges_predictions_test_ppr == OG_edges_predictions_test_ppr
+), "edges_predictions_test_ppr"
+assert (
+    all_edges_scores_test_ppr == OG_all_edges_scores_test_ppr
+), "all_edges_scores_test_ppr"
 
 
 ms.save_results(
