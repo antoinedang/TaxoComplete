@@ -88,6 +88,29 @@ preds = propagation(
 )
 
 (
+    OG_all_targets_val,
+    OG_all_predictions_val,
+    OG_all_scores_val,
+    OG_edges_predictions_val,
+    OG_all_edges_scores_val,
+) = ms.compute_prediction_og(
+    data_prep.core_subgraph.edges,
+    data_prep.pseudo_leaf_node,
+    data_prep.valid_queries,
+    corpus_embeddings,
+    model,
+    data_prep.valid_node_list,
+    data_prep.valid_node2pos,
+    data_prep.corpusId2nodeId,
+)
+
+assert OG_all_targets_val == all_targets_val
+assert OG_all_predictions_val == all_predictions_val
+assert OG_all_scores_val == all_scores_val
+assert OG_edges_predictions_val == edges_predictions_val
+assert OG_all_edges_scores_val == all_edges_scores_val
+
+(
     all_targets_test,
     all_predictions,
     all_scores_test,
@@ -103,6 +126,29 @@ preds = propagation(
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
 )
+
+(
+    OG_all_targets_test,
+    OG_all_predictions_test,
+    OG_all_scores_test,
+    OG_edges_predictions_test,
+    OG_all_edges_scores_test,
+) = ms.compute_prediction_og(
+    data_prep.core_subgraph.edges,
+    data_prep.pseudo_leaf_node,
+    data_prep.test_queries,
+    corpus_embeddings,
+    model,
+    data_prep.test_node_list,
+    data_prep.test_node2pos,
+    data_prep.corpusId2nodeId,
+)
+
+assert OG_all_targets_test == all_targets_test
+assert OG_all_predictions_test == all_predictions
+assert OG_all_scores_test == all_scores_test
+assert OG_edges_predictions_test == edges_predictions_test
+assert OG_all_edges_scores_test == all_edges_scores_test
 
 (
     all_targets_val_ppr,
@@ -122,6 +168,29 @@ preds = propagation(
 )
 
 (
+    OG_all_targets_val_ppr,
+    OG_all_predictions_val_ppr,
+    OG_all_scores_val_ppr,
+    OG_edges_predictions_val_ppr,
+    OG_all_edges_scores_val_ppr,
+) = ms.compute_prediction_og(
+    data_prep.core_subgraph.edges,
+    data_prep.pseudo_leaf_node,
+    data_prep.valid_queries,
+    preds,
+    model,
+    data_prep.valid_node_list,
+    data_prep.valid_node2pos,
+    data_prep.corpusId2nodeId,
+)
+
+assert OG_all_targets_val_ppr == all_targets_val_ppr
+assert OG_all_predictions_val_ppr == all_predictions_val_ppr
+assert OG_all_scores_val_ppr == all_scores_val_ppr
+assert OG_edges_predictions_val_ppr == edges_predictions_val_ppr
+assert OG_all_edges_scores_val_ppr == all_edges_scores_val_ppr
+
+(
     all_targets_test_ppr,
     all_predictions_ppr,
     all_scores_test_ppr,
@@ -137,6 +206,30 @@ preds = propagation(
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
 )
+
+(
+    OG_all_targets_test_ppr,
+    OG_all_predictions_ppr,
+    OG_all_scores_test_ppr,
+    OG_edges_predictions_test_ppr,
+    OG_all_edges_scores_test_ppr,
+) = ms.compute_prediction_og(
+    data_prep.core_subgraph.edges,
+    data_prep.pseudo_leaf_node,
+    data_prep.test_queries,
+    preds,
+    model,
+    data_prep.test_node_list,
+    data_prep.test_node2pos,
+    data_prep.corpusId2nodeId,
+)
+
+assert all_targets_test_ppr == OG_all_targets_test_ppr
+assert all_predictions_ppr == OG_all_predictions_ppr
+assert all_scores_test_ppr == OG_all_scores_test_ppr
+assert edges_predictions_test_ppr == OG_edges_predictions_test_ppr
+assert all_edges_scores_test_ppr == OG_all_edges_scores_test_ppr
+
 
 ms.save_results(
     str(config.save_dir) + "/", all_targets_val, edges_predictions_val, "eval_val"
