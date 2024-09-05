@@ -112,6 +112,8 @@ def compare_arrays(arr1, arr2, msg):
 
 compare_arrays(OG_all_targets_val, all_targets_val, "all_targets_val")
 compare_arrays(OG_all_predictions_val, all_predictions_val, "all_predictions_val")
+print(np.sort(np.array(OG_all_scores_val).flat)[100])
+print(np.sort(np.array(all_scores_val).flat)[100])
 compare_arrays(OG_all_scores_val, all_scores_val, "all_scores_val")
 compare_arrays(OG_edges_predictions_val, edges_predictions_val, "edges_predictions_val")
 compare_arrays(OG_all_edges_scores_val, all_edges_scores_val, "all_edges_scores_val")
