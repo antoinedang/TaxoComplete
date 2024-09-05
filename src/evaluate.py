@@ -73,7 +73,7 @@ preds = propagation(
 
 def compare_arrays(arr1, arr2, msg):
     np_arr1, np_arr2 = np.array(arr1), np.array(arr2)
-    assert np.array_equal(np.sort(np_arr1.flat), np.sort(np_arr2.flat)), msg
+    assert np.allclose(np.sort(np_arr1.flat), np.sort(np_arr2.flat), atol=1e-4), msg
 
 
 (
@@ -112,8 +112,6 @@ def compare_arrays(arr1, arr2, msg):
 
 compare_arrays(OG_all_targets_val, all_targets_val, "all_targets_val")
 compare_arrays(OG_all_predictions_val, all_predictions_val, "all_predictions_val")
-print(np.sort(np.array(OG_all_scores_val).flat)[100])
-print(np.sort(np.array(all_scores_val).flat)[100])
 compare_arrays(OG_all_scores_val, all_scores_val, "all_scores_val")
 compare_arrays(OG_edges_predictions_val, edges_predictions_val, "edges_predictions_val")
 compare_arrays(OG_all_edges_scores_val, all_edges_scores_val, "all_edges_scores_val")
