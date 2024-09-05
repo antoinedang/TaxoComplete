@@ -72,7 +72,7 @@ preds = propagation(
 
 
 def compare_arrays(arr1, arr2, msg):
-    np_arr1, np_arr2 = np.array(arr1), np.array(arr2)
+    np_arr1, np_arr2 = np.array(arr1, dtype=float), np.array(arr2, dtype=float)
     assert np.allclose(np.sort(np_arr1.flat), np.sort(np_arr2.flat), atol=1e-4), msg
 
 
