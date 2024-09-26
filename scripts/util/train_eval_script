@@ -18,5 +18,5 @@ pip install -r requirements
 echo "GOT HERE"
 python ./src/train.py --config ./config_files/psy/config_clst20_s47.json
 echo "TRAINING: $?"
-# python ./src/evaluate.py --config ./config_files_evaluate/psy/config_clst20_s49.json
+python ./src/evaluate.py --config ./config_files_evaluate/psy/config_clst20_s47.json
 echo "EVAL: $?"
