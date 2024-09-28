@@ -106,50 +106,94 @@ preds = propagation(
 
 targets = [data_prep.test_node2pos[node] for node in data_prep.test_node_list]
 query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
+nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
 
-print("Lengths:")
-print("# queries:", len(data_prep.test_queries))
-print("# targets:", len(targets))
-print("# predictions:", len(all_predictions))
-print("# predictions PPR:", len(all_predictions_ppr))
-print("# edges predictions:", len(edges_predictions_test))
-print("# edges predictions PPR:", len(edges_predictions_test_ppr))
-print()
-
+with open("error_analysis.csv", "w+") as f:
+    line = "sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR, cos_sim_query_pred_child, cos_sim_query_pred_parent, cos_sim_query_pred_child_ppr, cos_sim_query_pred_parent_ppr, graph_distance_query_pred_child, graph_distance_query_pred_parent, graph_distance_query_pred_child_ppr, graph_distance_query_pred_parent_ppr\n"
+    f.write(line)
+        
 #   FOR EACH QUERY:
 for i in range(len(data_prep.test_queries)):
     query = data_prep.test_queries[i]
+    query_node_id = data_prep.corpusId2nodeId[i]
     query_embedding = query_embeddings[i]
     target = targets[i]
     predicted = all_predictions[i]
     predicted_ppr = all_predictions_ppr[i]
-    predicted_edge = edges_predictions_test[i]
-    predicted_edge_ppr = edges_predictions_test_ppr[i]
-    print(f"Query: {query}")
-    print(f"Query Type: {type(query)}")
-    print(f"Target: {target}")
-    print(f"Target Type: {type(target)}")
-    print(f"Predicted: {predicted}")
-    print(f"Predicted Type: {type(predicted)}")
-    print(f"Predicted PPR: {predicted_ppr}")
-    print(f"Predicted PPR Type: {type(predicted_ppr)}")
-    print(f"Predicted Edge: {predicted_edge}")
-    print(f"Predicted Edge Type: {type(predicted_edge)}")
-    print(f"Predicted Edge PPR: {predicted_edge_ppr}")
-    print(f"Predicted Edge PPR Type: {type(predicted_edge_ppr)}")
+    predicted_edge = edges_predictions_test[i][0]
+    pred_child_embedding = corpus_embeddings[nodeId2corpusId[predicted_edge[1]]]
+    pred_parent_embedding = corpus_embeddings[nodeId2corpusId[predicted_edge[0]]]
+    predicted_edge_ppr = edges_predictions_test_ppr[i][0]
+    pred_child_embedding_ppr = preds[nodeId2corpusId[predicted_edge_ppr[1]]]
+    pred_parent_embedding_ppr = preds[nodeId2corpusId[predicted_edge_ppr[0]]]
     
     # NX: sparsityScore, level, height, graph_distance(query node, predicted parent), graph_distance(query node, predicted child)
-    # RELEVANCE: isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR
-    # COSINE SIMILARITY: cos_similarity(query node, predicted parent), cos_similarity(query node, predicted child)
+    query_level = nx.shortest_path_length(data_prep.core_subgraph, source=data_prep.root, target=query_node_id)
+    query_height = nx.shortest_path_length(data_prep.core_subgraph, source=query_node_id, target=data_prep.pseudo_leaf_node)
+    try:
+        dist_query_pred_parent = nx.shortest_path_length(data_prep.core_subgraph, source=query_node_id, target=predicted_edge[0])
+    except nx.NetworkXNoPath:
+        dist_query_pred_parent = nx.shortest_path_length(data_prep.core_subgraph, target=query_node_id, source=predicted_edge[0])
+    try:
+        dist_query_pred_child = nx.shortest_path_length(data_prep.core_subgraph, source=query_node_id, target=predicted_edge[1])
+    except nx.NetworkXNoPath:
+        dist_query_pred_child = nx.shortest_path_length(data_prep.core_subgraph, target=query_node_id, source=predicted_edge[1])
+    try:
+        dist_query_pred_parent_ppr = nx.shortest_path_length(data_prep.core_subgraph, source=query_node_id, target=predicted_edge_ppr[0])
+    except nx.NetworkXNoPath:
+        dist_query_pred_parent_ppr = nx.shortest_path_length(data_prep.core_subgraph, target=query_node_id, source=predicted_edge_ppr[0])
+    try:
+        dist_query_pred_child_ppr = nx.shortest_path_length(data_prep.core_subgraph, source=query_node_id, target=predicted_edge_ppr[1])
+    except nx.NetworkXNoPath:
+        dist_query_pred_child_ppr = nx.shortest_path_length(data_prep.core_subgraph, target=query_node_id, source=predicted_edge_ppr[1])
+    # sparsity score: calculate number of nodes in close neighborhood
+    ancestral_nodes = list(
+        reversed(
+            nx.shortest_path(data_prep.core_subgraph, source=data_prep.root, target=query_node_id)
+        )
+    )
+    ancestral_nodes.remove(data_prep.root)
+    ancestral_nodes.remove(query_node_id)
+    children = list(data_prep.core_subgraph.successors(query_node_id))
+    parent = list(data_prep.core_subgraph.predecessors(query_node_id))[0]
+    siblings = [n for n in data_prep.core_subgraph.successors(parent) if n != query_node_id]
+    close_neighborhood_size = len(ancestral_nodes) + len(children) + len(siblings)
     
-    query_node = data_prep.corpusId2nodeId[query["corpus_id"]]
-    #   1. WAS IT CORRECTLY CLASSIFIED WITHOUT PPR?
-    no_ppr_prediction = edges_predictions_test[all_targets_test.index(query_node)]
-    isCorrect = np.sum(ms.get_relevance([query_node], [no_ppr_prediction])) == 1
-    #   2. DID PPR RECTIFY THE CLASSIFICATION?
-    ppr_prediction = edges_predictions_test_ppr[all_targets_test_ppr.index(query_node)]
-    isCorrectPPR = np.sum(ms.get_relevance([query_node], [ppr_prediction])) == 1
+    # RELEVANCE: isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR
+    isCorrectParent = predicted_edge[0] == target[0][0] or predicted_edge[0] == target[1][0]
+    isCorrectChild = predicted_edge[1] == target[0][1] or predicted_edge[1] == target[1][1]
+    isCorrectParentPPR = predicted_edge_ppr[0] == target[0][0] or predicted_edge_ppr[0] == target[1][0]
+    isCorrectChildPPR = predicted_edge_ppr[1] == target[0][1] or predicted_edge_ppr[1] == target[1][1]
+    
+    relevance = ms.get_relevance([target], [edges_predictions_test[i]])
+    if (ms.compute_precision(relevance, 1) == 1) != (isCorrectChild and isCorrectParent):
+        print("Target", target)
+        print("Predicted", predicted_edge)
+        print("Precision @ 1:", ms.compute_precision(relevance, 1))
+    if (ms.compute_recall(relevance, 1) == 1) != (isCorrectChild and isCorrectParent):
+        print("Target", target)
+        print("Predicted", predicted_edge)
+        print("Recall @ 1:", ms.compute_recall(relevance, 1))
+        
+    relevance = ms.get_relevance([target], [edges_predictions_test_ppr[i]])
+    if (ms.compute_precision(relevance, 1) == 1) != (isCorrectChildPPR and isCorrectParentPPR):
+        print("Target", target)
+        print("Predicted PPR", predicted_edge_ppr)
+        print("Precision @ 1:", ms.compute_precision(relevance, 1))
+    if (ms.compute_recall(relevance, 1) == 1) != (isCorrectChildPPR and isCorrectParentPPR):
+        print("Target", target)
+        print("Predicted PPR", predicted_edge_ppr)
+        print("Recall @ 1:", ms.compute_recall(relevance, 1))
+    
+    # COSINE SIMILARITY: cos_similarity(query node, predicted parent), cos_similarity(query node, predicted child)
+    cos_similarity_query_pred_parent = torch.cosine_similarity(query_embedding, pred_parent_embedding)
+    cos_similarity_query_pred_child = torch.cosine_similarity(query_embedding, pred_child_embedding)
+    cos_similarity_query_pred_parent_ppr = torch.cosine_similarity(query_embedding, pred_parent_embedding_ppr)
+    cos_similarity_query_pred_child_ppr = torch.cosine_similarity(query_embedding, pred_child_embedding_ppr)
+
     #   STORE IN CSV:
-    # use nx library to compute things like depth, height, size of close neighborhood
-    # sparsity -> compute number of nodes in close neighborhood of query node
-    # sparsityScore, level, height, isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR, cos_similarity(query node, predicted parent), graph_distance(query node, predicted parent), cos_similarity(query node, predicted child), graph_distance(query node, predicted child)
+    with open("error_analysis.csv", "a+") as f:
+        line = "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}\n".format(
+            close_neighborhood_size, query_level, query_height, isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR, cos_similarity_query_pred_child, cos_similarity_query_pred_parent, cos_similarity_query_pred_child_ppr, cos_similarity_query_pred_parent_ppr, dist_query_pred_child, dist_query_pred_parent, dist_query_pred_child_ppr, dist_query_pred_parent_ppr
+        )
+        f.write(line)
