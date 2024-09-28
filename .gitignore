@@ -5,3 +5,4 @@ data/*2024*
 sbatch_out.txt
 job_output.txt
 job_error.txt
+*.safetensors
