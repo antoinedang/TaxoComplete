@@ -104,9 +104,44 @@ preds = propagation(
     data_prep.corpusId2nodeId,
 )
 
+targets = [data_prep.test_node2pos[node] for node in data_prep.test_node_list]
+query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
+
+print("Lengths:")
+print("# queries:", len(data_prep.test_queries))
+print("# targets:", len(targets))
+print("# predictions:", len(all_predictions))
+print("# predictions PPR:", len(all_predictions_ppr))
+print("# edges predictions:", len(edges_predictions_test))
+print("# edges predictions PPR:", len(edges_predictions_test_ppr))
+print()
+
 #   FOR EACH QUERY:
 for i in range(len(data_prep.test_queries)):
     query = data_prep.test_queries[i]
+    query_embedding = query_embeddings[i]
+    target = targets[i]
+    predicted = all_predictions[i]
+    predicted_ppr = all_predictions_ppr[i]
+    predicted_edge = edges_predictions_test[i]
+    predicted_edge_ppr = edges_predictions_test_ppr[i]
+    print(f"Query: {query}")
+    print(f"Query Type: {type(query)}")
+    print(f"Target: {target}")
+    print(f"Target Type: {type(target)}")
+    print(f"Predicted: {predicted}")
+    print(f"Predicted Type: {type(predicted)}")
+    print(f"Predicted PPR: {predicted_ppr}")
+    print(f"Predicted PPR Type: {type(predicted_ppr)}")
+    print(f"Predicted Edge: {predicted_edge}")
+    print(f"Predicted Edge Type: {type(predicted_edge)}")
+    print(f"Predicted Edge PPR: {predicted_edge_ppr}")
+    print(f"Predicted Edge PPR Type: {type(predicted_edge_ppr)}")
+    
+    # NX: sparsityScore, level, height, graph_distance(query node, predicted parent), graph_distance(query node, predicted child)
+    # RELEVANCE: isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR
+    # COSINE SIMILARITY: cos_similarity(query node, predicted parent), cos_similarity(query node, predicted child)
+    
     query_node = data_prep.corpusId2nodeId[query["corpus_id"]]
     #   1. WAS IT CORRECTLY CLASSIFIED WITHOUT PPR?
     no_ppr_prediction = edges_predictions_test[all_targets_test.index(query_node)]

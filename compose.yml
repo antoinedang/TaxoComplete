@@ -4,6 +4,7 @@ services:
       - ./:/root/TaxoComplete
     image: "taxocomplete:latest"
     command: bash -c "tail -f /dev/null"
+    build: .
     deploy:
       resources:
         reservations:
