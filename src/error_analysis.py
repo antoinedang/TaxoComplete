@@ -110,14 +110,16 @@ nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
 undirected_core_subgraph = data_prep.core_subgraph.to_undirected()
 undirected_core_subgraph.remove_node(data_prep.pseudo_leaf_node)
 
+
 def get_height(node):
     if not list(core_graph.successors(node)):
         return 0
     else:
         return 1 + max(get_height(child) for child in core_graph.successors(node))
 
+
 with open("error_analysis.csv", "w+") as f:
-    line = "sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR, cos_sim_query_pred_child, cos_sim_query_pred_parent, cos_sim_query_pred_child_ppr, cos_sim_query_pred_parent_ppr, graph_distance_query_pred_child, graph_distance_query_pred_parent, graph_distance_query_pred_child_ppr, graph_distance_query_pred_parent_ppr\n"
+    line = "sizeOfCloseNeighborhood,queryLevel,queryHeight,isCorrectParent,isCorrectChild,isCorrectParentPPR,isCorrectChildPPR,cos_sim_query_pred_child,cos_sim_query_pred_parent,cos_sim_query_pred_child_ppr,cos_sim_query_pred_parent_ppr,graph_distance_query_pred_child,graph_distance_query_pred_parent,graph_distance_query_pred_child_ppr,graph_distance_query_pred_parent_ppr\n"
     f.write(line)
 
 #   FOR EACH QUERY:
@@ -153,7 +155,7 @@ for i in range(len(data_prep.test_queries)):
         undirected_core_subgraph, source=data_prep.root, target=query_node_id
     )
     query_height = get_height(query_node_id)
-    
+
     if predicted_edge[0] != data_prep.pseudo_leaf_node:
         dist_query_pred_parent = nx.shortest_path_length(
             undirected_core_subgraph, source=query_node_id, target=predicted_edge[0]
@@ -188,21 +190,43 @@ for i in range(len(data_prep.test_queries)):
     )
     ancestral_nodes.remove(data_prep.root)
     ancestral_nodes.remove(query_node_id)
-    children = [n for n in list(data_prep.core_subgraph.successors(query_node_id)) if n != data_prep.pseudo_leaf_node]
+    children = [
+        n
+        for n in list(data_prep.core_subgraph.successors(query_node_id))
+        if n != data_prep.pseudo_leaf_node
+    ]
     parent = list(data_prep.core_subgraph.predecessors(query_node_id))[0]
     siblings = [
-        n for n in data_prep.core_subgraph.successors(parent) if n != query_node_id and n != data_prep.pseudo_leaf_node
+        n
+        for n in data_prep.core_subgraph.successors(parent)
+        if n != query_node_id and n != data_prep.pseudo_leaf_node
     ]
     close_neighborhood_size = len(ancestral_nodes) + len(children) + len(siblings)
 
     # RELEVANCE: isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR
     isCorrectParent = any([predicted_edge[0] == sub_target[0] for sub_target in target])
-    isCorrectChild = any([predicted_edge[1] == sub_target[1] or (predicted_edge[1] == data_prep.pseudo_leaf_node and not (sub_target[1] in list(undirected_core_subgraph.nodes())))  for sub_target in target])
+    isCorrectChild = any(
+        [
+            predicted_edge[1] == sub_target[1]
+            or (
+                predicted_edge[1] == data_prep.pseudo_leaf_node
+                and not (sub_target[1] in list(undirected_core_subgraph.nodes()))
+            )
+            for sub_target in target
+        ]
+    )
     isCorrectParentPPR = any(
         [predicted_edge_ppr[0] == sub_target[0] for sub_target in target]
     )
     isCorrectChildPPR = any(
-        [predicted_edge_ppr[1] == sub_target[1] or (predicted_edge_ppr[1] == data_prep.pseudo_leaf_node and not (sub_target[1] in list(undirected_core_subgraph.nodes()))) for sub_target in target]
+        [
+            predicted_edge_ppr[1] == sub_target[1]
+            or (
+                predicted_edge_ppr[1] == data_prep.pseudo_leaf_node
+                and not (sub_target[1] in list(undirected_core_subgraph.nodes()))
+            )
+            for sub_target in target
+        ]
     )
 
     # COSINE SIMILARITY: cos_similarity(query node, predicted parent), cos_similarity(query node, predicted child)
@@ -233,7 +257,7 @@ for i in range(len(data_prep.test_queries)):
 
     #   STORE IN CSV:
     with open("error_analysis.csv", "a+") as f:
-        line = "{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}\n".format(
+        line = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
             close_neighborhood_size,
             query_level,
             query_height,
