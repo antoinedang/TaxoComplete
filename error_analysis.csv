@@ -15,12 +15,12 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 15, 5, 0, True, True, True, True, N/A, 0.6638632416725159, N/A, 0.6727917790412903, N/A, 6, N/A, 6
 15, 5, 0, False, False, False, False, N/A, 0.6172367930412292, N/A, 0.6172367930412292, N/A, 7, N/A, 7
 16, 5, 1, False, True, False, True, N/A, 0.6501970291137695, N/A, 0.6540677547454834, N/A, 7, N/A, 6
-15, 5, 0, False, True, True, True, N/A, 0.7221719026565552, N/A, 0.7097217440605164, N/A, 6, N/A, 5
+15, 5, 0, False, True, True, True, N/A, 0.7221719026565552, N/A, 0.7097216844558716, N/A, 6, N/A, 5
 15, 5, 0, True, False, True, False, N/A, 0.8338937163352966, N/A, 0.8182486295700073, N/A, 5, N/A, 5
 15, 5, 0, False, True, False, True, N/A, 0.6606829762458801, N/A, 0.6776933670043945, N/A, 6, N/A, 6
 15, 5, 0, False, True, False, True, N/A, 0.6696553230285645, N/A, 0.6737523078918457, N/A, 6, N/A, 5
 16, 5, 1, False, False, False, False, N/A, 0.6558775305747986, N/A, 0.7080950736999512, N/A, 7, N/A, 7
-15, 5, 0, False, True, False, True, N/A, 0.8265607953071594, N/A, 0.8248648047447205, N/A, 6, N/A, 6
+15, 5, 0, False, True, False, True, N/A, 0.8265607953071594, N/A, 0.8248648643493652, N/A, 6, N/A, 6
 6, 6, 0, False, False, False, False, N/A, 0.7573764324188232, N/A, 0.7461121082305908, N/A, 7, N/A, 7
 6, 6, 0, False, True, False, True, N/A, 0.770280122756958, N/A, 0.7702802419662476, N/A, 8, N/A, 8
 5, 6, 0, False, True, False, True, N/A, 0.6595989465713501, N/A, 0.6595988869667053, N/A, 8, N/A, 8
@@ -81,7 +81,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 4, 5, 0, False, True, False, True, N/A, 0.7320606708526611, N/A, 0.7031857967376709, N/A, 5, N/A, 5
 8, 3, 0, False, True, False, True, N/A, 0.6311901211738586, N/A, 0.6438573598861694, N/A, 5, N/A, 5
 615, 3, 0, False, True, False, True, N/A, 0.7937892079353333, N/A, 0.7234063744544983, N/A, 5, N/A, 4
-50, 3, 0, False, True, False, True, N/A, 0.6174142956733704, N/A, 0.6158814430236816, N/A, 5, N/A, 4
+50, 3, 0, False, True, False, True, N/A, 0.6174142956733704, N/A, 0.6158813238143921, N/A, 5, N/A, 4
 39, 3, 0, False, True, True, True, N/A, 0.6709482669830322, N/A, 0.6717784404754639, N/A, 3, N/A, 1
 16, 3, 1, False, True, False, True, N/A, 0.6150355339050293, N/A, 0.6196222305297852, N/A, 5, N/A, 4
 615, 3, 0, False, True, False, True, N/A, 0.8171027302742004, N/A, 0.8171027302742004, N/A, 2, N/A, 2
@@ -132,14 +132,14 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 8, 6, 0, False, True, False, True, N/A, 0.7226213216781616, N/A, 0.7383824586868286, N/A, 6, N/A, 6
 8, 6, 0, False, True, False, True, N/A, 0.839809238910675, N/A, 0.8398092985153198, N/A, 8, N/A, 8
 17, 4, 1, False, True, False, True, N/A, 1.0, N/A, 0.9277523756027222, N/A, 5, N/A, 6
-4, 5, 0, False, True, True, True, N/A, 0.6671082377433777, N/A, 0.6798056960105896, N/A, 6, N/A, 5
+4, 5, 0, False, True, True, True, N/A, 0.6671082377433777, N/A, 0.6798057556152344, N/A, 6, N/A, 5
 232, 3, 1, True, True, False, True, N/A, 0.818136990070343, N/A, 0.8162970542907715, N/A, 4, N/A, 4
 3, 4, 0, False, True, False, True, N/A, 0.869238018989563, N/A, 0.869238018989563, N/A, 5, N/A, 5
 1097, 3, 1, False, True, False, True, N/A, 0.76822829246521, N/A, 0.76822829246521, N/A, 4, N/A, 4
 4, 4, 0, False, True, False, True, N/A, 0.8455368280410767, N/A, 0.8455368876457214, N/A, 5, N/A, 5
 4, 4, 0, False, True, False, True, N/A, 0.7065591812133789, N/A, 0.7065591812133789, N/A, 7, N/A, 7
 61, 4, 2, False, False, False, False, N/A, 0.8034782409667969, N/A, 0.7884578704833984, N/A, 5, N/A, 6
-16, 5, 0, False, True, False, True, N/A, 0.7341131567955017, N/A, 0.7321397066116333, N/A, 5, N/A, 5
+16, 5, 0, False, True, False, True, N/A, 0.7341131567955017, N/A, 0.7321396470069885, N/A, 5, N/A, 5
 16, 5, 0, False, True, False, True, N/A, 0.718384861946106, N/A, 0.7260019779205322, N/A, 5, N/A, 5
 17, 5, 1, False, True, False, True, N/A, 0.7878661155700684, N/A, 0.8010532855987549, N/A, 7, N/A, 7
 16, 5, 0, True, True, True, True, N/A, 0.6288272142410278, N/A, 0.6491692662239075, N/A, 6, N/A, 6
@@ -148,7 +148,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 16, 5, 0, False, True, False, True, N/A, 0.7306544780731201, N/A, 0.7306544780731201, N/A, 8, N/A, 8
 16, 5, 0, False, True, False, True, N/A, 0.759872317314148, N/A, 0.700499415397644, N/A, 6, N/A, 5
 17, 5, 1, True, True, True, True, N/A, 0.7136255502700806, N/A, 0.7170202136039734, N/A, 6, N/A, 6
-16, 5, 0, False, True, False, True, N/A, 0.7436951398849487, N/A, 0.7635466456413269, N/A, 5, N/A, 5
+16, 5, 0, False, True, False, True, N/A, 0.7436951398849487, N/A, 0.7635467052459717, N/A, 5, N/A, 5
 16, 5, 0, True, True, True, True, N/A, 0.6081589460372925, N/A, 0.6081589460372925, N/A, 3, N/A, 3
 17, 5, 1, True, True, True, True, N/A, 0.6966679096221924, N/A, 0.6224204301834106, N/A, 7, N/A, 7
 16, 5, 0, False, True, False, True, N/A, 0.5918148756027222, N/A, 0.5918148159980774, N/A, 5, N/A, 5
@@ -185,7 +185,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 80, 5, 0, True, True, True, True, N/A, 0.7298736572265625, N/A, 0.7422494292259216, N/A, 8, N/A, 8
 15, 6, 0, False, True, False, True, N/A, 0.7990059852600098, N/A, 0.799005925655365, N/A, 7, N/A, 7
 15, 6, 0, False, True, False, True, N/A, 0.793388843536377, N/A, 0.7883493304252625, N/A, 7, N/A, 7
-12, 6, 0, False, True, False, True, N/A, 0.7327820062637329, N/A, 0.7263430953025818, N/A, 7, N/A, 7
+12, 6, 0, False, True, False, True, N/A, 0.7327820062637329, N/A, 0.726343035697937, N/A, 7, N/A, 7
 80, 5, 0, False, True, False, True, N/A, 0.6306513547897339, N/A, 0.619509220123291, N/A, 4, N/A, 6
 80, 5, 0, True, True, True, True, N/A, 0.7379277944564819, N/A, 0.739378809928894, N/A, 7, N/A, 7
 15, 6, 0, True, True, True, True, N/A, 0.7436047792434692, N/A, 0.7970158457756042, N/A, 7, N/A, 7
@@ -249,7 +249,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 25, 5, 0, False, True, False, True, N/A, 1.0, N/A, 0.8443458676338196, N/A, 4, N/A, 4
 25, 5, 0, True, True, False, True, N/A, 0.7570847868919373, N/A, 0.6848837733268738, N/A, 6, N/A, 4
 25, 5, 0, True, True, True, True, N/A, 0.750523030757904, N/A, 0.759850025177002, N/A, 5, N/A, 5
-1778, 3, 3, False, True, False, True, N/A, 0.7504044771194458, N/A, 0.7368535399436951, N/A, 5, N/A, 5
+1778, 3, 3, False, True, False, True, N/A, 0.7504044771194458, N/A, 0.7368534803390503, N/A, 5, N/A, 5
 11, 4, 2, False, True, True, True, N/A, 0.7958521842956543, N/A, 0.7581964135169983, N/A, 5, N/A, 6
 10, 4, 0, False, True, False, True, N/A, 0.7379471063613892, N/A, 0.7270275950431824, N/A, 4, N/A, 4
 10, 4, 0, False, False, False, False, N/A, 0.8971513509750366, N/A, 0.8971513509750366, N/A, 5, N/A, 5
@@ -343,7 +343,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 18, 5, 0, False, True, False, True, N/A, 0.8181188106536865, N/A, 0.7609015703201294, N/A, 6, N/A, 6
 19, 5, 1, False, True, False, True, N/A, 0.7458125352859497, N/A, 0.7458124756813049, N/A, 4, N/A, 4
 18, 5, 0, False, False, False, False, N/A, 0.8310719728469849, N/A, 0.8027803897857666, N/A, 6, N/A, 6
-18, 5, 0, False, True, False, True, N/A, 0.7641031742095947, N/A, 0.7672950029373169, N/A, 6, N/A, 5
+18, 5, 0, False, True, False, True, N/A, 0.7641031742095947, N/A, 0.7672950625419617, N/A, 6, N/A, 5
 18, 5, 0, False, True, False, True, N/A, 0.7589849233627319, N/A, 0.7589849233627319, N/A, 6, N/A, 6
 18, 5, 0, False, True, False, True, N/A, 0.6287412643432617, N/A, 0.6287412643432617, N/A, 6, N/A, 6
 20, 5, 1, False, False, False, False, N/A, 1.0, N/A, 1.0, N/A, 4, N/A, 4
@@ -409,7 +409,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 12, 6, 0, False, True, False, True, N/A, 0.6752568483352661, N/A, 0.6847264766693115, N/A, 6, N/A, 6
 12, 6, 0, False, False, False, False, N/A, 0.8200584650039673, N/A, 0.8200584650039673, N/A, 6, N/A, 6
 12, 6, 0, True, False, True, True, 0.8010972142219543, 0.8010972142219543, N/A, 0.8432558178901672, 6, 5, N/A, 5
-12, 6, 0, True, True, True, True, N/A, 0.8894277811050415, N/A, 0.8769522309303284, N/A, 5, N/A, 5
+12, 6, 0, True, True, True, True, N/A, 0.8894277811050415, N/A, 0.8769521713256836, N/A, 5, N/A, 5
 26, 6, 0, False, True, False, True, N/A, 0.8729028701782227, N/A, 0.8729028701782227, N/A, 5, N/A, 5
 26, 6, 0, False, True, False, True, N/A, 0.8558449745178223, N/A, 0.8558450937271118, N/A, 9, N/A, 9
 26, 6, 0, False, True, True, True, N/A, 0.7943654656410217, N/A, 0.7962045073509216, N/A, 6, N/A, 6
@@ -423,7 +423,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 26, 6, 0, False, True, False, True, N/A, 0.8852767944335938, N/A, 0.8852767944335938, N/A, 6, N/A, 6
 26, 6, 0, False, True, False, True, N/A, 0.7016958594322205, N/A, 0.7021939158439636, N/A, 6, N/A, 7
 26, 6, 0, False, True, False, True, N/A, 0.6878184080123901, N/A, 0.6878184080123901, N/A, 7, N/A, 7
-26, 6, 0, False, False, False, False, N/A, 1.0, N/A, 0.7344620823860168, N/A, 6, N/A, 5
+26, 6, 0, False, False, False, False, N/A, 1.0, N/A, 0.7344620227813721, N/A, 6, N/A, 5
 26, 6, 0, False, True, False, True, N/A, 0.7311087250709534, N/A, 0.7311087250709534, N/A, 6, N/A, 6
 26, 6, 0, False, True, False, True, N/A, 0.6476393342018127, N/A, 0.654475212097168, N/A, 9, N/A, 7
 26, 6, 0, False, False, False, False, N/A, 0.7796826362609863, N/A, 0.7898386716842651, N/A, 5, N/A, 5
@@ -434,7 +434,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 9, 6, 0, False, False, False, False, N/A, 0.7958109378814697, N/A, 0.8079848289489746, N/A, 8, N/A, 7
 9, 6, 0, False, True, False, True, N/A, 0.6720262765884399, N/A, 0.6945808529853821, N/A, 7, N/A, 7
 9, 6, 0, True, True, True, True, N/A, 0.6933733820915222, N/A, 0.7227526307106018, N/A, 7, N/A, 7
-20, 4, 1, True, False, True, False, N/A, 0.7839375734329224, N/A, 0.7873284220695496, N/A, 5, N/A, 5
+20, 4, 1, True, False, True, False, N/A, 0.7839375734329224, N/A, 0.7873283624649048, N/A, 5, N/A, 5
 4, 4, 0, False, True, True, True, N/A, 0.8442409038543701, N/A, 0.825830340385437, N/A, 6, N/A, 6
 5, 5, 0, False, True, False, True, N/A, 0.7439841032028198, N/A, 0.743984043598175, N/A, 7, N/A, 7
 617, 3, 1, False, True, False, True, N/A, 0.7465861439704895, N/A, 0.7565080523490906, N/A, 5, N/A, 4
@@ -447,7 +447,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 6, 5, 0, False, True, False, True, N/A, 0.7530619502067566, N/A, 0.7530618906021118, N/A, 8, N/A, 8
 6, 5, 0, False, False, False, False, N/A, 0.8694021701812744, N/A, 0.8694021701812744, N/A, 7, N/A, 7
 9, 6, 0, False, True, False, True, N/A, 0.7199299335479736, N/A, 0.7199299335479736, N/A, 7, N/A, 7
-9, 6, 0, False, True, True, True, N/A, 0.7824224233627319, N/A, 0.7402694225311279, N/A, 7, N/A, 6
+9, 6, 0, False, True, True, True, N/A, 0.7824224233627319, N/A, 0.7402693629264832, N/A, 7, N/A, 6
 9, 6, 0, False, True, False, True, N/A, 0.8444417119026184, N/A, 0.8444416522979736, N/A, 8, N/A, 8
 9, 6, 0, False, True, False, True, N/A, 0.6487724781036377, N/A, 0.6679375171661377, N/A, 7, N/A, 7
 9, 6, 0, False, False, False, False, N/A, 0.8478453755378723, N/A, 0.8426231145858765, N/A, 7, N/A, 7
@@ -465,7 +465,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 4, 5, 0, False, True, False, True, N/A, 0.7314362525939941, N/A, 0.7314361929893494, N/A, 6, N/A, 6
 12, 4, 2, False, False, False, False, N/A, 0.913525402545929, N/A, 0.8940175175666809, N/A, 3, N/A, 3
 8, 5, 1, False, True, False, True, N/A, 0.784363865852356, N/A, 0.7843639254570007, N/A, 6, N/A, 6
-6, 5, 0, False, False, False, False, N/A, 0.8302024602890015, N/A, 0.8438740372657776, N/A, 5, N/A, 5
+6, 5, 0, False, False, False, False, N/A, 0.8302024602890015, N/A, 0.8438740968704224, N/A, 5, N/A, 5
 11, 5, 1, False, True, False, True, N/A, 0.7567857503890991, N/A, 0.7649976015090942, N/A, 7, N/A, 6
 6, 6, 0, True, True, True, True, N/A, 0.7877559661865234, N/A, 0.7708998918533325, N/A, 9, N/A, 9
 6, 6, 0, True, True, False, True, N/A, 0.7242259383201599, N/A, 0.6361085772514343, N/A, 7, N/A, 7
@@ -479,7 +479,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 3, 4, 0, False, True, False, True, N/A, 0.8150643110275269, N/A, 0.8030619621276855, N/A, 6, N/A, 6
 77, 4, 2, False, False, False, False, N/A, 0.6985592246055603, N/A, 0.7015451192855835, N/A, 7, N/A, 6
 15, 5, 1, False, True, False, True, N/A, 0.8206522464752197, N/A, 0.8206523060798645, N/A, 6, N/A, 6
-14, 5, 0, False, True, False, True, N/A, 0.5873594284057617, N/A, 0.5800161957740784, N/A, 5, N/A, 5
+14, 5, 0, False, True, False, True, N/A, 0.5873594284057617, N/A, 0.5800161361694336, N/A, 5, N/A, 5
 15, 6, 0, False, False, False, False, N/A, 0.813269853591919, N/A, 0.8207690715789795, N/A, 7, N/A, 7
 13, 4, 0, True, True, True, True, N/A, 0.7169478535652161, N/A, 0.7115007638931274, N/A, 3, N/A, 3
 14, 5, 0, False, False, False, False, N/A, 0.7319527864456177, N/A, 0.7023142576217651, N/A, 8, N/A, 8
@@ -511,7 +511,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 4, 5, 0, False, False, False, False, N/A, 1.0, N/A, 0.9999999403953552, N/A, 9, N/A, 9
 17, 4, 2, False, True, False, True, N/A, 0.8519330024719238, N/A, 0.8126237392425537, N/A, 5, N/A, 5
 11, 5, 1, False, False, False, False, N/A, 0.8412158489227295, N/A, 0.8198288679122925, N/A, 6, N/A, 6
-11, 6, 0, False, True, False, True, N/A, 0.7626539468765259, N/A, 0.7844426035881042, N/A, 8, N/A, 8
+11, 6, 0, False, True, False, True, N/A, 0.7626539468765259, N/A, 0.7844425439834595, N/A, 8, N/A, 8
 11, 6, 0, True, True, True, True, N/A, 0.6640214920043945, N/A, 0.6640216112136841, N/A, 7, N/A, 7
 11, 6, 0, True, True, True, True, N/A, 0.7937518954277039, N/A, 0.7861213088035583, N/A, 7, N/A, 7
 11, 6, 0, True, True, False, True, N/A, 0.6931527853012085, N/A, 0.6573141813278198, N/A, 8, N/A, 8
@@ -557,7 +557,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 7, 5, 0, False, True, False, True, N/A, 0.8217905759811401, N/A, 0.8217905163764954, N/A, 5, N/A, 5
 8, 6, 0, True, False, False, True, 1.0, 1.0, N/A, 1.0, 7, 7, N/A, 7
 9, 5, 0, False, True, True, True, N/A, 0.7589002847671509, N/A, 0.7328824996948242, N/A, 6, N/A, 6
-9, 5, 0, False, True, False, True, N/A, 0.5659556984901428, N/A, 0.5705068111419678, N/A, 5, N/A, 5
+9, 5, 0, False, True, False, True, N/A, 0.5659556984901428, N/A, 0.5705068707466125, N/A, 5, N/A, 5
 10, 6, 0, False, True, False, True, N/A, 0.62406986951828, N/A, 0.6240698099136353, N/A, 8, N/A, 8
 31, 4, 2, False, True, False, True, N/A, 0.6047966480255127, N/A, 0.6047966480255127, N/A, 6, N/A, 6
 7, 5, 0, False, True, False, True, N/A, 0.531000554561615, N/A, 0.536288857460022, N/A, 5, N/A, 6
@@ -590,7 +590,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 1275, 3, 1, False, True, False, True, N/A, 0.7419760227203369, N/A, 0.7316720485687256, N/A, 4, N/A, 4
 1274, 3, 0, False, False, False, False, N/A, 0.5548914670944214, N/A, 0.5555874109268188, N/A, 5, N/A, 4
 1274, 3, 0, False, True, False, True, N/A, 0.7368655204772949, N/A, 0.7368654608726501, N/A, 4, N/A, 4
-1275, 3, 1, False, True, False, True, N/A, 0.5982093811035156, N/A, 0.5995519161224365, N/A, 3, N/A, 3
+1275, 3, 1, False, True, False, True, N/A, 0.5982093811035156, N/A, 0.5995518565177917, N/A, 3, N/A, 3
 1274, 3, 0, False, False, True, False, N/A, 0.8372204899787903, N/A, 0.8508226871490479, N/A, 6, N/A, 5
 3, 4, 0, False, True, False, True, N/A, 0.828461229801178, N/A, 0.828461229801178, N/A, 5, N/A, 5
 3, 4, 0, False, True, True, True, N/A, 0.5821520090103149, N/A, 0.5978913307189941, N/A, 5, N/A, 3
@@ -623,7 +623,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 10, 6, 0, False, True, False, True, N/A, 0.7016757726669312, N/A, 0.7016757726669312, N/A, 9, N/A, 9
 10, 6, 0, True, False, True, False, N/A, 0.7942993640899658, N/A, 0.7891631126403809, N/A, 4, N/A, 4
 10, 6, 0, True, True, True, True, N/A, 0.6457151174545288, N/A, 0.6457151174545288, N/A, 7, N/A, 7
-23, 6, 0, False, True, False, True, N/A, 0.8707588911056519, N/A, 0.8846685290336609, N/A, 6, N/A, 6
+23, 6, 0, False, True, False, True, N/A, 0.8707588911056519, N/A, 0.8846685886383057, N/A, 6, N/A, 6
 23, 6, 0, False, False, True, False, N/A, 0.7961174249649048, N/A, 0.8298799395561218, N/A, 8, N/A, 7
 23, 6, 0, False, True, False, True, N/A, 0.7275015115737915, N/A, 0.7185721397399902, N/A, 7, N/A, 7
 23, 6, 0, True, False, True, False, N/A, 0.7706575393676758, N/A, 0.7459720969200134, N/A, 7, N/A, 7
@@ -642,7 +642,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 1797, 3, 3, False, True, False, True, N/A, 0.7758990526199341, N/A, 0.7758991122245789, N/A, 4, N/A, 4
 26, 4, 0, False, True, False, True, N/A, 0.7234514951705933, N/A, 0.7234514951705933, N/A, 5, N/A, 5
 27, 4, 2, False, True, False, True, N/A, 0.5697140693664551, N/A, 0.564895510673523, N/A, 5, N/A, 6
-26, 4, 0, True, False, True, False, N/A, 0.806428074836731, N/A, 0.8204129338264465, N/A, 5, N/A, 5
+26, 4, 0, True, False, True, False, N/A, 0.806428074836731, N/A, 0.8204129934310913, N/A, 5, N/A, 5
 31, 4, 2, True, True, True, True, N/A, 0.8048025369644165, N/A, 0.8079944849014282, N/A, 7, N/A, 7
 26, 4, 0, False, True, False, True, N/A, 1.0, N/A, 1.0000001192092896, N/A, 5, N/A, 5
 26, 4, 0, False, True, True, True, N/A, 0.7205225229263306, N/A, 0.7223803997039795, N/A, 5, N/A, 4
@@ -715,7 +715,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 23, 5, 1, False, True, False, True, N/A, 0.6059755682945251, N/A, 0.6135585308074951, N/A, 6, N/A, 6
 21, 5, 0, False, False, False, False, N/A, 0.7395035028457642, N/A, 0.7692365646362305, N/A, 4, N/A, 4
 21, 5, 0, True, False, True, False, N/A, 0.6965988278388977, N/A, 0.7078412771224976, N/A, 4, N/A, 4
-23, 5, 1, False, True, False, True, N/A, 0.695248544216156, N/A, 0.6920734643936157, N/A, 6, N/A, 6
+23, 5, 1, False, True, False, True, N/A, 0.695248544216156, N/A, 0.692073404788971, N/A, 6, N/A, 6
 21, 5, 0, False, True, False, True, N/A, 0.6763202548027039, N/A, 0.6763202548027039, N/A, 4, N/A, 4
 21, 5, 0, True, False, True, False, N/A, 0.8530696630477905, N/A, 0.8715747594833374, N/A, 5, N/A, 5
 21, 5, 0, False, True, True, True, N/A, 0.638228178024292, N/A, 0.6624608039855957, N/A, 7, N/A, 7
@@ -748,7 +748,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 9, 6, 0, False, True, False, True, N/A, 0.7889372110366821, N/A, 0.7651619911193848, N/A, 7, N/A, 7
 9, 6, 0, False, True, False, True, N/A, 0.7169053554534912, N/A, 0.7169053554534912, N/A, 7, N/A, 7
 9, 6, 0, False, True, False, True, N/A, 0.7424034476280212, N/A, 0.7592437267303467, N/A, 9, N/A, 6
-14, 4, 1, False, False, False, False, N/A, 0.6608515977859497, N/A, 0.6692254543304443, N/A, 4, N/A, 4
+14, 4, 1, False, False, False, False, N/A, 0.6608515977859497, N/A, 0.6692253947257996, N/A, 4, N/A, 4
 6, 5, 0, True, True, True, True, N/A, 0.6715626120567322, N/A, 0.679755687713623, N/A, 7, N/A, 7
 6, 5, 0, False, True, False, True, N/A, 0.7829993367195129, N/A, 0.7220563888549805, N/A, 5, N/A, 5
 6, 5, 0, False, True, False, True, N/A, 0.7031369209289551, N/A, 0.6691523790359497, N/A, 7, N/A, 7
@@ -798,7 +798,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 6, 4, 0, False, False, False, False, N/A, 0.7394073009490967, N/A, 0.7394073009490967, N/A, 4, N/A, 4
 7, 4, 1, False, True, False, True, N/A, 0.8644019365310669, N/A, 0.8644018173217773, N/A, 6, N/A, 6
 4, 5, 0, False, True, True, True, N/A, 0.7393083572387695, N/A, 0.7405723333358765, N/A, 6, N/A, 7
-14, 5, 1, False, True, False, True, N/A, 0.7344673871994019, N/A, 0.7366524934768677, N/A, 3, N/A, 3
+14, 5, 1, False, True, False, True, N/A, 0.7344673871994019, N/A, 0.7366525530815125, N/A, 3, N/A, 3
 10, 6, 0, False, True, False, True, N/A, 0.6139004826545715, N/A, 0.6139005422592163, N/A, 10, N/A, 10
 10, 6, 0, False, False, False, False, N/A, 0.9248483777046204, N/A, 0.9000086784362793, N/A, 7, N/A, 7
 10, 6, 0, False, False, False, False, N/A, 0.7651600241661072, N/A, 0.7651599645614624, N/A, 7, N/A, 7
@@ -820,7 +820,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 7, 5, 1, True, True, True, True, N/A, 0.8944615125656128, N/A, 0.8655122518539429, N/A, 6, N/A, 6
 9, 2, 1, True, True, False, True, N/A, 0.708777904510498, N/A, 0.726652979850769, N/A, 5, N/A, 6
 5, 3, 0, False, False, False, False, N/A, 0.8486310839653015, N/A, 0.7167339324951172, N/A, 6, N/A, 7
-5, 3, 0, False, True, False, True, N/A, 0.7156111598014832, N/A, 0.7180396318435669, N/A, 5, N/A, 5
+5, 3, 0, False, True, False, True, N/A, 0.7156111598014832, N/A, 0.7180395126342773, N/A, 5, N/A, 5
 5, 3, 0, False, True, False, True, N/A, 0.7365587949752808, N/A, 0.7060672044754028, N/A, 6, N/A, 6
 5, 3, 0, False, True, False, True, N/A, 0.6469810009002686, N/A, 0.6644668579101562, N/A, 7, N/A, 6
 385, 2, 4, True, True, True, True, N/A, 0.6798475980758667, N/A, 0.6257511377334595, N/A, 4, N/A, 4
@@ -875,7 +875,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 320, 3, 2, True, True, True, True, N/A, 0.6621823310852051, N/A, 0.6736146807670593, N/A, 5, N/A, 5
 314, 3, 0, False, True, False, True, N/A, 0.7382946014404297, N/A, 0.7382946610450745, N/A, 4, N/A, 4
 314, 3, 0, False, False, True, False, N/A, 0.7960764765739441, N/A, 0.8219452500343323, N/A, 5, N/A, 5
-314, 3, 0, False, True, True, True, N/A, 0.8311247825622559, N/A, 0.7948148846626282, N/A, 4, N/A, 3
+314, 3, 0, False, True, True, True, N/A, 0.8311247825622559, N/A, 0.7948148250579834, N/A, 4, N/A, 3
 319, 3, 3, False, True, False, True, N/A, 0.686100959777832, N/A, 0.7160570621490479, N/A, 3, N/A, 3
 314, 3, 0, True, True, True, True, N/A, 0.7723631858825684, N/A, 0.7565696835517883, N/A, 4, N/A, 4
 320, 3, 3, False, True, False, True, N/A, 0.541496992111206, N/A, 0.541496992111206, N/A, 5, N/A, 5
@@ -883,7 +883,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 316, 3, 1, True, True, True, True, N/A, 0.7020255327224731, N/A, 0.7003695368766785, N/A, 2, N/A, 2
 316, 3, 2, False, False, False, False, N/A, 0.9017504453659058, N/A, 0.9017504453659058, N/A, 4, N/A, 4
 314, 3, 0, False, False, False, False, N/A, 0.7997622489929199, N/A, 0.7821536064147949, N/A, 2, N/A, 2
-314, 3, 0, False, True, False, True, N/A, 0.7273618578910828, N/A, 0.7673968076705933, N/A, 4, N/A, 4
+314, 3, 0, False, True, False, True, N/A, 0.7273618578910828, N/A, 0.767396867275238, N/A, 4, N/A, 4
 314, 3, 0, False, True, False, True, N/A, 0.759581446647644, N/A, 0.7405000925064087, N/A, 4, N/A, 4
 314, 3, 0, False, True, False, True, N/A, 0.6146575212478638, N/A, 0.6148508787155151, N/A, 4, N/A, 3
 314, 3, 0, False, False, False, False, N/A, 0.7200107574462891, N/A, 0.7383588552474976, N/A, 3, N/A, 3
@@ -929,7 +929,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 314, 3, 0, False, True, False, True, N/A, 0.6547940373420715, N/A, 0.664861798286438, N/A, 6, N/A, 4
 315, 3, 1, False, True, False, True, N/A, 0.6595025062561035, N/A, 0.6595025062561035, N/A, 4, N/A, 4
 318, 3, 1, False, True, False, True, N/A, 0.6874532699584961, N/A, 0.6874533891677856, N/A, 4, N/A, 4
-314, 3, 0, True, True, True, True, N/A, 0.7931164503097534, N/A, 0.7885488271713257, N/A, 1, N/A, 1
+314, 3, 0, True, True, True, True, N/A, 0.7931164503097534, N/A, 0.7885487675666809, N/A, 1, N/A, 1
 315, 3, 1, True, False, False, False, N/A, 0.8363836407661438, N/A, 0.8155292272567749, N/A, 4, N/A, 4
 318, 3, 1, False, True, False, True, N/A, 0.7271934747695923, N/A, 0.7536188960075378, N/A, 5, N/A, 4
 314, 3, 0, False, True, False, True, N/A, 0.7519270181655884, N/A, 0.7519270181655884, N/A, 6, N/A, 6
@@ -946,7 +946,7 @@ sizeOfCloseNeighborhood, queryLevel, queryHeight, isCorrectParent, isCorrectChil
 314, 3, 0, False, True, False, True, N/A, 0.6937606334686279, N/A, 0.6943457722663879, N/A, 3, N/A, 2
 314, 3, 0, False, False, False, False, N/A, 0.7935502529144287, N/A, 0.7935503125190735, N/A, 4, N/A, 4
 314, 3, 0, False, True, False, True, N/A, 0.8314679265022278, N/A, 0.8314679265022278, N/A, 4, N/A, 4
-314, 3, 0, True, True, True, True, N/A, 0.8036901950836182, N/A, 0.805560827255249, N/A, 3, N/A, 3
+314, 3, 0, True, True, True, True, N/A, 0.8036901950836182, N/A, 0.8055608868598938, N/A, 3, N/A, 3
 314, 3, 0, False, True, False, True, N/A, 0.6273812055587769, N/A, 0.6370888948440552, N/A, 6, N/A, 5
 314, 3, 0, False, True, False, True, N/A, 0.6538029313087463, N/A, 0.6538028717041016, N/A, 5, N/A, 5
 314, 3, 0, False, True, False, True, N/A, 0.6954991817474365, N/A, 0.7010688781738281, N/A, 5, N/A, 4
