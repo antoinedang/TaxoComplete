@@ -62,7 +62,6 @@ with open(csv_file_path, mode="r") as file:
         cos_sim_query_pred_parent_ppr.append(
             to_float_or_none(row["cos_sim_query_pred_parent_ppr"])
         )
-        print(row["graph_distance_query_pred_child"])
         graph_distance_query_pred_child.append(
             to_float_or_none(row["graph_distance_query_pred_child"])
         )
@@ -333,14 +332,17 @@ plt.grid(axis="y")
 plt.tight_layout()
 plt.show()
 
-
+has_graph_distance = graph_distance_query_pred_parent != None
 inverse_graph_distance = 1 / (graph_distance_query_pred_parent)
-diff_to_cosine = np.abs(cos_sim_query_pred_parent - inverse_graph_distance)
+
+correct_normal = is_correct_parent & has_graph_distance
+not_correct_normal = ~is_correct_parent & has_graph_distance
 
 plt.scatter(
-    cos_sim_query_pred_parent[~correct_normal],
-    inverse_graph_distance[~correct_normal],
+    cos_sim_query_pred_parent[not_correct_normal],
+    inverse_graph_distance[not_correct_normal],
     c="blue",
+    label="Incorrect",
     # c=diff_to_cosine,
     # cmap="viridis",
     # alpha=0.5,
@@ -349,25 +351,31 @@ plt.scatter(
     cos_sim_query_pred_parent[correct_normal],
     inverse_graph_distance[correct_normal],
     c="red",
+    label="Correct",
     # c=diff_to_cosine,
     # cmap="viridis",
     # alpha=0.5,
 )
 # plt.colorbar()
-plt.yscale("log")
+# plt.yscale("log")
+plt.legend(["Incorrect", "Correct"])
 plt.xlabel("Cosine Similarity")
 plt.ylabel("Inverse Graph Distance")
 plt.title("Cosine Similarity vs. Inverse Graph Distance")
 plt.show()
 
 
+has_graph_distance_ppr = graph_distance_query_pred_parent_ppr != None
 inverse_graph_distance_ppr = 1 / (graph_distance_query_pred_parent_ppr)
-diff_to_cosine_ppr = np.abs(cos_sim_query_pred_parent_ppr - inverse_graph_distance_ppr)
+
+correct_ppr = is_correct_parent_ppr & has_graph_distance_ppr
+not_correct_ppr = ~is_correct_parent_ppr & has_graph_distance_ppr
 
 plt.scatter(
-    cos_sim_query_pred_parent_ppr[~correct_ppr],
-    inverse_graph_distance_ppr[~correct_ppr],
+    cos_sim_query_pred_parent_ppr[not_correct_ppr],
+    inverse_graph_distance_ppr[not_correct_ppr],
     c="blue",
+    label="Incorrect",
     # c=diff_to_cosine,
     # cmap="viridis",
     # alpha=0.5,
@@ -376,12 +384,14 @@ plt.scatter(
     cos_sim_query_pred_parent_ppr[correct_ppr],
     inverse_graph_distance_ppr[correct_ppr],
     c="red",
+    label="Correct",
     # c=diff_to_cosine,
     # cmap="viridis",
     # alpha=0.5,
 )
 # plt.colorbar()
-plt.yscale("log")
+# plt.yscale("log")
+plt.legend(["Incorrect", "Correct"])
 plt.xlabel("Cosine Similarity")
 plt.ylabel("Inverse Graph Distance")
 plt.title("Cosine Similarity vs. Inverse Graph Distance (w/ PPR)")
