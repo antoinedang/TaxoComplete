@@ -12,27 +12,28 @@ from model.utils import PPRPowerIteration
 import os
 import pickle
 
-if not os.path.exists("error_analysis_variables.pkl"):
-    torch.manual_seed(0)
-    args = argparse.ArgumentParser(description="Training taxonomy expansion model")
-    args.add_argument(
-        "-c",
-        "--config",
-        default=None,
-        type=str,
-        help="config file path (default: None)",
-    )
-    config = ConfigParser(args)
-    args = args.parse_args()
+torch.manual_seed(0)
+args = argparse.ArgumentParser(description="Training taxonomy expansion model")
+args.add_argument(
+    "-c",
+    "--config",
+    default=None,
+    type=str,
+    help="config file path (default: None)",
+)
+config = ConfigParser(args)
+args = args.parse_args()
 
-    saving_path = config["saving_path"]
-    name = config["name"]
-    data_path = config["data_path"]
-    sampling_method = config["sampling"]
-    neg_number = config["neg_number"]
-    partition_pattern = config["partition_pattern"]
-    seed = config["seed"]
+saving_path = config["saving_path"]
+name = config["name"]
+data_path = config["data_path"]
+sampling_method = config["sampling"]
+neg_number = config["neg_number"]
+partition_pattern = config["partition_pattern"]
+seed = config["seed"]
+error_analysis_filename = "error_analysis_variables_{}.pkl".format(name)
 
+if not os.path.exists(error_analysis_filename):
     taxonomy = dl.TaxoDataset(
         name, data_path, raw=True, partition_pattern=partition_pattern, seed=seed
     )
@@ -111,7 +112,7 @@ if not os.path.exists("error_analysis_variables.pkl"):
     nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
 
     # SAVE VARIABLES TO PICKLES TO MAKE DEVELOPMENT FASTER
-    with open("error_analysis_variables.pkl", "wb") as f:
+    with open(error_analysis_filename, "wb") as f:
         pickle.dump(
             [
                 taxonomy,
@@ -129,7 +130,7 @@ if not os.path.exists("error_analysis_variables.pkl"):
             f,
         )
 else:
-    with open("error_analysis_variables.pkl", "rb") as f:
+    with open(error_analysis_filename, "rb") as f:
         (
             taxonomy,
             data_prep,
@@ -144,13 +145,26 @@ else:
             preds,
         ) = pickle.load(f)
 
+# prediction_taxonomy = taxonomy.taxonomy
+# SET PREDICTION TAXONOMY TO CORE SUBGRAPH BECAUSE THIS IS THE GRAPH THAT TAXOCOMPLETE OPERATES ON
+# IF WE USE taxonomy.taxonomy, THE GRAPH DISTANCE BETWEEN QUERY AND PREDICTED PARENT MIGHT BE > 1 EVEN IF THE PREDICTION IS CORRECT
+prediction_taxonomy = data_prep.core_subgraph
+prediction_taxonomy_undirected = prediction_taxonomy.to_undirected()
+taxonomy_roots = (
+    [data_prep.root]
+    if prediction_taxonomy == data_prep.core_subgraph
+    else taxonomy.root
+)
+
 
 def get_height(node):
-    if not list(taxonomy.taxonomy.successors(node)):
+    if len(list(prediction_taxonomy.successors(node))) < 2:
         return 0
     else:
         return 1 + max(
-            get_height(child) for child in taxonomy.taxonomy.successors(node)
+            get_height(child)
+            for child in prediction_taxonomy.successors(node)
+            if child != data_prep.pseudo_leaf_node
         )
 
 
@@ -188,23 +202,25 @@ for i in range(len(data_prep.test_queries)):
 
     # NX: sparsityScore, level, height, graph_distance(query node, predicted parent), graph_distance(query node, predicted child)
     taxonomy_root = None
-    for root in taxonomy.root:
-        if nx.has_path(taxonomy.taxonomy, root, query_node_id):
+    for root in taxonomy_roots:
+        if nx.has_path(prediction_taxonomy, root, query_node_id):
             taxonomy_root = root
     query_level = nx.shortest_path_length(
-        taxonomy.taxonomy, source=taxonomy_root, target=query_node_id
+        prediction_taxonomy, source=taxonomy_root, target=query_node_id
     )
     query_height = get_height(query_node_id)
 
     if predicted_edge[0] != data_prep.pseudo_leaf_node:
         try:
             dist_query_pred_parent = nx.shortest_path_length(
-                taxonomy.taxonomy, source=predicted_edge[0], target=query_node_id
+                prediction_taxonomy, source=predicted_edge[0], target=query_node_id
             )
         except nx.NetworkXNoPath:
             try:
                 dist_query_pred_parent = -1 * nx.shortest_path_length(
-                    taxonomy.taxonomy, source=query_node_id, target=predicted_edge[0]
+                    prediction_taxonomy_undirected,
+                    source=query_node_id,
+                    target=predicted_edge[0],
                 )
             except nx.NetworkXNoPath:
                 dist_query_pred_parent = "N/A"
@@ -213,12 +229,14 @@ for i in range(len(data_prep.test_queries)):
     if predicted_edge[1] != data_prep.pseudo_leaf_node:
         try:
             dist_query_pred_child = nx.shortest_path_length(
-                taxonomy.taxonomy, source=query_node_id, target=predicted_edge[1]
+                prediction_taxonomy, source=query_node_id, target=predicted_edge[1]
             )
         except nx.NetworkXNoPath:
             try:
                 dist_query_pred_child = -1 * nx.shortest_path_length(
-                    taxonomy.taxonomy, source=predicted_edge[1], target=query_node_id
+                    prediction_taxonomy_undirected,
+                    source=predicted_edge[1],
+                    target=query_node_id,
                 )
             except nx.NetworkXNoPath:
                 dist_query_pred_child = "N/A"
@@ -227,14 +245,14 @@ for i in range(len(data_prep.test_queries)):
     if predicted_edge_ppr[0] != data_prep.pseudo_leaf_node:
         try:
             dist_query_pred_parent_ppr = nx.shortest_path_length(
-                taxonomy.taxonomy,
+                prediction_taxonomy,
                 source=predicted_edge_ppr[0],
                 target=query_node_id,
             )
         except nx.NetworkXNoPath:
             try:
                 dist_query_pred_parent_ppr = -1 * nx.shortest_path_length(
-                    taxonomy.taxonomy,
+                    prediction_taxonomy_undirected,
                     source=query_node_id,
                     target=predicted_edge_ppr[0],
                 )
@@ -245,12 +263,12 @@ for i in range(len(data_prep.test_queries)):
     if predicted_edge_ppr[1] != data_prep.pseudo_leaf_node:
         try:
             dist_query_pred_child_ppr = nx.shortest_path_length(
-                taxonomy.taxonomy, source=query_node_id, target=predicted_edge_ppr[1]
+                prediction_taxonomy, source=query_node_id, target=predicted_edge_ppr[1]
             )
         except nx.NetworkXNoPath:
             try:
                 dist_query_pred_child_ppr = -1 * nx.shortest_path_length(
-                    taxonomy.taxonomy,
+                    prediction_taxonomy_undirected,
                     source=predicted_edge_ppr[1],
                     target=query_node_id,
                 )
@@ -263,7 +281,7 @@ for i in range(len(data_prep.test_queries)):
     ancestral_nodes = list(
         reversed(
             nx.shortest_path(
-                taxonomy.taxonomy, source=taxonomy_root, target=query_node_id
+                prediction_taxonomy, source=taxonomy_root, target=query_node_id
             )
         )
     )
@@ -272,16 +290,24 @@ for i in range(len(data_prep.test_queries)):
         ancestral_nodes.remove(query_node_id)
     children = [
         n
-        for n in list(taxonomy.taxonomy.successors(query_node_id))
+        for n in list(prediction_taxonomy.successors(query_node_id))
         if n != data_prep.pseudo_leaf_node
     ]
-    parent = list(taxonomy.taxonomy.predecessors(query_node_id))[0]
-    siblings = [
-        n
-        for n in taxonomy.taxonomy.successors(parent)
-        if n != query_node_id and n != data_prep.pseudo_leaf_node
-    ]
-    close_neighborhood_size = len(ancestral_nodes) + len(children) + len(siblings)
+    parents = list(prediction_taxonomy.predecessors(query_node_id))
+    siblings = set()
+    for parent in parents:
+        siblings.update(
+            [
+                n
+                for n in prediction_taxonomy.successors(parent)
+                if n != query_node_id and n != data_prep.pseudo_leaf_node
+            ]
+        )
+    close_neighborhood = set()
+    close_neighborhood.update(ancestral_nodes)
+    close_neighborhood.update(children)
+    close_neighborhood.update(siblings)
+    close_neighborhood_size = len(close_neighborhood)
 
     # RELEVANCE: isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR
     isCorrectParentAt1 = any(
@@ -292,7 +318,7 @@ for i in range(len(data_prep.test_queries)):
             predicted_edge[1] == sub_target[1]
             or (
                 predicted_edge[1] == data_prep.pseudo_leaf_node
-                and not (sub_target[1] in list(taxonomy.taxonomy.nodes()))
+                and not (sub_target[1] in list(prediction_taxonomy.nodes()))
             )
             for sub_target in target
         ]
@@ -305,7 +331,7 @@ for i in range(len(data_prep.test_queries)):
             predicted_edge_ppr[1] == sub_target[1]
             or (
                 predicted_edge_ppr[1] == data_prep.pseudo_leaf_node
-                and not (sub_target[1] in list(taxonomy.taxonomy.nodes()))
+                and not (sub_target[1] in list(prediction_taxonomy.nodes()))
             )
             for sub_target in target
         ]
@@ -329,7 +355,7 @@ for i in range(len(data_prep.test_queries)):
                     edges_predictions_test[i][n][1] == sub_target[1]
                     or (
                         edges_predictions_test[i][n][1] == data_prep.pseudo_leaf_node
-                        and not (sub_target[1] in list(taxonomy.taxonomy.nodes()))
+                        and not (sub_target[1] in list(prediction_taxonomy.nodes()))
                     )
                     for sub_target in target
                 ]
@@ -356,7 +382,7 @@ for i in range(len(data_prep.test_queries)):
                     or (
                         edges_predictions_test_ppr[i][n][1]
                         == data_prep.pseudo_leaf_node
-                        and not (sub_target[1] in list(taxonomy.taxonomy.nodes()))
+                        and not (sub_target[1] in list(prediction_taxonomy.nodes()))
                     )
                     for sub_target in target
                 ]
