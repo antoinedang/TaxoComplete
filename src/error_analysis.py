@@ -1,125 +1,161 @@
 import networkx as nx
-import math
 import argparse
 import torch
 import numpy as np
-import time
 
-from torch.utils.data import DataLoader
 import data_process.split_data as st
 import data_process.data_loader as dl
-from model.sbert import SentenceTransformer, losses
-from model.sbert.evaluation import EmbeddingSimilarityEvaluator
+from model.sbert import SentenceTransformer
 import compute_metrics.metric as ms
 from parse_config import ConfigParser
 from model.utils import PPRPowerIteration
+import os
+import pickle
 
-torch.manual_seed(0)
-args = argparse.ArgumentParser(description="Training taxonomy expansion model")
-args.add_argument(
-    "-c", "--config", default=None, type=str, help="config file path (default: None)"
-)
-config = ConfigParser(args)
-args = args.parse_args()
+if not os.path.exists("error_analysis_variables.pkl"):
+    torch.manual_seed(0)
+    args = argparse.ArgumentParser(description="Training taxonomy expansion model")
+    args.add_argument(
+        "-c",
+        "--config",
+        default=None,
+        type=str,
+        help="config file path (default: None)",
+    )
+    config = ConfigParser(args)
+    args = args.parse_args()
 
-saving_path = config["saving_path"]
-name = config["name"]
-data_path = config["data_path"]
-sampling_method = config["sampling"]
-neg_number = config["neg_number"]
-partition_pattern = config["partition_pattern"]
-seed = config["seed"]
+    saving_path = config["saving_path"]
+    name = config["name"]
+    data_path = config["data_path"]
+    sampling_method = config["sampling"]
+    neg_number = config["neg_number"]
+    partition_pattern = config["partition_pattern"]
+    seed = config["seed"]
 
+    taxonomy = dl.TaxoDataset(
+        name, data_path, raw=True, partition_pattern=partition_pattern, seed=seed
+    )
+    data_prep = st.Dataset(taxonomy, sampling_method, neg_number, seed)
+    model_name = config["model_name"]
 
-taxonomy = dl.TaxoDataset(
-    name, data_path, raw=True, partition_pattern=partition_pattern, seed=seed
-)
-data_prep = st.Dataset(taxonomy, sampling_method, neg_number, seed)
-model_name = config["model_name"]
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    target_device = torch.device(device)
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-target_device = torch.device(device)
+    g = torch.Generator()
+    g.manual_seed(0)
 
-g = torch.Generator()
-g.manual_seed(0)
+    batch_size = config["batch_size"]
+    epochs = config["epochs"]
 
+    alpha = config["alpha"]
 
-batch_size = config["batch_size"]
-epochs = config["epochs"]
+    nclasses = max(list(data_prep.trainInputLevel.values())) + 1
+    nodes_list = np.array(data_prep.core_subgraph.nodes())
 
-alpha = config["alpha"]
+    nodeIdsCorpus = [
+        data_prep.corpusId2nodeId[idx] for idx in data_prep.corpusId2nodeId
+    ]
+    core_graph = data_prep.core_subgraph.copy()
+    core_graph.remove_node(data_prep.pseudo_leaf_node)
+    nodes_core_subgraph = list(core_graph.nodes)
+    assert nodes_core_subgraph == nodeIdsCorpus
+    propagation = PPRPowerIteration(
+        nx.adjacency_matrix(core_graph), alpha=alpha, niter=10
+    ).to(target_device)
 
-nclasses = max(list(data_prep.trainInputLevel.values())) + 1
-nodes_list = np.array(data_prep.core_subgraph.nodes())
+    model = SentenceTransformer.SentenceTransformer(config["model_path"])
+    corpus_embeddings = model.encode(
+        data_prep.corpus, convert_to_tensor=True, show_progress_bar=True
+    )
+    preds = propagation(
+        corpus_embeddings, torch.tensor(range(len(nodeIdsCorpus)), device=target_device)
+    )
 
-nodeIdsCorpus = [data_prep.corpusId2nodeId[idx] for idx in data_prep.corpusId2nodeId]
-core_graph = data_prep.core_subgraph.copy()
-core_graph.remove_node(data_prep.pseudo_leaf_node)
-nodes_core_subgraph = list(core_graph.nodes)
-assert nodes_core_subgraph == nodeIdsCorpus
-propagation = PPRPowerIteration(
-    nx.adjacency_matrix(core_graph), alpha=alpha, niter=10
-).to(target_device)
+    (
+        all_targets_test,
+        all_predictions,
+        all_scores_test,
+        edges_predictions_test,
+        all_edges_scores_test,
+    ) = ms.compute_prediction(
+        data_prep.core_subgraph.edges,
+        data_prep.pseudo_leaf_node,
+        data_prep.test_queries,
+        corpus_embeddings,
+        model,
+        data_prep.test_node_list,
+        data_prep.test_node2pos,
+        data_prep.corpusId2nodeId,
+    )
 
+    (
+        all_targets_test_ppr,
+        all_predictions_ppr,
+        all_scores_test_ppr,
+        edges_predictions_test_ppr,
+        all_edges_scores_test_ppr,
+    ) = ms.compute_prediction(
+        data_prep.core_subgraph.edges,
+        data_prep.pseudo_leaf_node,
+        data_prep.test_queries,
+        preds,
+        model,
+        data_prep.test_node_list,
+        data_prep.test_node2pos,
+        data_prep.corpusId2nodeId,
+    )
 
-model = SentenceTransformer.SentenceTransformer(config["model_path"])
-corpus_embeddings = model.encode(
-    data_prep.corpus, convert_to_tensor=True, show_progress_bar=True
-)
-preds = propagation(
-    corpus_embeddings, torch.tensor(range(len(nodeIdsCorpus)), device=target_device)
-)
+    targets = [data_prep.test_node2pos[node] for node in data_prep.test_node_list]
+    query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
+    nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
 
-(
-    all_targets_test,
-    all_predictions,
-    all_scores_test,
-    edges_predictions_test,
-    all_edges_scores_test,
-) = ms.compute_prediction(
-    data_prep.core_subgraph.edges,
-    data_prep.pseudo_leaf_node,
-    data_prep.test_queries,
-    corpus_embeddings,
-    model,
-    data_prep.test_node_list,
-    data_prep.test_node2pos,
-    data_prep.corpusId2nodeId,
-)
-
-(
-    all_targets_test_ppr,
-    all_predictions_ppr,
-    all_scores_test_ppr,
-    edges_predictions_test_ppr,
-    all_edges_scores_test_ppr,
-) = ms.compute_prediction(
-    data_prep.core_subgraph.edges,
-    data_prep.pseudo_leaf_node,
-    data_prep.test_queries,
-    preds,
-    model,
-    data_prep.test_node_list,
-    data_prep.test_node2pos,
-    data_prep.corpusId2nodeId,
-)
-
-targets = [data_prep.test_node2pos[node] for node in data_prep.test_node_list]
-query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
-nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
-undirected_core_subgraph = data_prep.core_subgraph.to_undirected()
-undirected_core_subgraph.remove_node(data_prep.pseudo_leaf_node)
+    # SAVE VARIABLES TO PICKLES TO MAKE DEVELOPMENT FASTER
+    with open("error_analysis_variables.pkl", "wb") as f:
+        pickle.dump(
+            [
+                taxonomy,
+                data_prep,
+                query_embeddings,
+                targets,
+                all_predictions,
+                all_predictions_ppr,
+                edges_predictions_test,
+                edges_predictions_test_ppr,
+                corpus_embeddings,
+                nodeId2corpusId,
+                preds,
+            ],
+            f,
+        )
+else:
+    with open("error_analysis_variables.pkl", "rb") as f:
+        (
+            taxonomy,
+            data_prep,
+            query_embeddings,
+            targets,
+            all_predictions,
+            all_predictions_ppr,
+            edges_predictions_test,
+            edges_predictions_test_ppr,
+            corpus_embeddings,
+            nodeId2corpusId,
+            preds,
+        ) = pickle.load(f)
 
 
 def get_height(node):
-    if not list(core_graph.successors(node)):
+    if not list(taxonomy.taxonomy.successors(node)):
         return 0
     else:
-        return 1 + max(get_height(child) for child in core_graph.successors(node))
+        return 1 + max(
+            get_height(child) for child in taxonomy.taxonomy.successors(node)
+        )
 
 
 with open("error_analysis.csv", "w+") as f:
-    line = "sizeOfCloseNeighborhood,queryLevel,queryHeight,isCorrectParent,isCorrectChild,isCorrectParentPPR,isCorrectChildPPR,cos_sim_query_pred_child,cos_sim_query_pred_parent,cos_sim_query_pred_child_ppr,cos_sim_query_pred_parent_ppr,graph_distance_query_pred_child,graph_distance_query_pred_parent,graph_distance_query_pred_child_ppr,graph_distance_query_pred_parent_ppr\n"
+    line = "sizeOfCloseNeighborhood,queryLevel,queryHeight,isCorrectParentAt1,isCorrectChildAt1,isCorrectParentPPRAt1,isCorrectChildPPRAt1,isCorrectParentAt10,isCorrectChildAt10,isCorrectParentPPRAt10,isCorrectChildPPRAt10,cos_sim_query_pred_child,cos_sim_query_pred_parent,cos_sim_query_pred_child_ppr,cos_sim_query_pred_parent_ppr,graph_distance_query_pred_child,graph_distance_query_pred_parent,graph_distance_query_pred_child_ppr,graph_distance_query_pred_parent_ppr\n"
     f.write(line)
 
 #   FOR EACH QUERY:
@@ -151,81 +187,181 @@ for i in range(len(data_prep.test_queries)):
         pred_parent_embedding_ppr = preds[nodeId2corpusId[predicted_edge_ppr[0]]]
 
     # NX: sparsityScore, level, height, graph_distance(query node, predicted parent), graph_distance(query node, predicted child)
+    taxonomy_root = None
+    for root in taxonomy.root:
+        if nx.has_path(taxonomy.taxonomy, root, query_node_id):
+            taxonomy_root = root
     query_level = nx.shortest_path_length(
-        undirected_core_subgraph, source=data_prep.root, target=query_node_id
+        taxonomy.taxonomy, source=taxonomy_root, target=query_node_id
     )
     query_height = get_height(query_node_id)
 
     if predicted_edge[0] != data_prep.pseudo_leaf_node:
-        dist_query_pred_parent = nx.shortest_path_length(
-            undirected_core_subgraph, source=query_node_id, target=predicted_edge[0]
-        )
+        try:
+            dist_query_pred_parent = nx.shortest_path_length(
+                taxonomy.taxonomy, source=predicted_edge[0], target=query_node_id
+            )
+        except nx.NetworkXNoPath:
+            try:
+                dist_query_pred_parent = -1 * nx.shortest_path_length(
+                    taxonomy.taxonomy, source=query_node_id, target=predicted_edge[0]
+                )
+            except nx.NetworkXNoPath:
+                dist_query_pred_parent = "N/A"
     else:
         dist_query_pred_parent = "N/A"
     if predicted_edge[1] != data_prep.pseudo_leaf_node:
-        dist_query_pred_child = nx.shortest_path_length(
-            undirected_core_subgraph, source=query_node_id, target=predicted_edge[1]
-        )
+        try:
+            dist_query_pred_child = nx.shortest_path_length(
+                taxonomy.taxonomy, source=query_node_id, target=predicted_edge[1]
+            )
+        except nx.NetworkXNoPath:
+            try:
+                dist_query_pred_child = -1 * nx.shortest_path_length(
+                    taxonomy.taxonomy, source=predicted_edge[1], target=query_node_id
+                )
+            except nx.NetworkXNoPath:
+                dist_query_pred_child = "N/A"
     else:
         dist_query_pred_child = "N/A"
     if predicted_edge_ppr[0] != data_prep.pseudo_leaf_node:
-        dist_query_pred_parent_ppr = nx.shortest_path_length(
-            undirected_core_subgraph, source=query_node_id, target=predicted_edge_ppr[0]
-        )
+        try:
+            dist_query_pred_parent_ppr = nx.shortest_path_length(
+                taxonomy.taxonomy,
+                source=predicted_edge_ppr[0],
+                target=query_node_id,
+            )
+        except nx.NetworkXNoPath:
+            try:
+                dist_query_pred_parent_ppr = -1 * nx.shortest_path_length(
+                    taxonomy.taxonomy,
+                    source=query_node_id,
+                    target=predicted_edge_ppr[0],
+                )
+            except nx.NetworkXNoPath:
+                dist_query_pred_parent_ppr = "N/A"
     else:
         dist_query_pred_parent_ppr = "N/A"
     if predicted_edge_ppr[1] != data_prep.pseudo_leaf_node:
-        dist_query_pred_child_ppr = nx.shortest_path_length(
-            undirected_core_subgraph, source=query_node_id, target=predicted_edge_ppr[1]
-        )
+        try:
+            dist_query_pred_child_ppr = nx.shortest_path_length(
+                taxonomy.taxonomy, source=query_node_id, target=predicted_edge_ppr[1]
+            )
+        except nx.NetworkXNoPath:
+            try:
+                dist_query_pred_child_ppr = -1 * nx.shortest_path_length(
+                    taxonomy.taxonomy,
+                    source=predicted_edge_ppr[1],
+                    target=query_node_id,
+                )
+            except nx.NetworkXNoPath:
+                dist_query_pred_child_ppr = "N/A"
     else:
         dist_query_pred_child_ppr = "N/A"
+
     # sparsity score: calculate number of nodes in close neighborhood
     ancestral_nodes = list(
         reversed(
             nx.shortest_path(
-                undirected_core_subgraph, source=data_prep.root, target=query_node_id
+                taxonomy.taxonomy, source=taxonomy_root, target=query_node_id
             )
         )
     )
-    ancestral_nodes.remove(data_prep.root)
-    ancestral_nodes.remove(query_node_id)
+    ancestral_nodes.remove(taxonomy_root)
+    if query_node_id in ancestral_nodes:
+        ancestral_nodes.remove(query_node_id)
     children = [
         n
-        for n in list(data_prep.core_subgraph.successors(query_node_id))
+        for n in list(taxonomy.taxonomy.successors(query_node_id))
         if n != data_prep.pseudo_leaf_node
     ]
-    parent = list(data_prep.core_subgraph.predecessors(query_node_id))[0]
+    parent = list(taxonomy.taxonomy.predecessors(query_node_id))[0]
     siblings = [
         n
-        for n in data_prep.core_subgraph.successors(parent)
+        for n in taxonomy.taxonomy.successors(parent)
         if n != query_node_id and n != data_prep.pseudo_leaf_node
     ]
     close_neighborhood_size = len(ancestral_nodes) + len(children) + len(siblings)
 
     # RELEVANCE: isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR
-    isCorrectParent = any([predicted_edge[0] == sub_target[0] for sub_target in target])
-    isCorrectChild = any(
+    isCorrectParentAt1 = any(
+        [predicted_edge[0] == sub_target[0] for sub_target in target]
+    )
+    isCorrectChildAt1 = any(
         [
             predicted_edge[1] == sub_target[1]
             or (
                 predicted_edge[1] == data_prep.pseudo_leaf_node
-                and not (sub_target[1] in list(undirected_core_subgraph.nodes()))
+                and not (sub_target[1] in list(taxonomy.taxonomy.nodes()))
             )
             for sub_target in target
         ]
     )
-    isCorrectParentPPR = any(
+    isCorrectParentPPRAt1 = any(
         [predicted_edge_ppr[0] == sub_target[0] for sub_target in target]
     )
-    isCorrectChildPPR = any(
+    isCorrectChildPPRAt1 = any(
         [
             predicted_edge_ppr[1] == sub_target[1]
             or (
                 predicted_edge_ppr[1] == data_prep.pseudo_leaf_node
-                and not (sub_target[1] in list(undirected_core_subgraph.nodes()))
+                and not (sub_target[1] in list(taxonomy.taxonomy.nodes()))
             )
             for sub_target in target
+        ]
+    )
+
+    isCorrectParentAt10 = any(
+        [
+            any(
+                [
+                    edges_predictions_test[i][n][0] == sub_target[0]
+                    for sub_target in target
+                ]
+            )
+            for n in range(10)
+        ]
+    )
+    isCorrectChildAt10 = any(
+        [
+            any(
+                [
+                    edges_predictions_test[i][n][1] == sub_target[1]
+                    or (
+                        edges_predictions_test[i][n][1] == data_prep.pseudo_leaf_node
+                        and not (sub_target[1] in list(taxonomy.taxonomy.nodes()))
+                    )
+                    for sub_target in target
+                ]
+            )
+            for n in range(10)
+        ]
+    )
+    isCorrectParentPPRAt10 = any(
+        [
+            any(
+                [
+                    edges_predictions_test_ppr[i][n][0] == sub_target[0]
+                    for sub_target in target
+                ]
+            )
+            for n in range(10)
+        ]
+    )
+    isCorrectChildPPRAt10 = any(
+        [
+            any(
+                [
+                    edges_predictions_test_ppr[i][n][1] == sub_target[1]
+                    or (
+                        edges_predictions_test_ppr[i][n][1]
+                        == data_prep.pseudo_leaf_node
+                        and not (sub_target[1] in list(taxonomy.taxonomy.nodes()))
+                    )
+                    for sub_target in target
+                ]
+            )
+            for n in range(10)
         ]
     )
 
@@ -257,14 +393,18 @@ for i in range(len(data_prep.test_queries)):
 
     #   STORE IN CSV:
     with open("error_analysis.csv", "a+") as f:
-        line = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
+        line = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
             close_neighborhood_size,
             query_level,
             query_height,
-            isCorrectParent,
-            isCorrectChild,
-            isCorrectParentPPR,
-            isCorrectChildPPR,
+            isCorrectParentAt1,
+            isCorrectChildAt1,
+            isCorrectParentPPRAt1,
+            isCorrectChildPPRAt1,
+            isCorrectParentAt10,
+            isCorrectChildAt10,
+            isCorrectParentPPRAt10,
+            isCorrectChildPPRAt10,
             cos_similarity_query_pred_child,
             cos_similarity_query_pred_parent,
             cos_similarity_query_pred_child_ppr,
