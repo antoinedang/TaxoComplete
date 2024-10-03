@@ -150,6 +150,7 @@ else:
 # IF WE USE taxonomy.taxonomy, THE GRAPH DISTANCE BETWEEN QUERY AND PREDICTED PARENT MIGHT BE > 1 EVEN IF THE PREDICTION IS CORRECT
 prediction_taxonomy = data_prep.core_subgraph
 prediction_taxonomy_undirected = prediction_taxonomy.to_undirected()
+prediction_taxonomy_undirected.remove_node(data_prep.pseudo_leaf_node)
 taxonomy_roots = (
     [data_prep.root]
     if prediction_taxonomy == data_prep.core_subgraph
