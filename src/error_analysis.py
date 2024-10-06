@@ -1,149 +1,35 @@
 import networkx as nx
 import argparse
 import torch
-import numpy as np
-
-import data_process.split_data as st
-import data_process.data_loader as dl
-from model.sbert import SentenceTransformer
-import compute_metrics.metric as ms
-from parse_config import ConfigParser
-from model.utils import PPRPowerIteration
-import os
 import pickle
+import os
 
 torch.manual_seed(0)
-args = argparse.ArgumentParser(description="Training taxonomy expansion model")
+args = argparse.ArgumentParser(description="Run error analysis on evaluation results.")
 args.add_argument(
-    "-c",
-    "--config",
-    default=None,
     type=str,
-    help="config file path (default: None)",
+    help="Error analysis pickle file path",
+    dest="filename",
 )
-config = ConfigParser(args)
 args = args.parse_args()
 
-saving_path = config["saving_path"]
-name = config["name"]
-data_path = config["data_path"]
-sampling_method = config["sampling"]
-neg_number = config["neg_number"]
-partition_pattern = config["partition_pattern"]
-seed = config["seed"]
-error_analysis_filename = "error_analysis_variables_{}.pkl".format(name)
+error_analysis_dir = os.path.dirname(args.filename)
+csv_filename = error_analysis_dir + "/error_analysis.csv"
 
-if not os.path.exists(error_analysis_filename):
-    taxonomy = dl.TaxoDataset(
-        name, data_path, raw=True, partition_pattern=partition_pattern, seed=seed
-    )
-    data_prep = st.Dataset(taxonomy, sampling_method, neg_number, seed)
-    model_name = config["model_name"]
-
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    target_device = torch.device(device)
-
-    g = torch.Generator()
-    g.manual_seed(0)
-
-    batch_size = config["batch_size"]
-    epochs = config["epochs"]
-
-    alpha = config["alpha"]
-
-    nclasses = max(list(data_prep.trainInputLevel.values())) + 1
-    nodes_list = np.array(data_prep.core_subgraph.nodes())
-
-    nodeIdsCorpus = [
-        data_prep.corpusId2nodeId[idx] for idx in data_prep.corpusId2nodeId
-    ]
-    core_graph = data_prep.core_subgraph.copy()
-    core_graph.remove_node(data_prep.pseudo_leaf_node)
-    nodes_core_subgraph = list(core_graph.nodes)
-    assert nodes_core_subgraph == nodeIdsCorpus
-    propagation = PPRPowerIteration(
-        nx.adjacency_matrix(core_graph), alpha=alpha, niter=10
-    ).to(target_device)
-
-    model = SentenceTransformer.SentenceTransformer(config["model_path"])
-    corpus_embeddings = model.encode(
-        data_prep.corpus, convert_to_tensor=True, show_progress_bar=True
-    )
-    preds = propagation(
-        corpus_embeddings, torch.tensor(range(len(nodeIdsCorpus)), device=target_device)
-    )
-
+with open(args.filename, "rb") as f:
     (
-        all_targets_test,
+        taxonomy,
+        data_prep,
+        query_embeddings,
+        targets,
         all_predictions,
-        all_scores_test,
-        edges_predictions_test,
-        all_edges_scores_test,
-    ) = ms.compute_prediction(
-        data_prep.core_subgraph.edges,
-        data_prep.pseudo_leaf_node,
-        data_prep.test_queries,
-        corpus_embeddings,
-        model,
-        data_prep.test_node_list,
-        data_prep.test_node2pos,
-        data_prep.corpusId2nodeId,
-    )
-
-    (
-        all_targets_test_ppr,
         all_predictions_ppr,
-        all_scores_test_ppr,
+        edges_predictions_test,
         edges_predictions_test_ppr,
-        all_edges_scores_test_ppr,
-    ) = ms.compute_prediction(
-        data_prep.core_subgraph.edges,
-        data_prep.pseudo_leaf_node,
-        data_prep.test_queries,
+        corpus_embeddings,
+        nodeId2corpusId,
         preds,
-        model,
-        data_prep.test_node_list,
-        data_prep.test_node2pos,
-        data_prep.corpusId2nodeId,
-    )
-
-    targets = [data_prep.test_node2pos[node] for node in data_prep.test_node_list]
-    query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
-    nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
-
-    # SAVE VARIABLES TO PICKLES TO MAKE DEVELOPMENT FASTER
-    with open(error_analysis_filename, "wb") as f:
-        pickle.dump(
-            [
-                taxonomy,
-                data_prep,
-                query_embeddings,
-                targets,
-                all_predictions,
-                all_predictions_ppr,
-                edges_predictions_test,
-                edges_predictions_test_ppr,
-                corpus_embeddings,
-                nodeId2corpusId,
-                preds,
-            ],
-            f,
-        )
-else:
-    with open(error_analysis_filename, "rb") as f:
-        (
-            taxonomy,
-            data_prep,
-            query_embeddings,
-            targets,
-            all_predictions,
-            all_predictions_ppr,
-            edges_predictions_test,
-            edges_predictions_test_ppr,
-            corpus_embeddings,
-            nodeId2corpusId,
-            preds,
-        ) = pickle.load(f)
+    ) = pickle.load(f)
 
 # prediction_taxonomy = taxonomy.taxonomy
 # SET PREDICTION TAXONOMY TO CORE SUBGRAPH BECAUSE THIS IS THE GRAPH THAT TAXOCOMPLETE OPERATES ON
@@ -169,9 +55,9 @@ def get_height(node):
         )
 
 
-with open("error_analysis.csv", "w+") as f:
-    line = "sizeOfCloseNeighborhood,queryLevel,queryHeight,isCorrectParentAt1,isCorrectChildAt1,isCorrectParentPPRAt1,isCorrectChildPPRAt1,isCorrectParentAt10,isCorrectChildAt10,isCorrectParentPPRAt10,isCorrectChildPPRAt10,cos_sim_query_pred_child,cos_sim_query_pred_parent,cos_sim_query_pred_child_ppr,cos_sim_query_pred_parent_ppr,graph_distance_query_pred_child,graph_distance_query_pred_parent,graph_distance_query_pred_child_ppr,graph_distance_query_pred_parent_ppr\n"
-    f.write(line)
+csv_format = "queryDef,predChildDef,predParentDef,predChildPPRDef,predParentPPRDef,numCloseNeighbors,queryLevel,queryHeight,isCorrectParentAt1,isCorrectChildAt1,isCorrectParentPPRAt1,isCorrectChildPPRAt1,isCorrectParentAt10,isCorrectChildAt10,isCorrectParentPPRAt10,isCorrectChildPPRAt10,cos_sim_query_pred_child,cos_sim_query_pred_parent,cos_sim_query_pred_child_ppr,cos_sim_query_pred_parent_ppr,graph_dist_query_pred_child,graph_dist_query_pred_parent,graph_dist_query_pred_child_ppr,graph_dist_query_pred_parent_ppr\n"
+with open(csv_filename, "w+") as f:
+    f.write(csv_format)
 
 #   FOR EACH QUERY:
 for i in range(len(data_prep.test_queries)):
@@ -211,7 +97,12 @@ for i in range(len(data_prep.test_queries)):
     )
     query_height = get_height(query_node_id)
 
+    query_definition = data_prep.corpusId2definition[nodeId2corpusId[query_node_id]]
+
     if predicted_edge[0] != data_prep.pseudo_leaf_node:
+        pred_parent_definition = data_prep.corpusId2definition[
+            nodeId2corpusId[predicted_edge[0]]
+        ]
         try:
             dist_query_pred_parent = nx.shortest_path_length(
                 prediction_taxonomy, source=predicted_edge[0], target=query_node_id
@@ -226,8 +117,13 @@ for i in range(len(data_prep.test_queries)):
             except nx.NetworkXNoPath:
                 dist_query_pred_parent = "N/A"
     else:
+        print(" > ERROR: predicted parent is pseudo leaf node")
+        pred_parent_definition = "N/A"
         dist_query_pred_parent = "N/A"
     if predicted_edge[1] != data_prep.pseudo_leaf_node:
+        pred_child_definition = data_prep.corpusId2definition[
+            nodeId2corpusId[predicted_edge[1]]
+        ]
         try:
             dist_query_pred_child = nx.shortest_path_length(
                 prediction_taxonomy, source=query_node_id, target=predicted_edge[1]
@@ -243,7 +139,11 @@ for i in range(len(data_prep.test_queries)):
                 dist_query_pred_child = "N/A"
     else:
         dist_query_pred_child = "N/A"
+        pred_child_definition = "N/A"
     if predicted_edge_ppr[0] != data_prep.pseudo_leaf_node:
+        pred_parent_ppr_definition = data_prep.corpusId2definition[
+            nodeId2corpusId[predicted_edge_ppr[0]]
+        ]
         try:
             dist_query_pred_parent_ppr = nx.shortest_path_length(
                 prediction_taxonomy,
@@ -260,8 +160,13 @@ for i in range(len(data_prep.test_queries)):
             except nx.NetworkXNoPath:
                 dist_query_pred_parent_ppr = "N/A"
     else:
+        print(" > ERROR: PPR predicted parent is pseudo leaf node")
+        pred_parent_ppr_definition = "N/A"
         dist_query_pred_parent_ppr = "N/A"
     if predicted_edge_ppr[1] != data_prep.pseudo_leaf_node:
+        pred_child_ppr_definition = data_prep.corpusId2definition[
+            nodeId2corpusId[predicted_edge_ppr[1]]
+        ]
         try:
             dist_query_pred_child_ppr = nx.shortest_path_length(
                 prediction_taxonomy, source=query_node_id, target=predicted_edge_ppr[1]
@@ -276,6 +181,7 @@ for i in range(len(data_prep.test_queries)):
             except nx.NetworkXNoPath:
                 dist_query_pred_child_ppr = "N/A"
     else:
+        pred_child_ppr_definition = "N/A"
         dist_query_pred_child_ppr = "N/A"
 
     # sparsity score: calculate number of nodes in close neighborhood
@@ -419,8 +325,13 @@ for i in range(len(data_prep.test_queries)):
         )
 
     #   STORE IN CSV:
-    with open("error_analysis.csv", "a+") as f:
-        line = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
+    with open(csv_filename, "a+") as f:
+        line = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
+            query_definition,
+            pred_child_definition,
+            pred_parent_definition,
+            pred_child_ppr_definition,
+            pred_parent_ppr_definition,
             close_neighborhood_size,
             query_level,
             query_height,

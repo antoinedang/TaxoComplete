@@ -1,18 +1,15 @@
 import networkx as nx
-import math
 import argparse
 import torch
 import numpy as np
-import time
 
-from torch.utils.data import DataLoader
 import data_process.split_data as st
 import data_process.data_loader as dl
-from model.sbert import SentenceTransformer, losses
-from model.sbert.evaluation import EmbeddingSimilarityEvaluator
+from model.sbert import SentenceTransformer
 import compute_metrics.metric as ms
 from parse_config import ConfigParser
 from model.utils import PPRPowerIteration
+import pickle
 
 torch.manual_seed(0)
 args = argparse.ArgumentParser(description="Training taxonomy expansion model")
@@ -156,3 +153,27 @@ ms.save_results(
     edges_predictions_test_ppr,
     "eval_test_ppr",
 )
+
+
+# SAVE VARIABLES TO PICKLES TO MAKE DEVELOPMENT FASTER
+targets = [data_prep.test_node2pos[node] for node in data_prep.test_node_list]
+query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
+nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
+error_analysis_filename = str(config.save_dir) + "/error_analysis.pkl"
+with open(error_analysis_filename, "wb") as f:
+    pickle.dump(
+        [
+            taxonomy,
+            data_prep,
+            query_embeddings,
+            targets,
+            all_predictions,
+            all_predictions_ppr,
+            edges_predictions_test,
+            edges_predictions_test_ppr,
+            corpus_embeddings,
+            nodeId2corpusId,
+            preds,
+        ],
+        f,
+    )

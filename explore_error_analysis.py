@@ -1,11 +1,24 @@
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
 
+args = argparse.ArgumentParser(description="Visualize error analysis results.")
+args.add_argument(
+    type=str,
+    help="Error analysis csv file path",
+    dest="filename",
+)
+args = args.parse_args()
 # Define the file path to the CSV
-csv_file_path = "error_analysis.csv"
+csv_file_path = args.filename
 
 # Initialize separate lists for each column
+queryDefs = []
+predChildDefs = []
+predParentDefs = []
+predChildPPRDefs = []
+predParentPPRDefs = []
 size_of_close_neighborhood = []
 query_level = []
 query_height = []
@@ -39,7 +52,12 @@ with open(csv_file_path, mode="r") as file:
 
     # Read each row and append values to respective lists
     for row in reader:
-        size_of_close_neighborhood.append(int(row["sizeOfCloseNeighborhood"]))
+        queryDefs.append(row["queryDef"])
+        predChildDefs.append(row["predChildDef"])
+        predParentDefs.append(row["predParentDef"])
+        predChildPPRDefs.append(row["predChildPPRDef"])
+        predParentPPRDefs.append(row["predParentPPRDef"])
+        size_of_close_neighborhood.append(int(row["numCloseNeighbors"]))
         query_level.append(int(row["queryLevel"]))
         query_height.append(int(row["queryHeight"]))
         is_correct_parent.append(row["isCorrectParentAt1"] == "True")
@@ -63,16 +81,16 @@ with open(csv_file_path, mode="r") as file:
             to_float_or_none(row["cos_sim_query_pred_parent_ppr"])
         )
         graph_distance_query_pred_child.append(
-            to_float_or_none(row["graph_distance_query_pred_child"])
+            to_float_or_none(row["graph_dist_query_pred_child"])
         )
         graph_distance_query_pred_parent.append(
-            to_float_or_none(row["graph_distance_query_pred_parent"])
+            to_float_or_none(row["graph_dist_query_pred_parent"])
         )
         graph_distance_query_pred_child_ppr.append(
-            to_float_or_none(row["graph_distance_query_pred_child_ppr"])
+            to_float_or_none(row["graph_dist_query_pred_child_ppr"])
         )
         graph_distance_query_pred_parent_ppr.append(
-            to_float_or_none(row["graph_distance_query_pred_parent_ppr"])
+            to_float_or_none(row["graph_dist_query_pred_parent_ppr"])
         )
 
 size_of_close_neighborhood = np.array(size_of_close_neighborhood)
@@ -396,3 +414,32 @@ plt.xlabel("Cosine Similarity")
 plt.ylabel("Inverse Graph Distance")
 plt.title("Cosine Similarity vs. Inverse Graph Distance (w/ PPR)")
 plt.show()
+
+print("=====================================")
+print("Query/Node pairs with cosine similarity == 1:")
+query_pred_parent_identical_embeddings = np.where(cos_sim_query_pred_parent == 1)[
+    0
+].tolist()
+for idx in query_pred_parent_identical_embeddings:
+    print(f"\nQuery:\n{queryDefs[idx]}\nPred. Parent:\n{predParentDefs[idx]}\n")
+
+
+query_pred_child_identical_embeddings = np.where(cos_sim_query_pred_child == 1)[
+    0
+].tolist()
+for idx in query_pred_child_identical_embeddings:
+    print(f"\nQuery:\n{queryDefs[idx]}\nPred. Child:\n{predChildDefs[idx]}\n")
+
+
+query_pred_parent_identical_embeddings_ppr = np.where(
+    cos_sim_query_pred_parent_ppr == 1
+)[0].tolist()
+for idx in query_pred_parent_identical_embeddings_ppr:
+    print(f"\nQuery:\n{queryDefs[idx]}\nPred. Parent PPR:\n{predParentPPRDefs[idx]}\n")
+
+
+query_pred_child_identical_embeddings_ppr = np.where(cos_sim_query_pred_child_ppr == 1)[
+    0
+].tolist()
+for idx in query_pred_child_identical_embeddings_ppr:
+    print(f"\nQuery:\n{queryDefs[idx]}\nPred. Child PPR:\n{predChildPPRDefs[idx]}\n")
