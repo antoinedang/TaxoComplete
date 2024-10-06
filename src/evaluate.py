@@ -10,6 +10,7 @@ import compute_metrics.metric as ms
 from parse_config import ConfigParser
 from model.utils import PPRPowerIteration
 import pickle
+import os
 
 torch.manual_seed(0)
 args = argparse.ArgumentParser(description="Training taxonomy expansion model")
@@ -159,7 +160,7 @@ ms.save_results(
 targets = [data_prep.test_node2pos[node] for node in data_prep.test_node_list]
 query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
 nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
-error_analysis_filename = str(config.save_dir) + "/error_analysis.pkl"
+error_analysis_filename = os.path.dirname(str(config.save_dir)) + "/error_analysis.pkl"
 with open(error_analysis_filename, "wb") as f:
     pickle.dump(
         [

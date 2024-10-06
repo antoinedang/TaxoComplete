@@ -2,6 +2,7 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
+import os
 
 args = argparse.ArgumentParser(description="Visualize error analysis results.")
 args.add_argument(
@@ -12,6 +13,26 @@ args.add_argument(
 args = args.parse_args()
 # Define the file path to the CSV
 csv_file_path = args.filename
+log_dir = os.path.dirname(csv_file_path)
+log_filename = log_dir + "/error_analysis.log"
+
+show_plots = False
+
+with open(log_filename, "w+") as f:
+    f.write("== ERROR ANALYSIS LOG ==" + "\n")
+
+print_ = print
+
+
+def print(*args):
+    string = ""
+    with open(log_filename, "a+", encoding="utf-8") as f:
+        for var in args:
+            string += str(var) + " "
+        string = string[:-1]
+        f.write(string + "\n")
+    print_(string)
+
 
 # Initialize separate lists for each column
 queryDefs = []
@@ -38,6 +59,10 @@ graph_distance_query_pred_child = []
 graph_distance_query_pred_parent = []
 graph_distance_query_pred_child_ppr = []
 graph_distance_query_pred_parent_ppr = []
+relation_query_pred_parent = []
+relation_query_pred_child = []
+relation_query_pred_parent_ppr = []
+relation_query_pred_child_ppr = []
 
 
 def to_float_or_none(value):
@@ -47,7 +72,7 @@ def to_float_or_none(value):
 
 
 # Open and read the CSV file
-with open(csv_file_path, mode="r") as file:
+with open(csv_file_path, mode="r", encoding="utf-8") as file:
     reader = csv.DictReader(file)
 
     # Read each row and append values to respective lists
@@ -92,6 +117,10 @@ with open(csv_file_path, mode="r") as file:
         graph_distance_query_pred_parent_ppr.append(
             to_float_or_none(row["graph_dist_query_pred_parent_ppr"])
         )
+        relation_query_pred_parent.append(row["relation_query_pred_parent"])
+        relation_query_pred_child.append(row["relation_query_pred_child"])
+        relation_query_pred_parent_ppr.append(row["relation_query_pred_parent_ppr"])
+        relation_query_pred_child_ppr.append(row["relation_query_pred_child_ppr"])
 
 size_of_close_neighborhood = np.array(size_of_close_neighborhood)
 query_level = np.array(query_level)
@@ -112,12 +141,15 @@ graph_distance_query_pred_child = np.array(graph_distance_query_pred_child)
 graph_distance_query_pred_parent = np.array(graph_distance_query_pred_parent)
 graph_distance_query_pred_child_ppr = np.array(graph_distance_query_pred_child_ppr)
 graph_distance_query_pred_parent_ppr = np.array(graph_distance_query_pred_parent_ppr)
+relation_query_pred_parent = np.array(relation_query_pred_parent)
+relation_query_pred_child = np.array(relation_query_pred_child)
+relation_query_pred_parent_ppr = np.array(relation_query_pred_parent_ppr)
+relation_query_pred_child_ppr = np.array(relation_query_pred_child_ppr)
 
 graph_distance_query_pred_parent[is_correct_parent] = 1
 graph_distance_query_pred_child[is_correct_child] = 1
 graph_distance_query_pred_parent_ppr[is_correct_parent_ppr] = 1
 graph_distance_query_pred_child_ppr[is_correct_child_ppr] = 1
-
 
 # Get total counts for isCorrect columns
 correctChild = sum(is_correct_child)
@@ -306,8 +338,10 @@ plt.title("Accuracy @ 1 as a Function of Size of Close Neighborhood")
 plt.legend()
 plt.grid(axis="y")
 plt.tight_layout()
-plt.show()
-
+plt.savefig(log_dir + "/neighborhood_accuracy.png")
+if show_plots:
+    plt.show()
+plt.clf()
 
 correct_normal_10 = correct_normal_10[sorted_indices]
 correct_ppr_10 = correct_ppr_10[sorted_indices]
@@ -348,98 +382,136 @@ plt.title("Accuracy @ 10 as a Function of Size of Close Neighborhood")
 plt.legend()
 plt.grid(axis="y")
 plt.tight_layout()
-plt.show()
+plt.savefig(log_dir + "/neighborhood_accuracy_10.png")
+if show_plots:
+    plt.show()
+plt.clf()
 
-has_graph_distance = graph_distance_query_pred_parent != None
-inverse_graph_distance = 1 / (graph_distance_query_pred_parent)
 
-correct_normal = is_correct_parent & has_graph_distance
-not_correct_normal = ~is_correct_parent & has_graph_distance
+def plot_dist_vs_cossim(
+    graph_dist, cossim, is_correct, title, filename, relations, ignore_relation
+):
+    has_graph_distance = graph_dist != None
+    has_cos_sim = cossim != None
+    correct = is_correct & has_graph_distance & has_cos_sim
+    not_correct = ~is_correct & has_graph_distance & has_cos_sim
 
-plt.scatter(
-    cos_sim_query_pred_parent[not_correct_normal],
-    inverse_graph_distance[not_correct_normal],
-    c="blue",
-    label="Incorrect",
-    # c=diff_to_cosine,
-    # cmap="viridis",
-    # alpha=0.5,
+    not_correct_child = not_correct & (relations == "child")
+    not_correct_parent = not_correct & (relations == "parent")
+    not_correct_sibling = not_correct & (relations == "sibling")
+    not_correct_ancestor = not_correct & (relations == "ancestor")
+    not_correct_descendant = not_correct & (relations == "descendant")
+    not_correct_distant = not_correct & (relations == "distant")
+
+    for color, label, vals in zip(
+        ["yellow", "green", "purple", "orange", "brown", "blue"],
+        [
+            "Incorrect Child",
+            "Incorrect Parent",
+            "Incorrect Sibling",
+            "Incorrect Ancestor",
+            "Incorrect Descendant",
+            "Incorrect",
+        ],
+        [
+            not_correct_child,
+            not_correct_parent,
+            not_correct_sibling,
+            not_correct_ancestor,
+            not_correct_descendant,
+            not_correct_distant,
+        ],
+    ):
+        if sum(vals) == 0:
+            continue
+        if label == ignore_relation:
+            continue
+        inverse_graph_distance_not_correct = 1 / (graph_dist[vals])
+
+        plt.scatter(
+            cossim[vals],
+            inverse_graph_distance_not_correct,
+            c=color,
+            label=label,
+        )
+    inverse_graph_distance_correct = 1 / (graph_dist[correct])
+    plt.scatter(
+        cossim[correct],
+        inverse_graph_distance_correct,
+        c="red",
+        label="Correct",
+    )
+    plt.legend()
+    plt.xlabel("Cosine Similarity")
+    plt.ylabel("Inverse Graph Distance")
+    plt.title(title)
+    plt.savefig(log_dir + "/" + filename)
+    if show_plots:
+        plt.show()
+
+    plt.clf()
+
+
+plot_dist_vs_cossim(
+    graph_distance_query_pred_child,
+    cos_sim_query_pred_child,
+    is_correct_child,
+    "Cosine Similarity vs. Inverse Graph Distance (Child, no PPR)",
+    "dist_vs_cossim_child.png",
+    relation_query_pred_child,
+    "Incorrect Child",
 )
-plt.scatter(
-    cos_sim_query_pred_parent[correct_normal],
-    inverse_graph_distance[correct_normal],
-    c="red",
-    label="Correct",
-    # c=diff_to_cosine,
-    # cmap="viridis",
-    # alpha=0.5,
+plot_dist_vs_cossim(
+    graph_distance_query_pred_parent,
+    cos_sim_query_pred_parent,
+    is_correct_parent,
+    "Cosine Similarity vs. Inverse Graph Distance (Parent, no PPR)",
+    "dist_vs_cossim_parent.png",
+    relation_query_pred_parent,
+    "Incorrect Parent",
 )
-# plt.colorbar()
-# plt.yscale("log")
-plt.legend(["Incorrect", "Correct"])
-plt.xlabel("Cosine Similarity")
-plt.ylabel("Inverse Graph Distance")
-plt.title("Cosine Similarity vs. Inverse Graph Distance")
-plt.show()
-
-
-has_graph_distance_ppr = graph_distance_query_pred_parent_ppr != None
-inverse_graph_distance_ppr = 1 / (graph_distance_query_pred_parent_ppr)
-
-correct_ppr = is_correct_parent_ppr & has_graph_distance_ppr
-not_correct_ppr = ~is_correct_parent_ppr & has_graph_distance_ppr
-
-plt.scatter(
-    cos_sim_query_pred_parent_ppr[not_correct_ppr],
-    inverse_graph_distance_ppr[not_correct_ppr],
-    c="blue",
-    label="Incorrect",
-    # c=diff_to_cosine,
-    # cmap="viridis",
-    # alpha=0.5,
+plot_dist_vs_cossim(
+    graph_distance_query_pred_child_ppr,
+    cos_sim_query_pred_child_ppr,
+    is_correct_child_ppr,
+    "Cosine Similarity vs. Inverse Graph Distance (Child, PPR)",
+    "dist_vs_cossim_child_ppr.png",
+    relation_query_pred_child_ppr,
+    "Incorrect Child",
 )
-plt.scatter(
-    cos_sim_query_pred_parent_ppr[correct_ppr],
-    inverse_graph_distance_ppr[correct_ppr],
-    c="red",
-    label="Correct",
-    # c=diff_to_cosine,
-    # cmap="viridis",
-    # alpha=0.5,
+plot_dist_vs_cossim(
+    graph_distance_query_pred_parent_ppr,
+    cos_sim_query_pred_parent_ppr,
+    is_correct_parent_ppr,
+    "Cosine Similarity vs. Inverse Graph Distance (Parent, PPR)",
+    "dist_vs_cossim_parent_ppr.png",
+    relation_query_pred_parent_ppr,
+    "Incorrect Parent",
 )
-# plt.colorbar()
-# plt.yscale("log")
-plt.legend(["Incorrect", "Correct"])
-plt.xlabel("Cosine Similarity")
-plt.ylabel("Inverse Graph Distance")
-plt.title("Cosine Similarity vs. Inverse Graph Distance (w/ PPR)")
-plt.show()
+
+
+def print_identical_embedding_definitions(query_defs, node_defs, cossims, isPPR):
+    ppr_text = " PPR" if isPPR else ""
+    identical_embeddings = np.where(cossims == 1)[0].tolist()
+    for idx in identical_embeddings:
+        print(
+            f"\nQuery:\n{query_defs[idx]}\nPred. Parent{ppr_text}:\n{node_defs[idx]}\n"
+        )
+
 
 print("=====================================")
 print("Query/Node pairs with cosine similarity == 1:")
-query_pred_parent_identical_embeddings = np.where(cos_sim_query_pred_parent == 1)[
-    0
-].tolist()
-for idx in query_pred_parent_identical_embeddings:
-    print(f"\nQuery:\n{queryDefs[idx]}\nPred. Parent:\n{predParentDefs[idx]}\n")
 
-
-query_pred_child_identical_embeddings = np.where(cos_sim_query_pred_child == 1)[
-    0
-].tolist()
-for idx in query_pred_child_identical_embeddings:
-    print(f"\nQuery:\n{queryDefs[idx]}\nPred. Child:\n{predChildDefs[idx]}\n")
-
-
-query_pred_parent_identical_embeddings_ppr = np.where(
-    cos_sim_query_pred_parent_ppr == 1
-)[0].tolist()
-for idx in query_pred_parent_identical_embeddings_ppr:
-    print(f"\nQuery:\n{queryDefs[idx]}\nPred. Parent PPR:\n{predParentPPRDefs[idx]}\n")
-
-
-query_pred_child_identical_embeddings_ppr = np.where(cos_sim_query_pred_child_ppr == 1)[
-    0
-].tolist()
-for idx in query_pred_child_identical_embeddings_ppr:
-    print(f"\nQuery:\n{queryDefs[idx]}\nPred. Child PPR:\n{predChildPPRDefs[idx]}\n")
+print_identical_embedding_definitions(
+    queryDefs, predParentDefs, cos_sim_query_pred_parent, False
+)
+print_identical_embedding_definitions(
+    queryDefs, predChildDefs, cos_sim_query_pred_child, False
+)
+print_identical_embedding_definitions(
+    queryDefs, predParentPPRDefs, cos_sim_query_pred_parent_ppr, True
+)
+print_identical_embedding_definitions(
+    queryDefs, predChildPPRDefs, cos_sim_query_pred_child_ppr, True
+)
+print("=====================================")
