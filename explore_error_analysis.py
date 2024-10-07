@@ -40,6 +40,8 @@ predChildDefs = []
 predParentDefs = []
 predChildPPRDefs = []
 predParentPPRDefs = []
+trueParentDefs = []
+trueChildDefs = []
 size_of_close_neighborhood = []
 query_level = []
 query_height = []
@@ -82,6 +84,8 @@ with open(csv_file_path, mode="r", encoding="utf-8") as file:
         predParentDefs.append(row["predParentDef"])
         predChildPPRDefs.append(row["predChildPPRDef"])
         predParentPPRDefs.append(row["predParentPPRDef"])
+        trueParentDefs.append(row["true_parent_def"])
+        trueChildDefs.append(row["true_child_def"])
         size_of_close_neighborhood.append(int(row["numCloseNeighbors"]))
         query_level.append(int(row["queryLevel"]))
         query_height.append(int(row["queryHeight"]))
@@ -490,12 +494,15 @@ plot_dist_vs_cossim(
 )
 
 
-def print_identical_embedding_definitions(query_defs, node_defs, cossims, isPPR):
+def print_identical_embedding_definitions(
+    query_defs, node_defs, true_defs, cossims, isPPR, isChild
+):
     ppr_text = " PPR" if isPPR else ""
+    relation_text = "Child" if isChild else "Parent"
     identical_embeddings = np.where(cossims == 1)[0].tolist()
     for idx in identical_embeddings:
         print(
-            f"\nQuery:\n{query_defs[idx]}\nPred. Parent{ppr_text}:\n{node_defs[idx]}\n"
+            f"\nQuery:\n{query_defs[idx]}\nPred. {relation_text}{ppr_text}:\n{node_defs[idx]}\nTrue {relation_text}:\n{true_defs[idx]}"
         )
 
 
@@ -503,15 +510,20 @@ print("=====================================")
 print("Query/Node pairs with cosine similarity == 1:")
 
 print_identical_embedding_definitions(
-    queryDefs, predParentDefs, cos_sim_query_pred_parent, False
+    queryDefs, predParentDefs, trueParentDefs, cos_sim_query_pred_parent, False, False
 )
 print_identical_embedding_definitions(
-    queryDefs, predChildDefs, cos_sim_query_pred_child, False
+    queryDefs, predChildDefs, trueChildDefs, cos_sim_query_pred_child, False, True
 )
 print_identical_embedding_definitions(
-    queryDefs, predParentPPRDefs, cos_sim_query_pred_parent_ppr, True
+    queryDefs,
+    predParentPPRDefs,
+    trueParentDefs,
+    cos_sim_query_pred_parent_ppr,
+    True,
+    False,
 )
 print_identical_embedding_definitions(
-    queryDefs, predChildPPRDefs, cos_sim_query_pred_child_ppr, True
+    queryDefs, predChildPPRDefs, trueChildDefs, cos_sim_query_pred_child_ppr, True, True
 )
 print("=====================================")

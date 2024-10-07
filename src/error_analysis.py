@@ -176,7 +176,7 @@ def get_relation_type(source_node, target_node):
         return "distant"
 
 
-csv_format = "queryDef,predChildDef,predParentDef,predChildPPRDef,predParentPPRDef,numCloseNeighbors,queryLevel,queryHeight,isCorrectParentAt1,isCorrectChildAt1,isCorrectParentPPRAt1,isCorrectChildPPRAt1,isCorrectParentAt10,isCorrectChildAt10,isCorrectParentPPRAt10,isCorrectChildPPRAt10,cos_sim_query_pred_child,cos_sim_query_pred_parent,cos_sim_query_pred_child_ppr,cos_sim_query_pred_parent_ppr,graph_dist_query_pred_child,graph_dist_query_pred_parent,graph_dist_query_pred_child_ppr,graph_dist_query_pred_parent_ppr,relation_query_pred_parent,relation_query_pred_child,relation_query_pred_parent_ppr,relation_query_pred_child_ppr,\n"
+csv_format = "queryDef,predChildDef,predParentDef,predChildPPRDef,predParentPPRDef,numCloseNeighbors,queryLevel,queryHeight,isCorrectParentAt1,isCorrectChildAt1,isCorrectParentPPRAt1,isCorrectChildPPRAt1,isCorrectParentAt10,isCorrectChildAt10,isCorrectParentPPRAt10,isCorrectChildPPRAt10,cos_sim_query_pred_child,cos_sim_query_pred_parent,cos_sim_query_pred_child_ppr,cos_sim_query_pred_parent_ppr,graph_dist_query_pred_child,graph_dist_query_pred_parent,graph_dist_query_pred_child_ppr,graph_dist_query_pred_parent_ppr,relation_query_pred_parent,relation_query_pred_child,relation_query_pred_parent_ppr,relation_query_pred_child_ppr,true_parent_def,true_child_def\n"
 with open(csv_filename, "w+") as f:
     f.write(csv_format)
 
@@ -207,6 +207,10 @@ for i in range(len(data_prep.test_queries)):
     pred_child_definition = '"' + str(get_definition(predicted_edge[1])) + '"'
     pred_parent_ppr_definition = '"' + str(get_definition(predicted_edge_ppr[0])) + '"'
     pred_child_ppr_definition = '"' + str(get_definition(predicted_edge_ppr[1])) + '"'
+    random_target_idx = torch.randint(0, len(target), (1,)).item()
+    random_target = target[random_target_idx]
+    random_gt_parent_definition = '"' + str(get_definition(random_target[0])) + '"'
+    random_gt_child_definition = '"' + str(get_definition(random_target[1])) + '"'
     dist_query_pred_parent = get_graph_distance(
         query_node_id, predicted_edge[0], isChild=False
     )
@@ -274,7 +278,7 @@ for i in range(len(data_prep.test_queries)):
 
     #   STORE IN CSV:
     with open(csv_filename, "a+") as f:
-        line = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
+        line = "{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}\n".format(
             query_definition,
             pred_child_definition,
             pred_parent_definition,
@@ -303,5 +307,7 @@ for i in range(len(data_prep.test_queries)):
             relation_query_pred_child,
             relation_query_pred_parent_ppr,
             relation_query_pred_child_ppr,
+            random_gt_parent_definition,
+            random_gt_child_definition,
         )
         f.write(line)
