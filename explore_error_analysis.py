@@ -223,6 +223,25 @@ print(f"Overall Accuracy @ 1: {sum(correct_normal) / len(correct_normal)}")
 correct_ppr = is_correct_parent_ppr & is_correct_child_ppr
 print(f"Overall Accuracy @ 1 PPR: {sum(correct_ppr) / len(correct_ppr)}")
 
+is_leaf = query_height == 0
+correct_normal_leaf = correct_normal[is_leaf]
+print(
+    f"Overall Accuracy @ 1 (Leaves): {sum(correct_normal_leaf) / len(correct_normal_leaf)}"
+)
+correct_ppr_leaf = correct_ppr[is_leaf]
+print(
+    f"Overall Accuracy @ 1 PPR (Leaves): {sum(correct_ppr_leaf) / len(correct_ppr_leaf)}"
+)
+
+correct_normal_non_leaf = correct_normal[~is_leaf]
+print(
+    f"Overall Accuracy @ 1 (Non-Leaves): {sum(correct_normal_non_leaf) / len(correct_normal_non_leaf)}"
+)
+correct_ppr_non_leaf = correct_ppr[~is_leaf]
+print(
+    f"Overall Accuracy @ 1 PPR (Non-Leaves): {sum(correct_ppr_non_leaf) / len(correct_ppr_non_leaf)}"
+)
+
 
 # Get total counts for isCorrect columns
 correctChild_10 = sum(is_correct_child_10)
@@ -291,6 +310,25 @@ correct_normal_10 = is_correct_parent_10 & is_correct_child_10
 print(f"Overall Accuracy @ 10: {sum(correct_normal_10) / len(correct_normal_10)}")
 correct_ppr_10 = is_correct_parent_ppr_10 & is_correct_child_ppr_10
 print(f"Overall Accuracy @ 10 PPR: {sum(correct_ppr_10) / len(correct_ppr_10)}")
+
+is_leaf = query_height == 0
+correct_normal_leaf = correct_normal_10[is_leaf]
+print(
+    f"Overall Accuracy @ 10 (Leaves): {sum(correct_normal_leaf) / len(correct_normal_leaf)}"
+)
+correct_ppr_leaf = correct_ppr_10[is_leaf]
+print(
+    f"Overall Accuracy @ 10 PPR (Leaves): {sum(correct_ppr_leaf) / len(correct_ppr_leaf)}"
+)
+
+correct_normal_non_leaf = correct_normal_10[~is_leaf]
+print(
+    f"Overall Accuracy @ 10 (Non-Leaves): {sum(correct_normal_non_leaf) / len(correct_normal_non_leaf)}"
+)
+correct_ppr_non_leaf = correct_ppr_10[~is_leaf]
+print(
+    f"Overall Accuracy @ 10 PPR (Non-Leaves): {sum(correct_ppr_non_leaf) / len(correct_ppr_non_leaf)}"
+)
 
 num_leaf_queries = 0
 for i in range(len(query_height)):
@@ -495,25 +533,38 @@ plot_dist_vs_cossim(
 
 
 def print_identical_embedding_definitions(
-    query_defs, node_defs, true_defs, cossims, isPPR, isChild
+    query_defs, node_defs, true_defs, cossims, isPPR, isChild, correct
 ):
     ppr_text = " PPR" if isPPR else ""
     relation_text = "Child" if isChild else "Parent"
     identical_embeddings = np.where(cossims == 1)[0].tolist()
     for idx in identical_embeddings:
-        print(
-            f"\nQuery:\n{query_defs[idx]}\nPred. {relation_text}{ppr_text}:\n{node_defs[idx]}\nTrue {relation_text}:\n{true_defs[idx]}"
-        )
+        if not correct[idx]:
+            print(
+                f"\nQuery:\n{query_defs[idx]}\nPred. {relation_text}{ppr_text}:\n{node_defs[idx]}\nTrue {relation_text}:\n{true_defs[idx]}"
+            )
 
 
 print("=====================================")
 print("Query/Node pairs with cosine similarity == 1:")
 
 print_identical_embedding_definitions(
-    queryDefs, predParentDefs, trueParentDefs, cos_sim_query_pred_parent, False, False
+    queryDefs,
+    predParentDefs,
+    trueParentDefs,
+    cos_sim_query_pred_parent,
+    False,
+    False,
+    is_correct_parent,
 )
 print_identical_embedding_definitions(
-    queryDefs, predChildDefs, trueChildDefs, cos_sim_query_pred_child, False, True
+    queryDefs,
+    predChildDefs,
+    trueChildDefs,
+    cos_sim_query_pred_child,
+    False,
+    True,
+    is_correct_child,
 )
 print_identical_embedding_definitions(
     queryDefs,
@@ -522,8 +573,47 @@ print_identical_embedding_definitions(
     cos_sim_query_pred_parent_ppr,
     True,
     False,
+    is_correct_parent_ppr,
 )
 print_identical_embedding_definitions(
-    queryDefs, predChildPPRDefs, trueChildDefs, cos_sim_query_pred_child_ppr, True, True
+    queryDefs,
+    predChildPPRDefs,
+    trueChildDefs,
+    cos_sim_query_pred_child_ppr,
+    True,
+    True,
+    is_correct_child_ppr,
 )
 print("=====================================")
+
+print("== CSV FOR ONLY PARENTS WITH COS_SIM @ 1 ==" + "\n")
+print("query def, true parent def, pred parent def ppr, pred parent def")
+
+
+def log_identical_embedding_definitions(
+    query_defs, node_defs, true_defs, cossims, isPPR, correct
+):
+    identical_embeddings = np.where(cossims == 1)[0].tolist()
+    for idx in identical_embeddings:
+        if not correct[idx]:
+            print(
+                f'"{query_defs[idx]}","{true_defs[idx]}","{"N/A" if not isPPR else node_defs[idx]}","{"N/A" if isPPR else node_defs[idx]}"'
+            )
+
+
+log_identical_embedding_definitions(
+    queryDefs,
+    predParentDefs,
+    trueParentDefs,
+    cos_sim_query_pred_parent,
+    False,
+    is_correct_parent,
+)
+log_identical_embedding_definitions(
+    queryDefs,
+    predParentPPRDefs,
+    trueParentDefs,
+    cos_sim_query_pred_parent_ppr,
+    True,
+    is_correct_parent_ppr,
+)
