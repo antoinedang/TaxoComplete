@@ -16,12 +16,12 @@ Num Correct Parent Incorrect Child:  40
 Num Correct Parent Incorrect Child PPR:  45
 Num Correct Child Incorrect Parent:  674
 Num Correct Child Incorrect Parent PPR:  667
-Overall Accuracy @ 1: 0.143
-Overall Accuracy @ 1 PPR: 0.156
-Overall Accuracy @ 1 (Leaves): 0.14192708333333334
-Overall Accuracy @ 1 PPR (Leaves): 0.16276041666666666
-Overall Accuracy @ 1 (Non-Leaves): 0.14655172413793102
-Overall Accuracy @ 1 PPR (Non-Leaves): 0.1336206896551724
+Overall HIT @ 1: 0.143
+Overall HIT @ 1 PPR: 0.156
+Overall HIT @ 1 (Leaves): 0.14192708333333334
+Overall HIT @ 1 PPR (Leaves): 0.16276041666666666
+Overall HIT @ 1 (Non-Leaves): 0.14655172413793102
+Overall HIT @ 1 PPR (Non-Leaves): 0.1336206896551724
  >>>> HIT @ 10
 Correct Child:  917
 Incorrect Child:  83
@@ -39,12 +39,12 @@ Num Correct Parent Incorrect Child:  40
 Num Correct Parent Incorrect Child PPR:  43
 Num Correct Child Incorrect Parent:  407
 Num Correct Child Incorrect Parent PPR:  401
-Overall Accuracy @ 10: 0.51
-Overall Accuracy @ 10 PPR: 0.517
-Overall Accuracy @ 10 (Leaves): 0.5078125
-Overall Accuracy @ 10 PPR (Leaves): 0.5130208333333334
-Overall Accuracy @ 10 (Non-Leaves): 0.5172413793103449
-Overall Accuracy @ 10 PPR (Non-Leaves): 0.5301724137931034
+Overall HIT @ 10: 0.51
+Overall HIT @ 10 PPR: 0.517
+Overall HIT @ 10 (Leaves): 0.5078125
+Overall HIT @ 10 PPR (Leaves): 0.5130208333333334
+Overall HIT @ 10 (Non-Leaves): 0.5172413793103449
+Overall HIT @ 10 PPR (Non-Leaves): 0.5301724137931034
 Num Leaf Queries:  768
 Num Non-Leaf Queries:  232
 =====================================

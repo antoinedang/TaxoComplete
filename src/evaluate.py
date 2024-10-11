@@ -17,6 +17,11 @@ args = argparse.ArgumentParser(description="Training taxonomy expansion model")
 args.add_argument(
     "-c", "--config", default=None, type=str, help="config file path (default: None)"
 )
+args.add_argument(
+    "--untrained",
+    action="store_true",
+    help="whether to use the untrained model to evaluate",
+)
 config = ConfigParser(args)
 args = args.parse_args()
 
@@ -59,8 +64,10 @@ propagation = PPRPowerIteration(
     nx.adjacency_matrix(core_graph), alpha=alpha, niter=10
 ).to(target_device)
 
-
-model = SentenceTransformer.SentenceTransformer(config["model_path"])
+if args.untrained:
+    model = SentenceTransformer.SentenceTransformer(model_name)
+else:
+    model = SentenceTransformer.SentenceTransformer(config["model_path"])
 corpus_embeddings = model.encode(
     data_prep.corpus, convert_to_tensor=True, show_progress_bar=True
 )
@@ -160,7 +167,16 @@ ms.save_results(
 targets = [data_prep.test_node2pos[node] for node in data_prep.test_node_list]
 query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
 nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
-error_analysis_filename = os.path.dirname(str(config.save_dir)) + "/error_analysis.pkl"
+os.makedirs(
+    os.path.dirname(str(config.save_dir))
+    + f"/{'untrained' if args.untrained else 'trained'}",
+    exist_ok=True,
+)
+error_analysis_filename = (
+    os.path.dirname(str(config.save_dir))
+    + f"/{'untrained' if args.untrained else 'trained'}"
+    + "/error_analysis.pkl"
+)
 with open(error_analysis_filename, "wb") as f:
     pickle.dump(
         [

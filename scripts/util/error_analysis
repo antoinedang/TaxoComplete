@@ -17,5 +17,7 @@ conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
 echo "GOT HERE"
 python ./src/evaluate.py --config ./config_files_evaluate/cs/config_clst20_s47.json
-python ./src/error_analysis.py data/MAG-CS-Wiki/error_analysis.pkl
+python ./src/error_analysis.py data/MAG-CS-Wiki/trained/error_analysis.pkl
+python ./src/evaluate.py --config ./config_files_evaluate/cs/config_clst20_s47.json --untrained
+python ./src/error_analysis.py data/MAG-CS-Wiki/untrained/error_analysis.pkl
 echo "ERROR ANALYSIS: $?"

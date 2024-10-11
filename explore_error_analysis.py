@@ -16,7 +16,7 @@ csv_file_path = args.filename
 log_dir = os.path.dirname(csv_file_path)
 log_filename = log_dir + "/error_analysis.log"
 
-show_plots = False
+show_plots = True
 
 with open(log_filename, "w+") as f:
     f.write("== ERROR ANALYSIS LOG ==" + "\n")
@@ -219,27 +219,25 @@ print(
 )
 
 correct_normal = is_correct_parent & is_correct_child
-print(f"Overall Accuracy @ 1: {sum(correct_normal) / len(correct_normal)}")
+print(f"Overall HIT @ 1: {sum(correct_normal) / len(correct_normal)}")
 correct_ppr = is_correct_parent_ppr & is_correct_child_ppr
-print(f"Overall Accuracy @ 1 PPR: {sum(correct_ppr) / len(correct_ppr)}")
+print(f"Overall HIT @ 1 PPR: {sum(correct_ppr) / len(correct_ppr)}")
 
 is_leaf = query_height == 0
 correct_normal_leaf = correct_normal[is_leaf]
 print(
-    f"Overall Accuracy @ 1 (Leaves): {sum(correct_normal_leaf) / len(correct_normal_leaf)}"
+    f"Overall HIT @ 1 (Leaves): {sum(correct_normal_leaf) / len(correct_normal_leaf)}"
 )
 correct_ppr_leaf = correct_ppr[is_leaf]
-print(
-    f"Overall Accuracy @ 1 PPR (Leaves): {sum(correct_ppr_leaf) / len(correct_ppr_leaf)}"
-)
+print(f"Overall HIT @ 1 PPR (Leaves): {sum(correct_ppr_leaf) / len(correct_ppr_leaf)}")
 
 correct_normal_non_leaf = correct_normal[~is_leaf]
 print(
-    f"Overall Accuracy @ 1 (Non-Leaves): {sum(correct_normal_non_leaf) / len(correct_normal_non_leaf)}"
+    f"Overall HIT @ 1 (Non-Leaves): {sum(correct_normal_non_leaf) / len(correct_normal_non_leaf)}"
 )
 correct_ppr_non_leaf = correct_ppr[~is_leaf]
 print(
-    f"Overall Accuracy @ 1 PPR (Non-Leaves): {sum(correct_ppr_non_leaf) / len(correct_ppr_non_leaf)}"
+    f"Overall HIT @ 1 PPR (Non-Leaves): {sum(correct_ppr_non_leaf) / len(correct_ppr_non_leaf)}"
 )
 
 
@@ -307,27 +305,25 @@ print(
 )
 
 correct_normal_10 = is_correct_parent_10 & is_correct_child_10
-print(f"Overall Accuracy @ 10: {sum(correct_normal_10) / len(correct_normal_10)}")
+print(f"Overall HIT @ 10: {sum(correct_normal_10) / len(correct_normal_10)}")
 correct_ppr_10 = is_correct_parent_ppr_10 & is_correct_child_ppr_10
-print(f"Overall Accuracy @ 10 PPR: {sum(correct_ppr_10) / len(correct_ppr_10)}")
+print(f"Overall HIT @ 10 PPR: {sum(correct_ppr_10) / len(correct_ppr_10)}")
 
 is_leaf = query_height == 0
 correct_normal_leaf = correct_normal_10[is_leaf]
 print(
-    f"Overall Accuracy @ 10 (Leaves): {sum(correct_normal_leaf) / len(correct_normal_leaf)}"
+    f"Overall HIT @ 10 (Leaves): {sum(correct_normal_leaf) / len(correct_normal_leaf)}"
 )
 correct_ppr_leaf = correct_ppr_10[is_leaf]
-print(
-    f"Overall Accuracy @ 10 PPR (Leaves): {sum(correct_ppr_leaf) / len(correct_ppr_leaf)}"
-)
+print(f"Overall HIT @ 10 PPR (Leaves): {sum(correct_ppr_leaf) / len(correct_ppr_leaf)}")
 
 correct_normal_non_leaf = correct_normal_10[~is_leaf]
 print(
-    f"Overall Accuracy @ 10 (Non-Leaves): {sum(correct_normal_non_leaf) / len(correct_normal_non_leaf)}"
+    f"Overall HIT @ 10 (Non-Leaves): {sum(correct_normal_non_leaf) / len(correct_normal_non_leaf)}"
 )
 correct_ppr_non_leaf = correct_ppr_10[~is_leaf]
 print(
-    f"Overall Accuracy @ 10 PPR (Non-Leaves): {sum(correct_ppr_non_leaf) / len(correct_ppr_non_leaf)}"
+    f"Overall HIT @ 10 PPR (Non-Leaves): {sum(correct_ppr_non_leaf) / len(correct_ppr_non_leaf)}"
 )
 
 num_leaf_queries = 0
@@ -375,8 +371,8 @@ bars1 = plt.bar(
 bars2 = plt.bar(x + bar_width / 2, accuracy_ppr, bar_width, label="PPR Predictions")
 plt.xticks(x, [f"{int(range[0])} - {int(range[1])}" for range in bucket_ranges])
 plt.xlabel("Size of Close Neighborhood")
-plt.ylabel("Accuracy @ 1")
-plt.title("Accuracy @ 1 as a Function of Size of Close Neighborhood")
+plt.ylabel("HIT @ 1")
+plt.title("HIT @ 1 as a Function of Size of Close Neighborhood")
 plt.legend()
 plt.grid(axis="y")
 plt.tight_layout()
@@ -419,8 +415,8 @@ bars1 = plt.bar(
 bars2 = plt.bar(x + bar_width / 2, accuracy_ppr_10, bar_width, label="PPR Predictions")
 plt.xticks(x, [f"{int(range[0])} - {int(range[1])}" for range in bucket_ranges])
 plt.xlabel("Size of Close Neighborhood")
-plt.ylabel("Accuracy @ 10")
-plt.title("Accuracy @ 10 as a Function of Size of Close Neighborhood")
+plt.ylabel("HIT @ 10")
+plt.title("HIT @ 10 as a Function of Size of Close Neighborhood")
 plt.legend()
 plt.grid(axis="y")
 plt.tight_layout()
