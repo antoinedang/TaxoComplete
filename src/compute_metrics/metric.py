@@ -5,7 +5,13 @@ import numpy as np
 import itertools
 import re
 from sentence_transformers import util
-import cupy as cp
+
+if torch.cuda.is_available():
+    import cupy as cp
+else:
+    import numpy as cp
+
+    cp.asnumpy = lambda x: x
 
 from pathlib import Path
 
