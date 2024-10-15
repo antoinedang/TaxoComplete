@@ -22,6 +22,11 @@ args.add_argument(
     action="store_true",
     help="whether to use the untrained model to evaluate",
 )
+args.add_argument(
+    "--random",
+    action="store_true",
+    help="whether to use a purely random model to evaluate",
+)
 config = ConfigParser(args)
 args = args.parse_args()
 
@@ -68,9 +73,14 @@ if args.untrained:
     model = SentenceTransformer.SentenceTransformer(model_name)
 else:
     model = SentenceTransformer.SentenceTransformer(config["model_path"])
-corpus_embeddings = model.encode(
-    data_prep.corpus, convert_to_tensor=True, show_progress_bar=True
-)
+if args.random:
+    corpus_embeddings = torch.rand(
+        len(data_prep.corpus), model.get_sentence_embedding_dimension()
+    ).to(target_device)
+else:
+    corpus_embeddings = model.encode(
+        data_prep.corpus, convert_to_tensor=True, show_progress_bar=True
+    )
 preds = propagation(
     corpus_embeddings, torch.tensor(range(len(nodeIdsCorpus)), device=target_device)
 )
@@ -167,16 +177,18 @@ ms.save_results(
 targets = [data_prep.test_node2pos[node] for node in data_prep.test_node_list]
 query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
 nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
-os.makedirs(
+
+pickle_folder = (
     os.path.dirname(str(config.save_dir))
-    + f"/{'untrained' if args.untrained else 'trained'}",
+    + f"/{'random' if args.random else ('untrained' if args.untrained else 'trained')}"
+)
+
+os.makedirs(
+    pickle_folder,
     exist_ok=True,
 )
-error_analysis_filename = (
-    os.path.dirname(str(config.save_dir))
-    + f"/{'untrained' if args.untrained else 'trained'}"
-    + "/error_analysis.pkl"
-)
+error_analysis_filename = pickle_folder + "/error_analysis.pkl"
+
 with open(error_analysis_filename, "wb") as f:
     pickle.dump(
         [
