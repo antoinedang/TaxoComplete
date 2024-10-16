@@ -113,59 +113,81 @@ class TaxoDataset(object):
         elif self.partition_pattern == "balanced":
             # balance leaf vs. non leaf nodes
             random.shuffle(self.leaf)
-            num_leaf = len(self.leaf)
-            num_non_leaf = len(self.taxonomy.nodes()) - num_leaf
-            non_leaf = [node for node in self.taxonomy.nodes() if node not in self.leaf]
+            leaf_nodes = [node for node in self.leaf if node not in self.root]
+            non_leaf_nodes = [
+                node
+                for node in self.taxonomy.nodes()
+                if node not in self.leaf + self.root
+            ]
+
+            num_leaf = len(leaf_nodes)
+            num_non_leaf = len(non_leaf_nodes)
+
             if num_leaf > num_non_leaf:
                 random_leaf_nodes = random.sample(
-                    self.leaf,
+                    leaf_nodes,
                     num_non_leaf,
                 )
-                total_nodes = non_leaf + random_leaf_nodes
+                leaf_nodes = random_leaf_nodes
             else:
                 random_nonleaf_nodes = random.sample(
-                    non_leaf,
+                    non_leaf_nodes,
                     num_leaf,
                 )
-                total_nodes = self.leaf + random_nonleaf_nodes
-            random.shuffle(total_nodes)
-            validation_size = min(int(len(total_nodes) * 0.1), MAX_VALIDATION_SIZE)
-            test_size = min(int(len(total_nodes) * 0.1), MAX_TEST_SIZE)
-            self.validation_node_ids = total_nodes[:validation_size]
-            self.test_node_ids = total_nodes[
-                validation_size : (validation_size + test_size)
-            ]
+                non_leaf_nodes = random_nonleaf_nodes
+            random.shuffle(leaf_nodes)
+            random.shuffle(non_leaf_nodes)
+            validation_size = min(int(len(leaf_nodes) * 0.1), MAX_VALIDATION_SIZE // 2)
+            test_size = min(int(len(leaf_nodes) * 0.1), MAX_TEST_SIZE // 2)
+            self.validation_node_ids = (
+                leaf_nodes[:validation_size] + non_leaf_nodes[:validation_size]
+            )
+            self.test_node_ids = (
+                leaf_nodes[validation_size : (validation_size + test_size)]
+                + non_leaf_nodes[validation_size : (validation_size + test_size)]
+            )
             self.train_node_ids = [
                 node_id
-                for node_id in total_nodes
+                for node_id in leaf_nodes + non_leaf_nodes
                 if node_id not in self.validation_node_ids
                 and node_id not in self.test_node_ids
             ]
         elif self.partition_pattern == "balanced_test":
             # balance leaf vs. non leaf nodes (only in test and validation sets)
             random.shuffle(self.leaf)
-            num_leaf = len(self.leaf)
-            num_non_leaf = len(self.taxonomy.nodes()) - num_leaf
-            non_leaf = [node for node in self.taxonomy.nodes() if node not in self.leaf]
+            leaf_nodes = [node for node in self.leaf if node not in self.root]
+            non_leaf_nodes = [
+                node
+                for node in self.taxonomy.nodes()
+                if node not in self.leaf + self.root
+            ]
+
+            num_leaf = len(leaf_nodes)
+            num_non_leaf = len(non_leaf_nodes)
+
             if num_leaf > num_non_leaf:
                 random_leaf_nodes = random.sample(
-                    self.leaf,
+                    leaf_nodes,
                     num_non_leaf,
                 )
-                total_nodes = non_leaf + random_leaf_nodes
+                leaf_nodes = random_leaf_nodes
             else:
                 random_nonleaf_nodes = random.sample(
-                    non_leaf,
+                    non_leaf_nodes,
                     num_leaf,
                 )
-                total_nodes = self.leaf + random_nonleaf_nodes
-            random.shuffle(total_nodes)
-            validation_size = min(int(len(total_nodes) * 0.1), MAX_VALIDATION_SIZE)
-            test_size = min(int(len(total_nodes) * 0.1), MAX_TEST_SIZE)
-            self.validation_node_ids = total_nodes[:validation_size]
-            self.test_node_ids = total_nodes[
-                validation_size : (validation_size + test_size)
-            ]
+                non_leaf_nodes = random_nonleaf_nodes
+            random.shuffle(leaf_nodes)
+            random.shuffle(non_leaf_nodes)
+            validation_size = min(int(len(leaf_nodes) * 0.1), MAX_VALIDATION_SIZE // 2)
+            test_size = min(int(len(leaf_nodes) * 0.1), MAX_TEST_SIZE // 2)
+            self.validation_node_ids = (
+                leaf_nodes[:validation_size] + non_leaf_nodes[:validation_size]
+            )
+            self.test_node_ids = (
+                leaf_nodes[validation_size : (validation_size + test_size)]
+                + non_leaf_nodes[validation_size : (validation_size + test_size)]
+            )
             self.train_node_ids = [
                 node_id
                 for node_id in self.taxonomy.nodes

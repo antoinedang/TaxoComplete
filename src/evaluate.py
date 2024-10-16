@@ -18,6 +18,13 @@ args.add_argument(
     "-c", "--config", default=None, type=str, help="config file path (default: None)"
 )
 args.add_argument(
+    "-n",
+    "--name",
+    default=None,
+    type=str,
+    help="Folder to save .pkl to (default: None)",
+)
+args.add_argument(
     "--untrained",
     action="store_true",
     help="whether to use the untrained model to evaluate",
@@ -180,7 +187,7 @@ nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
 
 pickle_folder = (
     os.path.dirname(str(config.save_dir))
-    + f"/{'random' if args.random else ('untrained' if args.untrained else 'trained')}"
+    + f"/{args.name if args.name is not None else ('random' if args.random else ('untrained' if args.untrained else 'trained'))}"
 )
 
 os.makedirs(
