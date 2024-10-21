@@ -17,6 +17,7 @@ RUN conda install -y -c dglteam dgl-cuda11.1
 RUN pip install -r requirements
 RUN pip install transformers==4.29.2 safetensors==0.3.0
 RUN pip install chardet
+RUN pip install matplotlib
 
 RUN echo "conda activate taxocomplete" >> ~/.bashrc
 
