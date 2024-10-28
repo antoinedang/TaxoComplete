@@ -29,6 +29,7 @@ seed = config["seed"]
 batch_size = config["batch_size"]
 epochs = config["epochs"]
 alpha = config["alpha"]
+rescale_cosine_similarity = bool(config.get("map_cos_sim_range", False))
 
 taxonomy = dl.TaxoDataset(
     name, data_path, raw=True, partition_pattern=partition_pattern, seed=seed
@@ -63,7 +64,12 @@ train_dataloader = DataLoader(data_prep.trainInput, shuffle=True, batch_size=bat
 warmup_steps = math.ceil(
     len(train_dataloader) * epochs * 0.1
 )  # 10% of train data for warm-up
-train_loss = losses.CosineSimilarityLoss(model)
+if rescale_cosine_similarity:
+    train_loss = losses.CosineSimilarityLoss(
+        model, cos_score_transformation=lambda x: (x + 1) / 2
+    )
+else:
+    train_loss = losses.CosineSimilarityLoss(model)
 evaluator = EmbeddingSimilarityEvaluator.from_input_examples(
     data_prep.val_examples, name="sts-dev"
 )
