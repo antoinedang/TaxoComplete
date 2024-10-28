@@ -3,9 +3,8 @@
 #SBATCH --output=job_output.txt
 #SBATCH --error=job_error.txt
 #SBATCH --ntasks=1
-#SBATCH --time=360:00
+#SBATCH --time=720:00
 #SBATCH --mem=100Gb
-#SBATCH --gres=gpu:1
 
 source ~/.bashrc
 module load miniconda/3
@@ -16,6 +15,9 @@ conda activate taxocomplete
 pip install torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2+cu118 -f https://download.pytorch.org/whl/torch_stable.html
 conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
-echo "GOT HERE"
+echo "\n\nTRAINING ORIGINAL:"
 python ./src/train.py --config ./config_files/psy/config_clst20_s47.json
-echo "TRAINING: $?"
+echo "TRAINING ORIGINAL: $?"
+echo "\n\nTRAINING SCALED:"
+python ./src/train.py --config ./config_files/psy/config_clst20_s47_scaled_cos_sim.json
+echo "TRAINING SCALED: $?"
