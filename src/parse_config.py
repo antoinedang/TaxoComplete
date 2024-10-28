@@ -27,6 +27,9 @@ class ConfigParser:
         # save updated config file to the checkpoint dir
         _write_json(self.config, self.save_dir / "config_method.json")
 
+    def get(self, name, default):
+        return self.config.get(name, default)
+
     def __getitem__(self, name):
         return self.config[name]
 

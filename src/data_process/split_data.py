@@ -281,7 +281,7 @@ class Dataset:
         neg_number,
         trainInputLevel,
     ):
-        pos_sample, neg_sample, _ = self._construct_samples(
+        pos_sample, neg_sample, parent_sample = self._construct_samples(
             sampled_nodes, train_node2pos, train_node_ids, sampling_method, neg_number
         )
         train_examples = []
@@ -290,18 +290,25 @@ class Dataset:
         for node in pos_sample:
             node_def = self.definitions[node]["summary"]
             pos_node = pos_sample[node]
+            parent_node = parent_sample[node]
             for posn in pos_node:
                 posn_def = self.definitions[posn]["summary"]
+                parent_def = self.definitions[
+                    parent_node[random.randint(0, len(parent_node) - 1)]
+                ]["summary"]
                 train_examples.append(
                     InputExample(
                         guid=str(node) + "_" + str(posn),
-                        texts=[node_def, posn_def],
-                        label=[1.0, trainInputLevel[node], trainInputLevel[posn]],
+                        texts=[node_def, posn_def, parent_def],
+                        label=[1.0, 1.0, trainInputLevel[node], trainInputLevel[posn]],
                     )
                 )
             neg_node = neg_sample[node]
             for negn in neg_node:
                 negn_def = self.definitions[negn]["summary"]
+                parent_def = self.definitions[
+                    parent_node[random.randint(0, len(parent_node) - 1)]
+                ]["summary"]
                 if sampling_method == "closest":
                     label_to_assign = 1 / (
                         nx.shortest_path_length(core_subgraph_un, node, negn)
@@ -343,9 +350,10 @@ class Dataset:
                 train_examples.append(
                     InputExample(
                         guid=str(node) + "_" + str(negn),
-                        texts=[node_def, negn_def],
+                        texts=[node_def, negn_def, parent_def],
                         label=[
                             label_to_assign,
+                            1.0,
                             trainInputLevel[node],
                             trainInputLevel[negn],
                         ],

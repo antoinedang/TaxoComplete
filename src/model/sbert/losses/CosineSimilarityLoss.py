@@ -35,11 +35,15 @@ class CosineSimilarityLoss(nn.Module):
         model: SentenceTransformer,
         loss_fct=nn.MSELoss(),
         cos_score_transformation=nn.Identity(),
+        alpha=1,
+        beta=0,
     ):
         super(CosineSimilarityLoss, self).__init__()
         self.model = model
         self.loss_fct = loss_fct
         self.cos_score_transformation = cos_score_transformation
+        self.alpha = alpha
+        self.beta = beta
 
     def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
         # pdb.set_trace()
@@ -47,7 +51,18 @@ class CosineSimilarityLoss(nn.Module):
             self.model(sentence_feature)["sentence_embedding"]
             for sentence_feature in sentence_features
         ]
-        output = self.cos_score_transformation(
-            torch.cosine_similarity(embeddings[0], embeddings[1])
+        query_embedding = embeddings[0]
+        corpus_embedding = embeddings[1]
+        parent_embedding = embeddings[2]
+
+        query_corpus_loss = self.cos_score_transformation(
+            torch.cosine_similarity(query_embedding, corpus_embedding)
         )
-        return self.loss_fct(output, labels[:, 0].view(-1))
+
+        query_parent_loss = self.cos_score_transformation(
+            torch.cosine_similarity(query_embedding, parent_embedding)
+        )
+
+        return self.alpha * self.loss_fct(
+            query_corpus_loss, labels[:, 0].view(-1)
+        ) + self.beta * self.loss_fct(query_parent_loss, labels[:, 1].view(-1))

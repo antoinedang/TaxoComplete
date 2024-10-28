@@ -30,6 +30,8 @@ batch_size = config["batch_size"]
 epochs = config["epochs"]
 alpha = config["alpha"]
 rescale_cosine_similarity = bool(config.get("map_cos_sim_range", False))
+loss_alpha = config.get("loss_alpha", 1)
+loss_beta = config.get("loss_beta", 0)
 
 taxonomy = dl.TaxoDataset(
     name, data_path, raw=True, partition_pattern=partition_pattern, seed=seed
@@ -66,10 +68,13 @@ warmup_steps = math.ceil(
 )  # 10% of train data for warm-up
 if rescale_cosine_similarity:
     train_loss = losses.CosineSimilarityLoss(
-        model, cos_score_transformation=lambda x: (x + 1) / 2
+        model,
+        cos_score_transformation=lambda x: (x + 1) / 2,
+        alpha=loss_alpha,
+        beta=loss_beta,
     )
 else:
-    train_loss = losses.CosineSimilarityLoss(model)
+    train_loss = losses.CosineSimilarityLoss(model, alpha=loss_alpha, beta=loss_beta)
 evaluator = EmbeddingSimilarityEvaluator.from_input_examples(
     data_prep.val_examples, name="sts-dev"
 )
