@@ -1,0 +1,26 @@
+TRAINING ORIGINAL:
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.165,0.079,0.047,0.165,0.396,0.473,666.361,26.352
+
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.150,0.073,0.048,0.150,0.367,0.478,584.380,24.840
+
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.187,0.083,0.050,0.187,0.416,0.500,672.680,28.429
+
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.160,0.076,0.048,0.160,0.381,0.482,576.252,25.821
+
+
+TRAINING SCALED:
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.088,0.040,0.025,0.088,0.198,0.249,2861.584,14.092
+
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.068,0.040,0.025,0.068,0.201,0.251,2792.941,12.683
+
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.094,0.046,0.029,0.094,0.229,0.295,2595.519,15.765
+
+prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
+ 0.082,0.043,0.028,0.082,0.214,0.283,2579.642,14.563

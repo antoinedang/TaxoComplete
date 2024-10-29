@@ -300,7 +300,7 @@ class Dataset:
                     InputExample(
                         guid=str(node) + "_" + str(posn),
                         texts=[node_def, posn_def, parent_def],
-                        label=[1.0, 1.0, trainInputLevel[node], trainInputLevel[posn]],
+                        label=[1.0, trainInputLevel[node], trainInputLevel[posn]],
                     )
                 )
             neg_node = neg_sample[node]
@@ -353,7 +353,6 @@ class Dataset:
                         texts=[node_def, negn_def, parent_def],
                         label=[
                             label_to_assign,
-                            1.0,
                             trainInputLevel[node],
                             trainInputLevel[negn],
                         ],

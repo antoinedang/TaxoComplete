@@ -65,4 +65,6 @@ class CosineSimilarityLoss(nn.Module):
 
         return self.alpha * self.loss_fct(
             query_corpus_loss, labels[:, 0].view(-1)
-        ) + self.beta * self.loss_fct(query_parent_loss, labels[:, 1].view(-1))
+        ) + self.beta * self.loss_fct(
+            query_parent_loss, torch.ones_like(labels[:, 0].view(-1))
+        )
