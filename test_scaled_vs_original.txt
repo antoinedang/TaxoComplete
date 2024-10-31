@@ -24,3 +24,4 @@ prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
 
 prec@1,prec@5,prec@10,recall@1,recall@5,recall@10,MR,MRR
  0.082,0.043,0.028,0.082,0.214,0.283,2579.642,14.563
+

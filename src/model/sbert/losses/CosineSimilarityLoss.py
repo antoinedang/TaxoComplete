@@ -34,16 +34,16 @@ class CosineSimilarityLoss(nn.Module):
         self,
         model: SentenceTransformer,
         loss_fct=nn.MSELoss(),
-        cos_score_transformation=nn.Identity(),
+        rescale_cos_sim_range=False,
         alpha=1,
         beta=0,
     ):
         super(CosineSimilarityLoss, self).__init__()
         self.model = model
         self.loss_fct = loss_fct
-        self.cos_score_transformation = cos_score_transformation
         self.alpha = alpha
         self.beta = beta
+        self.rescale_cos_sim_range = rescale_cos_sim_range
 
     def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
         # pdb.set_trace()
@@ -55,13 +55,20 @@ class CosineSimilarityLoss(nn.Module):
         corpus_embedding = embeddings[1]
         parent_embedding = embeddings[2]
 
-        query_corpus_loss = self.cos_score_transformation(
-            torch.cosine_similarity(query_embedding, corpus_embedding)
-        )
+        # apply cosine score transformation here, make sure it does not change negative to positive or vice versa
 
-        query_parent_loss = self.cos_score_transformation(
-            torch.cosine_similarity(query_embedding, parent_embedding)
-        )
+        query_corpus_loss = torch.cosine_similarity(query_embedding, corpus_embedding)
+        query_parent_loss = torch.cosine_similarity(query_embedding, parent_embedding)
+
+        if self.rescale_cos_sim_range:
+            query_corpus_loss = (query_corpus_loss + 1) / 2
+            query_parent_loss = (query_parent_loss + 1) / 2
+            assert torch.all(query_corpus_loss >= 0) and torch.all(
+                query_corpus_loss <= 1
+            )
+            assert torch.all(query_parent_loss >= 0) and torch.all(
+                query_parent_loss <= 1
+            )
 
         return self.alpha * self.loss_fct(
             query_corpus_loss, labels[:, 0].view(-1)
