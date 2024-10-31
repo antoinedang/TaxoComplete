@@ -55,8 +55,6 @@ class CosineSimilarityLoss(nn.Module):
         corpus_embedding = embeddings[1]
         parent_embedding = embeddings[2]
 
-        # apply cosine score transformation here, make sure it does not change negative to positive or vice versa
-
         query_corpus_loss = torch.cosine_similarity(query_embedding, corpus_embedding)
         query_parent_loss = torch.cosine_similarity(query_embedding, parent_embedding)
 
