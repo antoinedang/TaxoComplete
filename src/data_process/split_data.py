@@ -313,6 +313,10 @@ class Dataset:
                     label_to_assign = 1 / (
                         nx.shortest_path_length(core_subgraph_un, node, negn)
                     )
+                elif sampling_method == "closest_map":
+                    label_to_assign = (
+                        2 / (nx.shortest_path_length(core_subgraph_un, node, negn))
+                    ) - 1
                 elif sampling_method == "closest_sign":
                     if nx.has_path(self.core_subgraph, negn, node):
                         label_to_assign = 1 / (
