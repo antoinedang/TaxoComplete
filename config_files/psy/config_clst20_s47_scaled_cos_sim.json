@@ -10,5 +10,7 @@
     "partition_pattern":"internal",
     "alpha":0.1,
     "seed":47,
-    "map_cos_sim_range": "True"
+    "map_cos_sim_range": "True",
+    "loss_alpha": 1.0,
+    "loss_beta": 0.0
 }
