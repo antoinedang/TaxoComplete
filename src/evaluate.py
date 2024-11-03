@@ -61,6 +61,9 @@ g.manual_seed(0)
 
 batch_size = config["batch_size"]
 epochs = config["epochs"]
+rescale_cosine_similarity = bool(
+    config.get("map_cos_sim_range", "False").lower() == "true"
+)
 
 alpha = config["alpha"]
 
@@ -107,6 +110,7 @@ preds = propagation(
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
+    rescale_cosine_similarity=rescale_cosine_similarity,
 )
 
 (
@@ -124,6 +128,7 @@ preds = propagation(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
+    rescale_cosine_similarity=rescale_cosine_similarity,
 )
 
 (
@@ -141,6 +146,7 @@ preds = propagation(
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
+    rescale_cosine_similarity=rescale_cosine_similarity,
 )
 
 (
@@ -158,6 +164,7 @@ preds = propagation(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
+    rescale_cosine_similarity=rescale_cosine_similarity,
 )
 
 ms.save_results(

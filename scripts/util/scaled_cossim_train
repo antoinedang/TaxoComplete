@@ -17,6 +17,6 @@ conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
 echo ""
 echo ""
-echo "TRAINING SCALED:"
+echo "TRAINING COSSIM SCALED:"
 python ./src/train.py --config ./config_files/psy/config_clst20_s47_scaled_cos_sim.json
 echo "ERROR CODE: $?"

@@ -111,6 +111,7 @@ preds = propagation(
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
+    rescale_cos_sim_range=rescale_cosine_similarity,
 )
 ms.save_results(
     str(config.save_dir) + "/", all_targets_val, edges_predictions_val, "eval_val"
@@ -130,6 +131,7 @@ ms.save_results(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
+    rescale_cos_sim_range=rescale_cosine_similarity,
 )
 ms.save_results(
     str(config.save_dir) + "/", all_targets_test, edges_predictions_test, "eval_test"
@@ -151,6 +153,7 @@ ms.save_results(
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
+    rescale_cos_sim_range=rescale_cosine_similarity,
 )
 ms.save_results(
     str(config.save_dir) + "/",
@@ -173,6 +176,7 @@ ms.save_results(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
+    rescale_cos_sim_range=rescale_cosine_similarity,
 )
 ms.save_results(
     str(config.save_dir) + "/",
