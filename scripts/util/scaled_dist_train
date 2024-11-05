@@ -18,5 +18,5 @@ pip install -r requirements
 echo ""
 echo ""
 echo "TRAINING DIST SCALED:"
-python ./src/train.py --config ./config_files/psy/config_clst20_s47_scaled_dist.json
+python ./src/train.py --config ./config_files/cs/config_clst20_s47_scaled_dist.json
 echo "ERROR CODE: $?"
