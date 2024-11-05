@@ -3,7 +3,7 @@
     "epochs" : 5,
 	"sampling" : "closest",
     "saving_path" : "./data/MAG-PSY/results/",
-    "model_path" : "./data/MAG-PSY/07-Feb-2023 (20:15:13.967474)",
+    "model_path" : "./data/MAG-PSY/dist_scaling",
     "name" : "psychology",
     "data_path" : "./data/MAG-PSY/",
     "model_name" : "multi-qa-distilbert-cos-v1",
