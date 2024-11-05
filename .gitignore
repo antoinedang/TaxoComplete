@@ -8,3 +8,4 @@ job_output.txt
 job_error.txt
 *.safetensors
 *.pickle.bin
+*.pkl
