@@ -8,5 +8,8 @@
     "model_name" : "multi-qa-distilbert-cos-v1",
     "neg_number" : 20,
     "partition_pattern":"internal",
-    "seed":49
+    "alpha":0.1,
+    "seed":49,
+    "loss_alpha": 1.0,
+    "loss_beta": 0.0
 }

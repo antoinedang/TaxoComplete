@@ -9,5 +9,7 @@
     "neg_number" : 20,
     "partition_pattern":"internal",
     "alpha":0.1,
-    "seed":47
+    "seed":47,
+    "loss_alpha": 1.0,
+    "loss_beta": 0.0
 }
