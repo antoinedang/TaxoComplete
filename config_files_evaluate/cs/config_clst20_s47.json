@@ -3,7 +3,7 @@
     "epochs" : 5,
     "sampling" : "closest",
     "saving_path" : "./data/MAG-CS-Wiki/results/",
-    "model_path" : "./data/MAG-CS-Wiki/23-Sep-2024 (18%3A58%3A23.357861)",
+    "model_path" : "./data/MAG-CS-Wiki/dist_scaling",
     "name" : "computer_science",
     "data_path" : "./data/MAG-CS-Wiki/",
     "model_name" : "multi-qa-distilbert-cos-v1",
