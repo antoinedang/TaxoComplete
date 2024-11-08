@@ -45,11 +45,23 @@ neg_number = config["neg_number"]
 partition_pattern = config["partition_pattern"]
 seed = config["seed"]
 
+cosine_range = config.get("cossim_mapping_range", [0, 1])
+
 
 taxonomy = dl.TaxoDataset(
-    name, data_path, raw=True, partition_pattern=partition_pattern, seed=seed
+    name,
+    data_path,
+    raw=True,
+    partition_pattern=partition_pattern,
+    seed=seed,
 )
-data_prep = st.Dataset(taxonomy, sampling_method, neg_number, seed)
+data_prep = st.Dataset(
+    taxonomy,
+    sampling_method,
+    neg_number,
+    seed,
+    cosine_range=cosine_range,
+)
 model_name = config["model_name"]
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -61,9 +73,6 @@ g.manual_seed(0)
 
 batch_size = config["batch_size"]
 epochs = config["epochs"]
-rescale_cosine_similarity = bool(
-    config.get("map_cos_sim_range", "False").lower() == "true"
-)
 
 alpha = config["alpha"]
 
@@ -110,7 +119,6 @@ preds = propagation(
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
-    rescale_cos_sim_range=rescale_cosine_similarity,
 )
 
 (
@@ -128,7 +136,6 @@ preds = propagation(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
-    rescale_cos_sim_range=rescale_cosine_similarity,
 )
 
 (
@@ -146,7 +153,6 @@ preds = propagation(
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
-    rescale_cos_sim_range=rescale_cosine_similarity,
 )
 
 (
@@ -164,7 +170,6 @@ preds = propagation(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
-    rescale_cos_sim_range=rescale_cosine_similarity,
 )
 
 ms.save_results(

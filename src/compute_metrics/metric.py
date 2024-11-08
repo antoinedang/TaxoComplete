@@ -52,7 +52,6 @@ def compute_prediction(
     node_list,
     node2positions,
     corpusId2nodeId,
-    rescale_cos_sim_range,
 ):
     top_k = len(corpus_embeddings)
     all_targets = [node2positions[node] for node in node_list]
@@ -66,17 +65,9 @@ def compute_prediction(
     children = cp.array(children)
 
     question_embeddings = model.encode(queries, convert_to_tensor=True)
-    if rescale_cos_sim_range:
-        hits_scores = util.semantic_search(
-            question_embeddings,
-            corpus_embeddings,
-            top_k=top_k,
-            score_function=lambda x, y: (util.cos_sim(x, y) + 1) / 2,
-        )
-    else:
-        hits_scores = util.semantic_search(
-            question_embeddings, corpus_embeddings, top_k=top_k
-        )
+    hits_scores = util.semantic_search(
+        question_embeddings, corpus_embeddings, top_k=top_k
+    )
 
     for hits_score in hits_scores:
         try:

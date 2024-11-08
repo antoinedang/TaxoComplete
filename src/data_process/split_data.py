@@ -12,8 +12,9 @@ mp.pretty = True
 
 
 class Dataset:
-    def __init__(self, graph_dataset, sampling_method, neg_number, seed):
+    def __init__(self, graph_dataset, sampling_method, neg_number, seed, cosine_range):
         helpers.set_seed(seed)
+        self.cosine_range = cosine_range
         full_graph = graph_dataset.taxonomy
         train_node_ids = graph_dataset.train_node_ids
         roots = graph_dataset.root
@@ -314,9 +315,16 @@ class Dataset:
                         nx.shortest_path_length(core_subgraph_un, node, negn)
                     )
                 elif sampling_method == "closest_map":
-                    label_to_assign = (
-                        2 / (nx.shortest_path_length(core_subgraph_un, node, negn))
-                    ) - 1
+                    label_to_assign = 1 / (
+                        nx.shortest_path_length(core_subgraph_un, node, negn)
+                    )
+                    mapped_label_to_assign = (
+                        self.cosine_range[1] - self.cosine_range[0]
+                    ) * label_to_assign  # scale range from length of 1 to the correct length
+                    mapped_label_to_assign = (
+                        mapped_label_to_assign - self.cosine_range[0]
+                    )  # shift range to start at min
+                    label_to_assign = mapped_label_to_assign
                 elif sampling_method == "closest_sign":
                     if nx.has_path(self.core_subgraph, negn, node):
                         label_to_assign = 1 / (
