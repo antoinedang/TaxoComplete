@@ -17,6 +17,6 @@ conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
 echo ""
 echo ""
-echo "TRAINING DIST SCALED:"
+echo "TRAINING DIST SCALED MISTAKE:"
 python ./src/train.py --config ./config_files/psy/config_clst20_s47_scaled_dist_mistake.json
 echo "ERROR CODE: $?"
