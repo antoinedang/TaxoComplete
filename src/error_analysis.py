@@ -3,6 +3,13 @@ import argparse
 import torch
 import pickle
 import os
+import io
+
+class CPU_Unpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        if module == 'torch.storage' and name == '_load_from_bytes':
+            return lambda b: torch.load(io.BytesIO(b), map_location='cpu')
+        else: return super().find_class(module, name)
 
 torch.manual_seed(0)
 args = argparse.ArgumentParser(description="Run error analysis on evaluation results.")
@@ -29,7 +36,7 @@ with open(args.filename, "rb") as f:
         corpus_embeddings,
         nodeId2corpusId,
         preds,
-    ) = pickle.load(f)
+    ) = CPU_Unpickler(f).load()
 
 core_subgraph_undirected = data_prep.core_subgraph.to_undirected()
 core_subgraph_undirected.remove_node(data_prep.pseudo_leaf_node)

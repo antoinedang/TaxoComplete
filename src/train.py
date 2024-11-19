@@ -10,6 +10,8 @@ from model.sbert.evaluation import EmbeddingSimilarityEvaluator
 import compute_metrics.metric as ms
 from parse_config import ConfigParser
 from model.utils import PPRPowerIteration
+import os
+import pickle
 
 torch.manual_seed(0)
 args = argparse.ArgumentParser(description="Training taxonomy expansion model")
@@ -184,3 +186,34 @@ ms.save_results(
     edges_predictions_test_ppr,
     "eval_test_ppr",
 )
+
+# SAVE VARIABLES TO PICKLES TO MAKE DEVELOPMENT FASTER
+targets = [data_prep.test_node2pos[node] for node in data_prep.test_node_list]
+query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
+nodeId2corpusId = {v: k for k, v in data_prep.corpusId2nodeId.items()}
+
+pickle_folder = os.path.dirname(str(config.save_dir)) + f"/{args.name if args.name is not None else ""}"
+
+os.makedirs(
+    pickle_folder,
+    exist_ok=True,
+)
+error_analysis_filename = pickle_folder + "/error_analysis.pkl"
+
+with open(error_analysis_filename, "wb") as f:
+    pickle.dump(
+        [
+            taxonomy,
+            data_prep,
+            query_embeddings,
+            targets,
+            all_predictions,
+            all_predictions_ppr,
+            edges_predictions_test,
+            edges_predictions_test_ppr,
+            corpus_embeddings,
+            nodeId2corpusId,
+            preds,
+        ],
+        f,
+    )

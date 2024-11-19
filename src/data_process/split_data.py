@@ -322,7 +322,7 @@ class Dataset:
                         self.cosine_range[1] - self.cosine_range[0]
                     ) * label_to_assign  # scale range from length of 1 to the correct length
                     mapped_label_to_assign = (
-                        mapped_label_to_assign - self.cosine_range[0]
+                        mapped_label_to_assign + self.cosine_range[0]
                     )  # shift range to start at min
                     label_to_assign = mapped_label_to_assign
                 elif sampling_method == "closest_sign":
