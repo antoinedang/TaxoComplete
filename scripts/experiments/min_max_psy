@@ -17,6 +17,6 @@ conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
 echo ""
 echo ""
-echo "TRAINING ALPHA=0.99, BETA=0.01:"
-python ./src/train.py --config ./config_files/psy/config_clst20_s47_alpha0.99_beta0.01.json
+echo "MIN MAX PSY:"
+python ./src/train.py --config ./config_files/psy/min_max.json
 echo "ERROR CODE: $?"

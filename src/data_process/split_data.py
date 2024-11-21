@@ -314,7 +314,7 @@ class Dataset:
                     label_to_assign = 1 / (
                         nx.shortest_path_length(core_subgraph_un, node, negn)
                     )
-                elif sampling_method == "closest_map":
+                elif sampling_method == "closest_range":
                     label_to_assign = 1 / (
                         nx.shortest_path_length(core_subgraph_un, node, negn)
                     )
@@ -325,6 +325,16 @@ class Dataset:
                         mapped_label_to_assign + self.cosine_range[0]
                     )  # shift range to start at min
                     label_to_assign = mapped_label_to_assign
+                elif sampling_method == "closest_linear":
+                    label_to_assign = max(
+                        -0.9,
+                        1
+                        - (0.1 * nx.shortest_path_length(core_subgraph_un, node, negn)),
+                    )
+                elif sampling_method == "closest_epsilon":
+                    label_to_assign = 1 / (
+                        nx.shortest_path_length(core_subgraph_un, node, negn) + 0.1
+                    )
                 elif sampling_method == "closest_sign":
                     if nx.has_path(self.core_subgraph, negn, node):
                         label_to_assign = 1 / (

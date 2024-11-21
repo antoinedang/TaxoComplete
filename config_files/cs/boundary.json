@@ -1,8 +1,8 @@
 {
     "batch_size" : 32,
     "epochs" : 5,
-	"sampling" : "closest_map",
-    "cossim_mapping_range": [-0.2, 0.7],
+	"sampling" : "closest_range",
+    "cossim_mapping_range": [0, 0.9],
     "saving_path" : "./data/MAG-CS-Wiki/results/",
     "name" : "computer_science",
     "data_path" : "./data/MAG-CS-Wiki/",

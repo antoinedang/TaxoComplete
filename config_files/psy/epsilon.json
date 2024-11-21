@@ -1,7 +1,7 @@
 {
     "batch_size" : 32,
-    "epochs" : 10,
-	"sampling" : "closest",
+    "epochs" : 5,
+	"sampling" : "closest_epsilon",
     "saving_path" : "./data/MAG-PSY/results/",
     "name" : "psychology",
     "data_path" : "./data/MAG-PSY/",
@@ -10,6 +10,6 @@
     "partition_pattern":"internal",
     "alpha":0.1,
     "seed":47,
-    "loss_alpha": 0.9,
-    "loss_beta": 0.1
+    "loss_alpha": 1.0,
+    "loss_beta": 0.0
 }

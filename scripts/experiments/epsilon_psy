@@ -17,6 +17,6 @@ conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
 echo ""
 echo ""
-echo "TRAINING ALPHA=0.95, BETA=0.05:"
-python ./src/train.py --config ./config_files/psy/config_clst20_s47_alpha0.95_beta0.05.json
+echo "EPSILON PSY:"
+python ./src/train.py --config ./config_files/psy/epsilon.json
 echo "ERROR CODE: $?"
