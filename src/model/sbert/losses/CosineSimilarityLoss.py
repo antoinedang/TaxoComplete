@@ -59,7 +59,7 @@ class CosineSimilarityLoss(nn.Module):
             query_corpus_cossim = torch.cosine_similarity(
                 query_embedding, corpus_embedding
             )
-            return self.loss_fct(-2 * query_corpus_cossim + 3 - labels[:, 0].view(-1))
+            return self.loss_fct(-2 * query_corpus_cossim + 3, labels[:, 0].view(-1))
         else:
             query_corpus_loss = torch.cosine_similarity(
                 query_embedding, corpus_embedding
