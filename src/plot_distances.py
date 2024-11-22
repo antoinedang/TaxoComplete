@@ -75,6 +75,7 @@ for label_name, labeling_fn in [("original", lambda d : 1/d),
                                 ("boundary", lambda d : scaled_label(d, 0, 0.9)),
                                 ("full_boundary", lambda d : scaled_label(d, -0.9, 0.9)),
                                 ("min_max", lambda d : scaled_label(d, -0.1875, 0.5625)),
+                                ("min_max_mistake", lambda d : scaled_label(d, 0.1875, 0.9375)),
                                 ]:
     label_plot_filename = error_analysis_dir + f"/{label_name}_label_distributions.png"
     print(f"Computing {label_name} labels...")
