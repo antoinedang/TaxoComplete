@@ -86,6 +86,7 @@ train_loss = losses.CosineSimilarityLoss(
     model,
     alpha=loss_alpha,
     beta=loss_beta,
+    modified_loss=bool(config.get("loss_modified", "false") == "true"),
 )
 evaluator = EmbeddingSimilarityEvaluator.from_input_examples(
     data_prep.val_examples, name="sts-dev"

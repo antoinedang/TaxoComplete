@@ -36,12 +36,14 @@ class CosineSimilarityLoss(nn.Module):
         loss_fct=nn.MSELoss(),
         alpha=1,
         beta=0,
+        modified_loss=False,
     ):
         super(CosineSimilarityLoss, self).__init__()
         self.model = model
         self.loss_fct = loss_fct
         self.alpha = alpha
         self.beta = beta
+        self.modified_loss = modified_loss
 
     def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
         # pdb.set_trace()
@@ -53,11 +55,23 @@ class CosineSimilarityLoss(nn.Module):
         corpus_embedding = embeddings[1]
         parent_embedding = embeddings[2]
 
-        query_corpus_loss = torch.cosine_similarity(query_embedding, corpus_embedding)
-        query_parent_loss = torch.cosine_similarity(query_embedding, parent_embedding)
+        if self.modified_loss:
+            query_corpus_cossim = torch.cosine_similarity(
+                query_embedding, corpus_embedding
+            )
+            return (-2 * query_corpus_cossim + 3 - labels[:, 0].view(-1)) / len(
+                labels[:, 0].view(-1)
+            )
+        else:
+            query_corpus_loss = torch.cosine_similarity(
+                query_embedding, corpus_embedding
+            )
+            query_parent_loss = torch.cosine_similarity(
+                query_embedding, parent_embedding
+            )
 
-        return self.alpha * self.loss_fct(
-            query_corpus_loss, labels[:, 0].view(-1)
-        ) + self.beta * self.loss_fct(
-            query_parent_loss, torch.ones_like(labels[:, 0].view(-1))
-        )
+            return self.alpha * self.loss_fct(
+                query_corpus_loss, labels[:, 0].view(-1)
+            ) + self.beta * self.loss_fct(
+                query_parent_loss, torch.ones_like(labels[:, 0].view(-1))
+            )

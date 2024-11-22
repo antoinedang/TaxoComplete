@@ -288,6 +288,8 @@ class Dataset:
         train_examples = []
         core_subgraph_un = self.core_subgraph.to_undirected()
         core_subgraph_un.remove_node(self.pseudo_leaf_node)
+        max_graph_distance = nx.diameter(core_subgraph_un)
+        min_graph_distance = 1
         for node in pos_sample:
             node_def = self.definitions[node]["summary"]
             pos_node = pos_sample[node]
@@ -325,6 +327,19 @@ class Dataset:
                         mapped_label_to_assign + self.cosine_range[0]
                     )  # shift range to start at min
                     label_to_assign = mapped_label_to_assign
+                elif sampling_method == "closest_range_linear":
+                    label_to_assign = (
+                        max_graph_distance
+                        - nx.shortest_path_length(core_subgraph_un, node, negn)
+                    ) / (max_graph_distance - min_graph_distance)
+                    label_to_assign = (
+                        label_to_assign * (self.cosine_range[1] - self.cosine_range[0])
+                        + self.cosine_range[0]
+                    )
+                elif sampling_method == "closest_distance":
+                    label_to_assign = nx.shortest_path_length(
+                        core_subgraph_un, node, negn
+                    )
                 elif sampling_method == "closest_linear":
                     label_to_assign = max(
                         -0.9,
