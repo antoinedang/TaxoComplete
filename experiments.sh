@@ -24,6 +24,8 @@ rm job_output.txt job_error.txt sbatch_out.txt 2&> /dev/null
 for experiment in $experiments; do
   cd $HOME
   echo "Copying 'TaxoComplete/' to 'experiments/$experiment'..."
+  cd "experiments/$experiment" 2>/dev/null && ./cancel.sh 2>/dev/null
+  cd $HOME
   rm -rf "experiments/$experiment"
   cp -r TaxoComplete "experiments/$experiment"
   
