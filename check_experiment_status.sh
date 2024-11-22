@@ -1,0 +1,15 @@
+experiments_dir=$1
+
+experiments=$(ls "$experiments_dir")
+
+cd "$experiments_dir"
+
+for experiment in $experiments; do
+  cd "$experiment"
+  status=$(scontrol show job $(cat sbatch_out.txt | awk '{print $4}') | grep JobState | awk -F'=' '{for(i=1;i<=NF;i++) if($i ~ /JobState/) {split($(i+1), arr, " "); print arr[1]; break}}')
+  echo "$experiment   ->   $status"
+  cd ..
+  
+done
+
+cd $HOME/TaxoComplete
