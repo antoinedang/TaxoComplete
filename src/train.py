@@ -18,6 +18,13 @@ args = argparse.ArgumentParser(description="Training taxonomy expansion model")
 args.add_argument(
     "-c", "--config", default=None, type=str, help="config file path (default: None)"
 )
+args.add_argument(
+    "-n",
+    "--name",
+    default=None,
+    type=str,
+    help="Folder to save .pkl to (default: None)",
+)
 config = ConfigParser(args)
 args = args.parse_args()
 

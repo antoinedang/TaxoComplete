@@ -17,6 +17,6 @@ conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
 echo ""
 echo ""
-echo "LINEAR CS:"
-python ./src/train.py --config ./config_files/cs/linear.json
+echo "MIN MAX MISTAKE CS:"
+python ./src/train.py --config ./config_files/cs/min_max_mistake.json
 echo "ERROR CODE: $?"
