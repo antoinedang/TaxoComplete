@@ -52,6 +52,7 @@ def compute_prediction(
     node_list,
     node2positions,
     corpusId2nodeId,
+    score_function,
 ):
     top_k = len(corpus_embeddings)
     all_targets = [node2positions[node] for node in node_list]
@@ -66,7 +67,10 @@ def compute_prediction(
 
     question_embeddings = model.encode(queries, convert_to_tensor=True)
     hits_scores = util.semantic_search(
-        question_embeddings, corpus_embeddings, top_k=top_k
+        question_embeddings,
+        corpus_embeddings,
+        top_k=top_k,
+        score_function=score_function,
     )
 
     for hits_score in hits_scores:

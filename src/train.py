@@ -12,6 +12,8 @@ from parse_config import ConfigParser
 from model.utils import PPRPowerIteration
 import os
 import pickle
+import geoopt
+import transformers
 
 torch.manual_seed(0)
 args = argparse.ArgumentParser(description="Training taxonomy expansion model")
@@ -87,10 +89,16 @@ train_loss = losses.CosineSimilarityLoss(
     alpha=loss_alpha,
     beta=loss_beta,
     modified_loss=bool(config.get("loss_modified", "false") == "true"),
+    hyperbolic=bool(config.get("hyperbolic", "false") == "true"),
+    hyperbolic_curvature=float(config.get("hyperbolic_curvature", 1.0)),
 )
 evaluator = EmbeddingSimilarityEvaluator.from_input_examples(
     data_prep.val_examples, name="sts-dev"
 )
+if config.get("hyperbolic", "false") == "true":
+    optimizer_class = geoopt.optim.RiemannianAdam
+else:
+    optimizer_class = transformers.AdamW
 # Tune the model
 model.fit(
     train_objectives=[(train_dataloader, train_loss)],
@@ -100,6 +108,7 @@ model.fit(
     warmup_steps=warmup_steps,
     output_path=str(config.save_dir),
     save_best_model=True,
+    optimizer_class=optimizer_class,
 )
 
 model = SentenceTransformer.SentenceTransformer(str(config.save_dir))

@@ -5,6 +5,30 @@ from ..SentenceTransformer import SentenceTransformer
 import pdb
 
 
+def exp_map_hyperboloid(x, c=1.0):
+    norm_x = torch.norm(x, p=2, dim=-1, keepdim=True)
+    x_hyperboloid = torch.cat([torch.sqrt(c + norm_x**2), x], dim=-1)
+    return x_hyperboloid
+
+
+def lorentzian_inner_product(u, v, c=1.0):
+    # Lorentzian inner product with curvature
+    return -(c**2) * u[:, 0] * v[:, 0] + torch.sum(u[:, 1:] * v[:, 1:], dim=1)
+
+
+def lorentz_norm(u, c=1.0):
+    # Lorentz norm with curvature
+    inner_prod = lorentzian_inner_product(u, u, c)
+    return torch.sqrt(torch.clamp(-inner_prod, min=1e-5))
+
+
+def hyperbolic_cosine_similarity(u, v, c=1.0):
+    inner_prod = lorentzian_inner_product(u, v, c)
+    norm_u = lorentz_norm(u, c)
+    norm_v = lorentz_norm(v, c)
+    return inner_prod / (norm_u * norm_v)
+
+
 class CosineSimilarityLoss(nn.Module):
     """
     CosineSimilarityLoss expects, that the InputExamples consists of two texts and a float label.
@@ -37,6 +61,8 @@ class CosineSimilarityLoss(nn.Module):
         alpha=1,
         beta=0,
         modified_loss=False,
+        hyperbolic=False,
+        hyperbolic_curvature=1.0,
     ):
         super(CosineSimilarityLoss, self).__init__()
         self.model = model
@@ -44,6 +70,8 @@ class CosineSimilarityLoss(nn.Module):
         self.alpha = alpha
         self.beta = beta
         self.modified_loss = modified_loss
+        self.hyperbolic = hyperbolic
+        self.hyperbolic_curvature = hyperbolic_curvature
 
     def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
         # pdb.set_trace()
@@ -55,21 +83,31 @@ class CosineSimilarityLoss(nn.Module):
         corpus_embedding = embeddings[1]
         parent_embedding = embeddings[2]
 
-        if self.modified_loss:
-            query_corpus_cossim = torch.cosine_similarity(
-                query_embedding, corpus_embedding
+        if self.hyperbolic:
+            query_embedding = exp_map_hyperboloid(
+                query_embedding, self.hyperbolic_curvature
             )
+            corpus_embedding = exp_map_hyperboloid(
+                corpus_embedding, self.hyperbolic_curvature
+            )
+            parent_embedding = exp_map_hyperboloid(
+                parent_embedding, self.hyperbolic_curvature
+            )
+            similarity_measure = lambda x, y: hyperbolic_cosine_similarity(
+                x, y, self.hyperbolic_curvature
+            )
+        else:
+            similarity_measure = torch.cosine_similarity
+
+        if self.modified_loss:
+            query_corpus_cossim = similarity_measure(query_embedding, corpus_embedding)
             return self.loss_fct(
                 float(-2) * query_corpus_cossim + float(3),
                 labels[:, 0].view(-1).float(),
             ).float()
         else:
-            query_corpus_loss = torch.cosine_similarity(
-                query_embedding, corpus_embedding
-            )
-            query_parent_loss = torch.cosine_similarity(
-                query_embedding, parent_embedding
-            )
+            query_corpus_loss = similarity_measure(query_embedding, corpus_embedding)
+            query_parent_loss = similarity_measure(query_embedding, parent_embedding)
 
             return self.alpha * self.loss_fct(
                 query_corpus_loss, labels[:, 0].view(-1)

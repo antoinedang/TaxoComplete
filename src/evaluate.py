@@ -9,8 +9,10 @@ from model.sbert import SentenceTransformer
 import compute_metrics.metric as ms
 from parse_config import ConfigParser
 from model.utils import PPRPowerIteration
+from model.sbert.losses import *
 import pickle
 import os
+from sentence_transformers import util
 
 torch.manual_seed(0)
 args = argparse.ArgumentParser(description="Training taxonomy expansion model")
@@ -100,6 +102,12 @@ else:
     corpus_embeddings = model.encode(
         data_prep.corpus, convert_to_tensor=True, show_progress_bar=True
     )
+if config.get("hyperbolic", "false") == "true":
+    c = config.get("hyperbolic_curvature", 1.0)
+    corpus_embeddings = exp_map_hyperboloid(corpus_embeddings, c)
+    score_function = lambda x, y: hyperbolic_cosine_similarity(x, y, c)
+else:
+    score_function = util.cos_sim
 preds = propagation(
     corpus_embeddings, torch.tensor(range(len(nodeIdsCorpus)), device=target_device)
 )
@@ -119,6 +127,7 @@ preds = propagation(
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
+    score_function,
 )
 
 (
@@ -136,6 +145,7 @@ preds = propagation(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
+    score_function,
 )
 
 (
@@ -153,6 +163,7 @@ preds = propagation(
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
+    score_function,
 )
 
 (
@@ -170,6 +181,7 @@ preds = propagation(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
+    score_function,
 )
 
 ms.save_results(
