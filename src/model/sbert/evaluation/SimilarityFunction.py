@@ -6,3 +6,4 @@ class SimilarityFunction(Enum):
     EUCLIDEAN = 1
     MANHATTAN = 2
     DOT_PRODUCT = 3
+    HYPERBOLIC = 4

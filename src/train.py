@@ -94,12 +94,19 @@ train_loss = losses.CosineSimilarityLoss(
     hyperbolic=bool(config.get("hyperbolic", "false") == "true"),
     hyperbolic_curvature=float(config.get("hyperbolic_curvature", 1.0)),
 )
-evaluator = EmbeddingSimilarityEvaluator.from_input_examples(
-    data_prep.val_examples, name="sts-dev"
-)
 if config.get("hyperbolic", "false") == "true":
     optimizer_class = geoopt.optim.RiemannianAdam
+
+    evaluator = EmbeddingSimilarityEvaluator.from_input_examples(
+        data_prep.val_examples,
+        name="sts-dev",
+        main_similarity=4,
+        hyperbolic_c=float(config.get("hyperbolic_curvature", 1.0)),
+    )
 else:
+    evaluator = EmbeddingSimilarityEvaluator.from_input_examples(
+        data_prep.val_examples, name="sts-dev"
+    )
     optimizer_class = transformers.AdamW
 # Tune the model
 model.fit(

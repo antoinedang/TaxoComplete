@@ -12,6 +12,7 @@ from scipy.stats import pearsonr, spearmanr
 import numpy as np
 from typing import List
 from ..readers import InputExample
+from ..losses.CosineSimilarityLoss import hyperbolic_cosine_similarity
 
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         name: str = "",
         show_progress_bar: bool = False,
         write_csv: bool = True,
+        hyperbolic_c: float = 1.0,
     ):
         """
         Constructs an evaluator based for the dataset
@@ -52,6 +54,8 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         self.sentences2 = sentences2
         self.scores = scores
         self.write_csv = write_csv
+
+        self.hyperbolic_c = hyperbolic_c
 
         assert len(self.sentences1) == len(self.sentences2)
         assert len(self.sentences1) == len(self.scores)
@@ -81,6 +85,8 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
             "manhattan_spearman",
             "dot_pearson",
             "dot_spearman",
+            "hyperbolic_pearson",
+            "hyperbolic_spearman",
         ]
 
     @classmethod
@@ -133,6 +139,9 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         dot_products = [
             np.dot(emb1, emb2) for emb1, emb2 in zip(embeddings1, embeddings2)
         ]
+        hyperbolic_distances = hyperbolic_cosine_similarity(
+            embeddings1, embeddings2, self.hyperbolic_c
+        )
 
         eval_pearson_cosine, _ = pearsonr(labels, cosine_scores)
         eval_spearman_cosine, _ = spearmanr(labels, cosine_scores)
@@ -145,6 +154,9 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
 
         eval_pearson_dot, _ = pearsonr(labels, dot_products)
         eval_spearman_dot, _ = spearmanr(labels, dot_products)
+
+        eval_pearson_hyperbolic, _ = pearsonr(labels, hyperbolic_distances)
+        eval_spearman_hyperbolic, _ = spearmanr(labels, hyperbolic_distances)
 
         logger.info(
             "Cosine-Similarity :\tPearson: {:.4f}\tSpearman: {:.4f}".format(
@@ -164,6 +176,11 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
         logger.info(
             "Dot-Product-Similarity:\tPearson: {:.4f}\tSpearman: {:.4f}".format(
                 eval_pearson_dot, eval_spearman_dot
+            )
+        )
+        logger.info(
+            "Hyperbolic-Similarity:\tPearson: {:.4f}\tSpearman: {:.4f}".format(
+                eval_pearson_hyperbolic, eval_spearman_hyperbolic
             )
         )
 
@@ -192,6 +209,8 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
                         eval_spearman_manhattan,
                         eval_pearson_dot,
                         eval_spearman_dot,
+                        eval_pearson_hyperbolic,
+                        eval_spearman_hyperbolic,
                     ]
                 )
 
@@ -203,6 +222,8 @@ class EmbeddingSimilarityEvaluator(SentenceEvaluator):
             return eval_spearman_manhattan
         elif self.main_similarity == SimilarityFunction.DOT_PRODUCT:
             return eval_spearman_dot
+        elif self.main_similarity == SimilarityFunction.HYPERBOLIC:
+            return eval_spearman_hyperbolic
         elif self.main_similarity is None:
             return max(
                 eval_spearman_cosine,
