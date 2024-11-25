@@ -10,6 +10,8 @@ from model.sbert.evaluation import EmbeddingSimilarityEvaluator
 import compute_metrics.metric as ms
 from parse_config import ConfigParser
 from model.utils import PPRPowerIteration
+from model.sbert.losses import exp_map_hyperboloid, hyperbolic_cosine_similarity
+from sentence_transformers import util
 import os
 import pickle
 import geoopt
@@ -119,6 +121,13 @@ preds = propagation(
     corpus_embeddings, torch.tensor(range(len(nodeIdsCorpus)), device=target_device)
 )
 
+if config.get("hyperbolic", "false") == "true":
+    c = config.get("hyperbolic_curvature", 1.0)
+    corpus_embeddings = exp_map_hyperboloid(corpus_embeddings, c)
+    score_function = lambda x, y: hyperbolic_cosine_similarity(x, y, c)
+else:
+    score_function = util.cos_sim
+
 (
     all_targets_val,
     all_predictions_val,
@@ -134,6 +143,7 @@ preds = propagation(
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
+    score_function,
 )
 ms.save_results(
     str(config.save_dir) + "/", all_targets_val, edges_predictions_val, "eval_val"
@@ -153,6 +163,7 @@ ms.save_results(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
+    score_function,
 )
 ms.save_results(
     str(config.save_dir) + "/", all_targets_test, edges_predictions_test, "eval_test"
@@ -174,6 +185,7 @@ ms.save_results(
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
+    score_function,
 )
 ms.save_results(
     str(config.save_dir) + "/",
@@ -196,6 +208,7 @@ ms.save_results(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
+    score_function,
 )
 ms.save_results(
     str(config.save_dir) + "/",

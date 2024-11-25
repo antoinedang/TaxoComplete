@@ -9,7 +9,7 @@ from model.sbert import SentenceTransformer
 import compute_metrics.metric as ms
 from parse_config import ConfigParser
 from model.utils import PPRPowerIteration
-from model.sbert.losses import *
+from model.sbert.losses import exp_map_hyperboloid, hyperbolic_cosine_similarity
 import pickle
 import os
 from sentence_transformers import util

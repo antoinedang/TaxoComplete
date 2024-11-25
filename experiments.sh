@@ -20,6 +20,8 @@ experiments=$(ls "$experiment_dir")
 
 rm job_output.txt job_error.txt sbatch_out.txt 2&> /dev/null
 
+mkdir -p "$HOME/experiments"
+
 # Loop through all the destination directories
 for experiment in $experiments; do
   cd "$HOME/experiments/$experiment" 2>/dev/null && ./cancel.sh 2>/dev/null && echo "Cancelling previous $experiment job..." && sleep 5
