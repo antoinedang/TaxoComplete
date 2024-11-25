@@ -12,7 +12,7 @@ from scipy.stats import pearsonr, spearmanr
 import numpy as np
 from typing import List
 from ..readers import InputExample
-from ..losses.CosineSimilarityLoss import hyperbolic_cosine_similarity
+from ..losses import hyperbolic_cosine_similarity
 
 
 logger = logging.getLogger(__name__)

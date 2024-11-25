@@ -1,8 +1,6 @@
 import torch
 from torch import nn, Tensor
 from typing import Iterable, Dict, List
-from ..SentenceTransformer import SentenceTransformer
-import pdb
 
 
 def exp_map_hyperboloid(x, c=1.0):
@@ -57,7 +55,7 @@ class CosineSimilarityLoss(nn.Module):
 
     def __init__(
         self,
-        model: SentenceTransformer,
+        model,
         loss_fct=nn.MSELoss(),
         alpha=1,
         beta=0,
