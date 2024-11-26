@@ -1,6 +1,7 @@
 import torch
 from torch import nn, Tensor
 from typing import Iterable, Dict, List
+import numpy as np
 
 
 def exp_map_hyperboloid(x, c=1.0):
@@ -12,13 +13,15 @@ def exp_map_hyperboloid(x, c=1.0):
 def lorentzian_inner_product(u, v, c=1.0):
     try:
         dim = u.dim()
+        sum_fn = torch.sum
     except AttributeError:
         dim = u.ndim
+        sum_fn = np.sum
 
     if dim == 1:  # Non-batch case
-        return -(c**2) * u[0] * v[0] + torch.sum(u[1:] * v[1:])
+        return -(c**2) * u[0] * v[0] + sum_fn(u[1:] * v[1:])
     else:  # Batch-wise case
-        return -(c**2) * u[:, 0] * v[:, 0] + torch.sum(u[:, 1:] * v[:, 1:], dim=-1)
+        return -(c**2) * u[:, 0] * v[:, 0] + sum_fn(u[:, 1:] * v[:, 1:], dim=-1)
 
 
 def lorentz_norm(u, c=1.0):
