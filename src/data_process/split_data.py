@@ -316,6 +316,18 @@ class Dataset:
                     label_to_assign = 1 / (
                         nx.shortest_path_length(core_subgraph_un, node, negn)
                     )
+                elif sampling_method == "closest_lca":
+                    lca = nx.lowest_common_ancestor(
+                        self.core_subgraph, node, negn, default=self.root
+                    )
+                    label_to_assign = (
+                        2
+                        * nx.shortest_path_length(core_subgraph_un, self.root, lca)
+                        / (
+                            nx.shortest_path_length(core_subgraph_un, self.root, negn)
+                            + nx.shortest_path_length(core_subgraph_un, self.root, node)
+                        )
+                    )
                 elif sampling_method == "closest_range":
                     label_to_assign = 1 / (
                         nx.shortest_path_length(core_subgraph_un, node, negn)
