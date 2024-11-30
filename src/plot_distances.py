@@ -50,13 +50,26 @@ core_subgraph_undirected.remove_node(data_prep.pseudo_leaf_node)
 print("Computing graph distances...")
 all_distances = dict(nx.all_pairs_shortest_path_length(core_subgraph_undirected))
 distances = []
+lca_labels = []
 test_query_node_ids = [
     data_prep.corpusId2nodeId[i] for i in range(len(data_prep.test_queries))
 ]
+root = data_prep.root
 for i in range(len(data_prep.test_queries)):
     print(f"Query {i+1}/{len(data_prep.test_queries)}")
     for n in core_subgraph_undirected.nodes:
         if n != data_prep.corpusId2nodeId[i]:
+            lca_query_node = nx.lowest_common_ancestor(
+                data_prep.core_subgraph, data_prep.corpusId2nodeId[i], n
+            )
+            lca_labels.append(
+                2
+                * all_distances[root][lca_query_node]
+                / (
+                    all_distances[root][data_prep.corpusId2nodeId[i]]
+                    + all_distances[root][n]
+                )
+            )
             distances.append(all_distances[data_prep.corpusId2nodeId[i]][n])
 
 # MAKE A SCATTER PLOT OF THE DISTANCES
@@ -94,10 +107,14 @@ for label_name, labeling_fn in [
     ("min_max", lambda d: scaled_label(d, -0.1875, 0.5625)),
     ("min_max_mistake", lambda d: scaled_label(d, 0.1875, 0.9375)),
     ("linear_scale", lambda d: linear_scaled_label(d, -0.1875, 0.5625)),
+    ("lca", lambda d: linear_scaled_label(d, -0.1875, 0.5625)),
 ]:
     label_plot_filename = error_analysis_dir + f"/{label_name}_label_distributions.png"
     print(f"Computing {label_name} labels...")
-    labels = [labeling_fn(d) for d in distances]
+    if label_name == "lca":
+        labels = lca_labels
+    else:
+        labels = [labeling_fn(d) for d in distances]
     # labels.append(labeling_fn(min(distances)-0.9))
     # labels.append(labeling_fn(max(distances)+1))
     plt.figure(figsize=(10, 6))

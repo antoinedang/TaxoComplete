@@ -5,6 +5,10 @@ import numpy as np
 
 
 def exp_map_hyperboloid(x, c=1.0):
+    if type(x) is np.ndarray:
+        norm_x = np.linalg.norm(x, ord=2, axis=-1, keepdims=True)
+        x_hyperboloid = np.concatenate([np.sqrt(c + norm_x**2), x], axis=-1)
+        return x_hyperboloid
     norm_x = torch.norm(x, p=2, dim=-1, keepdim=True)
     x_hyperboloid = torch.cat([torch.sqrt(c + norm_x**2), x], dim=-1)
     return x_hyperboloid
@@ -30,6 +34,8 @@ def lorentzian_inner_product(u, v, c=1.0):
 
 
 def lorentz_norm(u, c=1.0):
+    if type(u) is np.ndarray:
+        return np.sqrt(np.clip(-lorentzian_inner_product(u, u, c), a_min=1e-5, a_max=None))
     inner_prod = lorentzian_inner_product(u, u, c)
     return torch.sqrt(torch.clamp(-inner_prod, min=1e-5))
 
