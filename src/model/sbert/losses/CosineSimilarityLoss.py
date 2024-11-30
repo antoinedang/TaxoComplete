@@ -12,13 +12,18 @@ def exp_map_hyperboloid(x, c=1.0):
 
 def lorentzian_inner_product(u, v, c=1.0):
     try:
-        dim = u.dim()
+        u_dim = u.dim()
         sum_fn = torch.sum
     except AttributeError:
-        dim = u.ndim
-        sum_fn = np.sum
+        u_dim = u.ndim
 
-    if dim == 1:  # Non-batch case
+        def sum_fn(x, dim=None):
+            if dim is None:
+                return np.sum(x)
+            else:
+                return np.sum(x, axis=dim)
+
+    if u_dim == 1:  # Non-batch case
         return -(c**2) * u[0] * v[0] + sum_fn(u[1:] * v[1:])
     else:  # Batch-wise case
         return -(c**2) * u[:, 0] * v[:, 0] + sum_fn(u[:, 1:] * v[:, 1:], dim=-1)
