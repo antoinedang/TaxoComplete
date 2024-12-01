@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import data_process.split_data as st
 import data_process.data_loader as dl
 from model.sbert import SentenceTransformer, losses
-from model.sbert.evaluation import EmbeddingSimilarityEvaluator
+from model.sbert.evaluation import EmbeddingSimilarityEvaluator, SimilarityFunction
 import compute_metrics.metric as ms
 from parse_config import ConfigParser
 from model.utils import PPRPowerIteration
@@ -100,7 +100,7 @@ if config.get("hyperbolic", "false") == "true":
     evaluator = EmbeddingSimilarityEvaluator.from_input_examples(
         data_prep.val_examples,
         name="sts-dev",
-        main_similarity=4,
+        main_similarity=SimilarityFunction.HYPERBOLIC,
         hyperbolic_c=float(config.get("hyperbolic_curvature", 1.0)),
     )
 else:
