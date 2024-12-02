@@ -107,17 +107,17 @@ if config.get("hyperbolic", "false") == "true":
     corpus_embeddings = exp_map_hyperboloid(corpus_embeddings, c)
 
     def score_function(x, y):
-        if not isinstance(a, torch.Tensor):
-            a = torch.tensor(a)
+        if not isinstance(x, torch.Tensor):
+            x = torch.tensor(x)
 
-        if not isinstance(b, torch.Tensor):
-            b = torch.tensor(b)
+        if not isinstance(y, torch.Tensor):
+            y = torch.tensor(y)
 
-        if len(a.shape) == 1:
-            a = a.unsqueeze(0)
+        if len(x.shape) == 1:
+            x = x.unsqueeze(0)
 
-        if len(b.shape) == 1:
-            b = b.unsqueeze(0)
+        if len(y.shape) == 1:
+            y = y.unsqueeze(0)
         return hyperbolic_cosine_similarity(x, y, c)
 
 else:
