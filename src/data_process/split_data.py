@@ -328,6 +328,25 @@ class Dataset:
                             + nx.shortest_path_length(core_subgraph_un, self.root, node)
                         )
                     )
+                elif sampling_method == "closest_lca_mapped":
+                    lca = nx.lowest_common_ancestor(
+                        self.core_subgraph, node, negn, default=self.root
+                    )
+                    label_to_assign = (
+                        2
+                        * nx.shortest_path_length(core_subgraph_un, self.root, lca)
+                        / (
+                            nx.shortest_path_length(core_subgraph_un, self.root, negn)
+                            + nx.shortest_path_length(core_subgraph_un, self.root, node)
+                        )
+                    )
+                    mapped_label_to_assign = (
+                        self.cosine_range[1] - self.cosine_range[0]
+                    ) * label_to_assign  # scale range from length of 1 to the correct length
+                    mapped_label_to_assign = (
+                        mapped_label_to_assign + self.cosine_range[0]
+                    )  # shift range to start at min
+                    label_to_assign = mapped_label_to_assign
                 elif sampling_method == "closest_range":
                     label_to_assign = 1 / (
                         nx.shortest_path_length(core_subgraph_un, node, negn)
