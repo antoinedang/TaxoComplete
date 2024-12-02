@@ -19,7 +19,3 @@ pip install -r requirements
 echo "EVAL HYPERBOLIC 1.0 PSY"
 python ./src/evaluate.py -c ./config_files_evaluate/psy/hyperbolic_1.0.json
 echo "EVAL HYPERBOLIC 1.0 PSY: $?"
-
-echo "EVAL MINMAX PSY CS"
-python ./src/evaluate.py -c ./config_files_evaluate/cs/min_max_psy.json
-echo "EVAL MINMAX PSY CS: $?"

@@ -105,7 +105,12 @@ else:
 if config.get("hyperbolic", "false") == "true":
     c = config.get("hyperbolic_curvature", 1.0)
     corpus_embeddings = exp_map_hyperboloid(corpus_embeddings, c)
-    score_function = lambda x, y: hyperbolic_cosine_similarity(x, y, c)
+
+    def score_function(x, y):
+        print("x.shape", x.shape)
+        print("y.shape", y.shape)
+        return hyperbolic_cosine_similarity(x, y, c)
+
 else:
     score_function = util.cos_sim
 preds = propagation(
