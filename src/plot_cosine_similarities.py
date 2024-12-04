@@ -1,9 +1,12 @@
 import argparse
 import torch
 import pickle
+import numpy as np
+import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import io
+
 
 class CPU_Unpickler(pickle.Unpickler):
     def find_class(self, module, name):
@@ -57,25 +60,41 @@ def get_cosine_similarity(embedding1, embedding2):
     else:
         return torch.cosine_similarity(embedding1, embedding2, dim=0)
 
+if not os.path.exists(error_analysis_dir + "/cosine_similarities.pkl"):
+    cosine_similarities = []
 
-cosine_similarities = []
+    #   FOR EACH QUERY:
+    try:
+        for i in range(len(data_prep.valid_queries)):
+            print(f"Query {i+1}/{len(data_prep.valid_queries)}")
+            query_embedding = query_embeddings[i]
+            for corpus_embedding in corpus_embeddings:
+                cos_sim = get_cosine_similarity(query_embedding, corpus_embedding)
+                if cos_sim != "N/A":
+                    cosine_similarities.append(float(cos_sim))
+    except Exception as e:
+        print(e)
 
-#   FOR EACH QUERY:
-try:
-    for i in range(len(data_prep.valid_queries)):
-        print(f"Query {i+1}/{len(data_prep.valid_queries)}")
-        query_embedding = query_embeddings[i]
-        for corpus_embedding in corpus_embeddings:
-            cos_sim = get_cosine_similarity(query_embedding, corpus_embedding)
-            if cos_sim != "N/A":
-                cosine_similarities.append(float(cos_sim))
-except Exception as e:
-    print(e)
-
+    with open(error_analysis_dir + "/cosine_similarities.pkl", "wb") as f:
+        pickle.dump(cosine_similarities, f)
+else:
+    with open(error_analysis_dir + "/cosine_similarities.pkl", "rb") as f:
+        cosine_similarities = pickle.load(f)
 
 # MAKE A SCATTER PLOT OF THE COSINE SIMILARITIES
 plt.figure(figsize=(10, 6))
-plt.hist(cosine_similarities, bins=100)
+num_bins = 100
+
+bin_edges = np.linspace(min(cosine_similarities), max(cosine_similarities), num_bins + 1)
+counts, _ = np.histogram(cosine_similarities, bins=bin_edges)
+bin_ranges = [f"{bin_edges[i]:.3f} to {bin_edges[i+1]:.3f}" for i in range(num_bins)]
+hist_data = pd.DataFrame({
+    "Bin Range": bin_ranges,
+    "Count": counts
+})
+hist_data.to_csv(error_analysis_dir + '/cosine_similarity_bins.csv', index=False)
+
+plt.hist(cosine_similarities, bins=bin_edges)
 # change x axis range
 plt.xlim(-1, 1)
 plt.xlabel("Cosine similarity")
