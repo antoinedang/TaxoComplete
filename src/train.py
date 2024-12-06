@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 import data_process.split_data as st
 import data_process.data_loader as dl
+import data_process.helpers as hp
 from model.sbert import SentenceTransformer, losses
 from model.sbert.evaluation import EmbeddingSimilarityEvaluator, SimilarityFunction
 import compute_metrics.metric as ms
@@ -47,6 +48,9 @@ cosine_range = config.get("cossim_mapping_range", [0, 1])
 loss_alpha = float(config.get("loss_alpha", 1))
 loss_beta = float(config.get("loss_beta", 0))
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+target_device = torch.device(device)
+
 taxonomy = dl.TaxoDataset(
     name, data_path, raw=True, partition_pattern=partition_pattern, seed=seed
 )
@@ -57,15 +61,30 @@ data_prep = st.Dataset(
     seed,
     cosine_range=cosine_range,
 )
+
 model_name = config["model_name"]
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-target_device = torch.device(device)
-
 if torch.cuda.is_available():
     model = SentenceTransformer.SentenceTransformer(model_name, device="cuda")
 else:
     model = SentenceTransformer.SentenceTransformer(model_name)
+
+if config.get("cossim_mapping_range_percentile", None) is not None:
+    corpus_embeddings = model.encode(
+        data_prep.corpus, convert_to_tensor=True, show_progress_bar=True
+    )
+    query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
+    cosine_range = hp.compute_cosine_ranges(
+        config.get("cossim_mapping_range_percentile"),
+        query_embeddings,
+        corpus_embeddings,
+    )
+    data_prep = st.Dataset(
+        taxonomy,
+        sampling_method,
+        neg_number,
+        seed,
+        cosine_range=cosine_range,
+    )
 
 g = torch.Generator()
 g.manual_seed(0)
@@ -93,6 +112,7 @@ train_loss = losses.CosineSimilarityLoss(
     modified_loss=bool(config.get("loss_modified", "false") == "true"),
     hyperbolic=bool(config.get("hyperbolic", "false") == "true"),
     hyperbolic_curvature=float(config.get("hyperbolic_curvature", 1.0)),
+    cosine_absolute=bool(config.get("cosine_absolute", "false") == "true"),
 )
 if config.get("hyperbolic", "false") == "true":
     optimizer_class = geoopt.optim.RiemannianAdam
@@ -134,6 +154,9 @@ if config.get("hyperbolic", "false") == "true":
     score_function = lambda x, y: hyperbolic_cosine_similarity(x, y, c)
 else:
     score_function = util.cos_sim
+
+if config.get("cosine_absolute", "false") == "true":
+    score_function = lambda x, y: torch.abs(score_function(x, y))
 
 (
     all_targets_val,

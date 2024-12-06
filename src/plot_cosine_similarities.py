@@ -94,10 +94,40 @@ hist_data = pd.DataFrame({
 })
 hist_data.to_csv(error_analysis_dir + '/cosine_similarity_bins.csv', index=False)
 
+# calculate value from 0 to 1 that 80% of cosine similarities are less than
+cosine_similarities_sorted = np.sort(cosine_similarities)
+percentile_80 = np.percentile(cosine_similarities_sorted, 80)
+top_percentile = np.percentile(cosine_similarities_sorted, 99.99)
+
 plt.hist(cosine_similarities, bins=bin_edges)
+plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f})".format(percentile_80))
+plt.axvline(top_percentile, color='g', linestyle='--', label="99.99th percentile ({:.3f})".format(top_percentile))
 # change x axis range
 plt.xlim(-1, 1)
 plt.xlabel("Cosine similarity")
 plt.ylabel("# Query/Node Pairs")
 plt.title("Cosine similarities between query and corpus embeddings")
+plt.legend()
 plt.savefig(plot_filename)
+
+
+bin_edges = np.linspace(min(np.abs(cosine_similarities)), max(np.abs(cosine_similarities)), num_bins + 1)
+
+# calculate value from 0 to 1 that 80% of cosine similarities are less than
+cosine_similarities_sorted = np.sort(np.abs(cosine_similarities))
+percentile_80 = np.percentile(cosine_similarities_sorted, 80)
+top_percentile = np.percentile(cosine_similarities_sorted, 99.99)
+
+# clear plot
+plt.clf()
+
+plt.hist(np.abs(cosine_similarities), bins=bin_edges)
+plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f})".format(percentile_80))
+plt.axvline(top_percentile, color='g', linestyle='--', label="99.99th percentile ({:.3f})".format(top_percentile))
+# change x axis range
+plt.xlim(0, 1)
+plt.xlabel("Cosine similarity")
+plt.ylabel("# Query/Node Pairs")
+plt.title("Absolute cosine similarities between query and corpus embeddings")
+plt.legend()
+plt.savefig(error_analysis_dir + "/absolute_embedding_cosine_similarities.png")

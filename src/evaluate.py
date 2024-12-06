@@ -122,6 +122,8 @@ if config.get("hyperbolic", "false") == "true":
 
 else:
     score_function = util.cos_sim
+if config.get("cosine_absolute", "false") == "true":
+    score_function = lambda x, y: torch.abs(score_function(x, y))
 preds = propagation(
     corpus_embeddings, torch.tensor(range(len(nodeIdsCorpus)), device=target_device)
 )

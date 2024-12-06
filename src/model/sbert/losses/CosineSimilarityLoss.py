@@ -35,7 +35,9 @@ def lorentzian_inner_product(u, v, c=1.0):
 
 def lorentz_norm(u, c=1.0):
     if type(u) is np.ndarray:
-        return np.sqrt(np.clip(-lorentzian_inner_product(u, u, c), a_min=1e-5, a_max=None))
+        return np.sqrt(
+            np.clip(-lorentzian_inner_product(u, u, c), a_min=1e-5, a_max=None)
+        )
     inner_prod = lorentzian_inner_product(u, u, c)
     return torch.sqrt(torch.clamp(-inner_prod, min=1e-5))
 
@@ -81,6 +83,7 @@ class CosineSimilarityLoss(nn.Module):
         modified_loss=False,
         hyperbolic=False,
         hyperbolic_curvature=1.0,
+        cosine_absolute=False,
     ):
         super(CosineSimilarityLoss, self).__init__()
         self.model = model
@@ -90,6 +93,7 @@ class CosineSimilarityLoss(nn.Module):
         self.modified_loss = modified_loss
         self.hyperbolic = hyperbolic
         self.hyperbolic_curvature = hyperbolic_curvature
+        self.cosine_absolute = cosine_absolute
 
     def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
         # pdb.set_trace()
@@ -116,6 +120,9 @@ class CosineSimilarityLoss(nn.Module):
             )
         else:
             similarity_measure = torch.cosine_similarity
+
+        if self.cosine_absolute:
+            similarity_measure = lambda x, y: torch.abs(similarity_measure(x, y))
 
         if self.modified_loss:
             query_corpus_cossim = similarity_measure(query_embedding, corpus_embedding)
