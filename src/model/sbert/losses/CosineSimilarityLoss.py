@@ -122,17 +122,19 @@ class CosineSimilarityLoss(nn.Module):
             similarity_measure = torch.cosine_similarity
 
         if self.cosine_absolute:
-            similarity_measure = lambda x, y: torch.abs(similarity_measure(x, y))
+            similarity_measure_ = lambda x, y: torch.abs(similarity_measure(x, y))
+        else:
+            similarity_measure_ = similarity_measure
 
         if self.modified_loss:
-            query_corpus_cossim = similarity_measure(query_embedding, corpus_embedding)
+            query_corpus_cossim = similarity_measure_(query_embedding, corpus_embedding)
             return self.loss_fct(
                 float(-2) * query_corpus_cossim + float(3),
                 labels[:, 0].view(-1).float(),
             ).float()
         else:
-            query_corpus_loss = similarity_measure(query_embedding, corpus_embedding)
-            query_parent_loss = similarity_measure(query_embedding, parent_embedding)
+            query_corpus_loss = similarity_measure_(query_embedding, corpus_embedding)
+            query_parent_loss = similarity_measure_(query_embedding, parent_embedding)
 
             return self.alpha * self.loss_fct(
                 query_corpus_loss, labels[:, 0].view(-1)

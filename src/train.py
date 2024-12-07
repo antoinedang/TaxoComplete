@@ -159,7 +159,9 @@ else:
     score_function = util.cos_sim
 
 if config.get("cosine_absolute", "false") == "true":
-    score_function = lambda x, y: torch.abs(score_function(x, y))
+    score_function_ = lambda x, y: torch.abs(score_function(x, y))
+else:
+    score_function_ = score_function
 
 (
     all_targets_val,
@@ -176,7 +178,7 @@ if config.get("cosine_absolute", "false") == "true":
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
-    score_function,
+    score_function_,
 )
 ms.save_results(
     str(config.save_dir) + "/", all_targets_val, edges_predictions_val, "eval_val"
@@ -196,7 +198,7 @@ ms.save_results(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
-    score_function,
+    score_function_,
 )
 ms.save_results(
     str(config.save_dir) + "/", all_targets_test, edges_predictions_test, "eval_test"
@@ -218,7 +220,7 @@ ms.save_results(
     data_prep.valid_node_list,
     data_prep.valid_node2pos,
     data_prep.corpusId2nodeId,
-    score_function,
+    score_function_,
 )
 ms.save_results(
     str(config.save_dir) + "/",
@@ -241,7 +243,7 @@ ms.save_results(
     data_prep.test_node_list,
     data_prep.test_node2pos,
     data_prep.corpusId2nodeId,
-    score_function,
+    score_function_,
 )
 ms.save_results(
     str(config.save_dir) + "/",
