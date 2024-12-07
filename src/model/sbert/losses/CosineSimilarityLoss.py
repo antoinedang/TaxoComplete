@@ -122,7 +122,9 @@ class CosineSimilarityLoss(nn.Module):
             similarity_measure = torch.cosine_similarity
 
         if self.cosine_absolute:
-            similarity_measure_ = lambda x, y: torch.abs(similarity_measure(x, y))
+            similarity_measure_ = lambda x, y: torch.abs(
+                similarity_measure(x, y)
+            ).float()
         else:
             similarity_measure_ = similarity_measure
 
