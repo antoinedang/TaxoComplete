@@ -78,6 +78,9 @@ if config.get("cossim_mapping_range_percentile", None) is not None:
         query_embeddings,
         corpus_embeddings,
     )
+    taxonomy = dl.TaxoDataset(
+        name, data_path, raw=True, partition_pattern=partition_pattern, seed=seed
+    )
     data_prep = st.Dataset(
         taxonomy,
         sampling_method,
