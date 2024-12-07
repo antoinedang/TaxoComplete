@@ -74,7 +74,7 @@ if config.get("cossim_mapping_range_percentile", None) is not None:
     )
     query_embeddings = model.encode(data_prep.test_queries, convert_to_tensor=True)
     cosine_range = hp.compute_cosine_ranges(
-        config.get("cossim_mapping_range_percentile"),
+        config.get("cossim_mapping_range_percentile", [0, 100]),
         query_embeddings,
         corpus_embeddings,
     )
