@@ -142,8 +142,8 @@ class CosineSimilarityLoss(nn.Module):
             print(corpus_embedding.dtype)
             print(query_corpus_loss.dtype)
             print(query_parent_loss.dtype)
-            print(torch.ones_like(labels[:, 0].view(-1)).dtype)
-            print(labels[:, 0].view(-1).dtype)
+            print(torch.ones_like(labels[:, 0].view(-1)).float().dtype)
+            print(labels[:, 0].view(-1).float().dtype)
             print(self.loss_fct(query_corpus_loss, labels[:, 0].view(-1)).float().dtype)
             print(
                 self.loss_fct(query_parent_loss, torch.ones_like(labels[:, 0].view(-1)))
@@ -162,9 +162,11 @@ class CosineSimilarityLoss(nn.Module):
 
             return (
                 self.alpha
-                * self.loss_fct(query_corpus_loss, labels[:, 0].view(-1)).float()
+                * self.loss_fct(
+                    query_corpus_loss, labels[:, 0].view(-1).float()
+                ).float()
                 + self.beta
                 * self.loss_fct(
-                    query_parent_loss, torch.ones_like(labels[:, 0].view(-1))
+                    query_parent_loss, torch.ones_like(labels[:, 0].view(-1)).float()
                 ).float()
             )
