@@ -138,8 +138,11 @@ class CosineSimilarityLoss(nn.Module):
             query_corpus_loss = similarity_measure_(query_embedding, corpus_embedding)
             query_parent_loss = similarity_measure_(query_embedding, parent_embedding)
 
-            return self.alpha * self.loss_fct(
-                query_corpus_loss, labels[:, 0].view(-1)
-            ) + self.beta * self.loss_fct(
-                query_parent_loss, torch.ones_like(labels[:, 0].view(-1))
+            return (
+                self.alpha
+                * self.loss_fct(query_corpus_loss, labels[:, 0].view(-1)).float()
+                + self.beta
+                * self.loss_fct(
+                    query_parent_loss, torch.ones_like(labels[:, 0].view(-1))
+                ).float()
             )
