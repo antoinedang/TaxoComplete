@@ -77,6 +77,7 @@ if config.get("cossim_mapping_range_percentile", None) is not None:
         config.get("cossim_mapping_range_percentile", [0, 100]),
         query_embeddings,
         corpus_embeddings,
+        cosine_absolute=bool(config.get("cosine_absolute", "false") == "true"),
     )
     taxonomy = dl.TaxoDataset(
         name, data_path, raw=True, partition_pattern=partition_pattern, seed=seed
