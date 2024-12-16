@@ -65,8 +65,8 @@ if not os.path.exists(error_analysis_dir + "/cosine_similarities.pkl"):
 
     #   FOR EACH QUERY:
     try:
-        for i in range(len(data_prep.valid_queries)):
-            print(f"Query {i+1}/{len(data_prep.valid_queries)}")
+        for i in range(len(data_prep.test_queries)):
+            print(f"Query {i+1}/{len(data_prep.test_queries)}")
             query_embedding = query_embeddings[i]
             for corpus_embedding in corpus_embeddings:
                 cos_sim = get_cosine_similarity(query_embedding, corpus_embedding)
@@ -97,10 +97,11 @@ hist_data.to_csv(error_analysis_dir + '/cosine_similarity_bins.csv', index=False
 # calculate value from 0 to 1 that 80% of cosine similarities are less than
 cosine_similarities_sorted = np.sort(cosine_similarities)
 percentile_80 = np.percentile(cosine_similarities_sorted, 80)
+count_above_80 = len([x for x in cosine_similarities if np.abs(x) > percentile_80])
 top_percentile = np.percentile(cosine_similarities_sorted, 99.99)
 
 plt.hist(cosine_similarities, bins=bin_edges)
-plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f})".format(percentile_80))
+plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f}) ({} nodes above)".format(percentile_80, count_above_80))
 plt.axvline(top_percentile, color='g', linestyle='--', label="99.99th percentile ({:.3f})".format(top_percentile))
 # change x axis range
 plt.xlim(-1, 1)
@@ -116,13 +117,16 @@ bin_edges = np.linspace(min(np.abs(cosine_similarities)), max(np.abs(cosine_simi
 # calculate value from 0 to 1 that 80% of cosine similarities are less than
 cosine_similarities_sorted = np.sort(np.abs(cosine_similarities))
 percentile_80 = np.percentile(cosine_similarities_sorted, 80)
+count_above_80 = len([x for x in cosine_similarities if np.abs(x) > percentile_80])
 top_percentile = np.percentile(cosine_similarities_sorted, 99.99)
+
+
 
 # clear plot
 plt.clf()
 
 plt.hist(np.abs(cosine_similarities), bins=bin_edges)
-plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f})".format(percentile_80))
+plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f}) ({} nodes above)".format(percentile_80, count_above_80))
 plt.axvline(top_percentile, color='g', linestyle='--', label="99.99th percentile ({:.3f})".format(top_percentile))
 # change x axis range
 plt.xlim(0, 1)
