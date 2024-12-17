@@ -119,7 +119,7 @@ if not os.path.exists(error_analysis_dir + "/evaluations_per_cosine_sim.pkl"):
     cosine_similarity_score = []
     #   FOR EACH QUERY:
     for i in range(len(data_prep.test_queries)):
-        print("Evaluating query #", i)
+        print("Evaluating query #{} of {}".format(i, len(data_prep.test_queries)))
         query = data_prep.test_queries[i]
         target = targets[i]
         
@@ -148,21 +148,19 @@ if not os.path.exists(error_analysis_dir + "/evaluations_per_cosine_sim.pkl"):
             # COSINE SIMILARITY: cos_similarity_untrained(query node, actual parent), cos_similarity_untrained(query node, actual child)
             index_query = data_prep.test_queries.index(query)
             true_parent = sub_target[0]
-            true_child = sub_target[1]
             index_true_parent = nodeId2corpusId[true_parent]
-            if true_child == data_prep.pseudo_leaf_node:
-                continue
-            index_true_child = nodeId2corpusId[true_child]
-            
             cos_sim_query_parent = cosine_similarities[index_query * len(corpus_embeddings) + index_true_parent]
-            cos_sim_query_child = cosine_similarities[index_query * len(corpus_embeddings) + index_true_child]
-            
             hit_at_1.append(isCorrectParentPPRAt1)
             hit_at_5.append(isCorrectParentPPRAt5)
             hit_at_10.append(isCorrectParentPPRAt10)
             MR.append(rank_parent)
             cosine_similarity_score.append(cos_sim_query_parent)
             
+            true_child = sub_target[1]
+            if true_child == data_prep.pseudo_leaf_node:
+                continue
+            index_true_child = nodeId2corpusId[true_child]
+            cos_sim_query_child = cosine_similarities[index_query * len(corpus_embeddings) + index_true_child]
             hit_at_1.append(isCorrectChildPPRAt1)
             hit_at_5.append(isCorrectChildPPRAt5)
             hit_at_10.append(isCorrectChildPPRAt10)
