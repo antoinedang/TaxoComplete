@@ -101,7 +101,7 @@ count_above_80 = len([x for x in cosine_similarities if np.abs(x) > percentile_8
 top_percentile = np.percentile(cosine_similarities_sorted, 99.99)
 
 plt.hist(cosine_similarities, bins=bin_edges)
-plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f}) ({} nodes above)".format(percentile_80, count_above_80))
+plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f})".format(percentile_80))
 plt.axvline(top_percentile, color='g', linestyle='--', label="99.99th percentile ({:.3f})".format(top_percentile))
 # change x axis range
 plt.xlim(-1, 1)
@@ -126,7 +126,7 @@ top_percentile = np.percentile(cosine_similarities_sorted, 99.99)
 plt.clf()
 
 plt.hist(np.abs(cosine_similarities), bins=bin_edges)
-plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f}) ({} nodes above)".format(percentile_80, count_above_80))
+plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f})".format(percentile_80))
 plt.axvline(top_percentile, color='g', linestyle='--', label="99.99th percentile ({:.3f})".format(top_percentile))
 # change x axis range
 plt.xlim(0, 1)

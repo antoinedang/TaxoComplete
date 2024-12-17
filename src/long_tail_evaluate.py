@@ -109,19 +109,14 @@ def rank_of_correct_prediction(edges, target, checkChild):
         found_correct = is_correct_prediction(edges, target, checkChild, rank)
     return rank
     
-for percentile in [20, 80]:
-    hit_at_1_below_percentile = []
-    hit_at_1_above_percentile = []
-    hit_at_5_below_percentile = []
-    hit_at_5_above_percentile = []
-    hit_at_10_below_percentile = []
-    hit_at_10_above_percentile = []
-    MR_below_percentile = []
-    MR_above_percentile = []
 
-    cosine_similarities_sorted = np.sort(cosine_similarities)
-    percentile_boundary_value = np.percentile(cosine_similarities_sorted, percentile)
-
+cosine_similarities_sorted = np.sort(cosine_similarities)
+if not os.path.exists(error_analysis_dir + "/evaluations_per_cosine_sim.pkl"):
+    hit_at_1 = []
+    hit_at_5 = []
+    hit_at_10 = []
+    MR = []
+    cosine_similarity_score = []
     #   FOR EACH QUERY:
     for i in range(len(data_prep.test_queries)):
         print("Evaluating query #", i)
@@ -162,43 +157,41 @@ for percentile in [20, 80]:
             cos_sim_query_parent = cosine_similarities[index_query * len(corpus_embeddings) + index_true_parent]
             cos_sim_query_child = cosine_similarities[index_query * len(corpus_embeddings) + index_true_child]
             
-            if cos_sim_query_parent < percentile_boundary_value:
-                hit_at_1_below_percentile.append(isCorrectParentPPRAt1)
-                hit_at_5_below_percentile.append(isCorrectParentPPRAt5)
-                hit_at_10_below_percentile.append(isCorrectParentPPRAt10)
-                MR_below_percentile.append(rank_parent)
-            else:
-                hit_at_1_above_percentile.append(isCorrectParentPPRAt1)
-                hit_at_5_above_percentile.append(isCorrectParentPPRAt5)
-                hit_at_10_above_percentile.append(isCorrectParentPPRAt10)
-                MR_above_percentile.append(rank_parent)
+            hit_at_1.append(isCorrectParentPPRAt1)
+            hit_at_5.append(isCorrectParentPPRAt5)
+            hit_at_10.append(isCorrectParentPPRAt10)
+            MR.append(rank_parent)
+            cosine_similarity_score.append(cos_sim_query_parent)
             
-            if cos_sim_query_child < percentile_boundary_value:
-                hit_at_1_below_percentile.append(isCorrectChildPPRAt1)
-                hit_at_5_below_percentile.append(isCorrectChildPPRAt5)
-                hit_at_10_below_percentile.append(isCorrectChildPPRAt10)
-                MR_below_percentile.append(rank_child)
-            else:
-                hit_at_1_above_percentile.append(isCorrectChildPPRAt1)
-                hit_at_5_above_percentile.append(isCorrectChildPPRAt5)
-                hit_at_10_above_percentile.append(isCorrectChildPPRAt10)
-                MR_above_percentile.append(rank_child)
+            hit_at_1.append(isCorrectChildPPRAt1)
+            hit_at_5.append(isCorrectChildPPRAt5)
+            hit_at_10.append(isCorrectChildPPRAt10)
+            MR.append(rank_child)
+            cosine_similarity_score.append(cos_sim_query_child)
             
+    with open(error_analysis_dir + "/evaluations_per_cosine_sim.pkl", "wb") as f:
+        pickle.dump((
+            hit_at_1,
+            hit_at_5,
+            hit_at_10,
+            MR,
+            cosine_similarity_score
+        ), f)
+else:
+    with open(error_analysis_dir + "/evaluations_per_cosine_sim.pkl", "rb") as f:
+        hit_at_1, hit_at_5, hit_at_10, MR, cosine_similarity_score = pickle.load(f)
         
-    hit_at_1_below_percentile = np.mean(hit_at_1_below_percentile)
-    hit_at_5_below_percentile = np.mean(hit_at_5_below_percentile)
-    hit_at_10_below_percentile = np.mean(hit_at_10_below_percentile)
-    hit_at_1_above_percentile = np.mean(hit_at_1_above_percentile)
-    hit_at_5_above_percentile = np.mean(hit_at_5_above_percentile)
-    hit_at_10_above_percentile = np.mean(hit_at_10_above_percentile)
-    MR_below_percentile = np.mean(MR_below_percentile)
-    MR_above_percentile = np.mean(MR_above_percentile)
-
-    print(f"Hit@1 below {percentile}th percentile: {hit_at_1_below_percentile}")
-    print(f"Hit@5 below {percentile}th percentile: {hit_at_5_below_percentile}")
-    print(f"Hit@10 below {percentile}th percentile: {hit_at_10_below_percentile}")
-    print(f"Hit@1 above {percentile}th percentile: {hit_at_1_above_percentile}")
-    print(f"Hit@5 above {percentile}th percentile: {hit_at_5_above_percentile}")
-    print(f"Hit@10 above {percentile}th percentile: {hit_at_10_above_percentile}")
-    print(f"Mean rank below {percentile}th percentile: {MR_below_percentile}")
-    print(f"Mean rank above {percentile}th percentile: {MR_above_percentile}")
+for i in range(10):
+    percentile_lower_bound = np.percentile(cosine_similarity_score, i * 10)
+    percentile_upper_bound = np.percentile(cosine_similarity_score, (i + 1) * 10)
+    
+    hit_at_1_average = np.mean([hit_at_1[j] for j in range(len(hit_at_1)) if percentile_lower_bound <= cosine_similarity_score[j] < percentile_upper_bound])
+    hit_at_5_average = np.mean([hit_at_5[j] for j in range(len(hit_at_5)) if percentile_lower_bound <= cosine_similarity_score[j] < percentile_upper_bound])
+    hit_at_10_average = np.mean([hit_at_10[j] for j in range(len(hit_at_10)) if percentile_lower_bound <= cosine_similarity_score[j] < percentile_upper_bound])
+    MR_average = np.mean([MR[j] for j in range(len(MR)) if percentile_lower_bound <= cosine_similarity_score[j] < percentile_upper_bound])
+    
+    print(f"Percentile range: {percentile_lower_bound} - {percentile_upper_bound}")
+    print(f"Hit@1: {hit_at_1_average}")
+    print(f"Hit@5: {hit_at_5_average}")
+    print(f"Hit@10: {hit_at_10_average}")
+    print(f"Mean rank: {MR_average}")
