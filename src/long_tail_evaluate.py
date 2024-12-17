@@ -109,92 +109,96 @@ def rank_of_correct_prediction(edges, target, checkChild):
         found_correct = is_correct_prediction(edges, target, checkChild, rank)
     return rank
     
-hit_at_1_below_80th = []
-hit_at_1_above_80th = []
-hit_at_5_below_80th = []
-hit_at_5_above_80th = []
-hit_at_10_below_80th = []
-hit_at_10_above_80th = []
-MR_below_80th = []
-MR_above_80th = []
+for percentile in [20, 80]:
+    hit_at_1_below_percentile = []
+    hit_at_1_above_percentile = []
+    hit_at_5_below_percentile = []
+    hit_at_5_above_percentile = []
+    hit_at_10_below_percentile = []
+    hit_at_10_above_percentile = []
+    MR_below_percentile = []
+    MR_above_percentile = []
 
-cosine_similarities_sorted = np.sort(cosine_similarities)
-percentile_80 = np.percentile(cosine_similarities_sorted, 80)
+    cosine_similarities_sorted = np.sort(cosine_similarities)
+    percentile_boundary_value = np.percentile(cosine_similarities_sorted, percentile)
 
-#   FOR EACH QUERY:
-for i in range(len(data_prep.test_queries)):
-    query = data_prep.test_queries[i]
-    target = targets[i]
-    
-    # RELEVANCE: isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR
-    isCorrectParentPPRAt1 = is_correct_prediction(
-        edges_predictions_test_ppr, target, checkChild=False, K=1
-    )
-    isCorrectParentPPRAt5 = is_correct_prediction(
-        edges_predictions_test_ppr, target, checkChild=False, K=5
-    )
-    isCorrectParentPPRAt10 = is_correct_prediction(
-        edges_predictions_test_ppr, target, checkChild=False, K=10
-    )
-    isCorrectChildPPRAt1 = is_correct_prediction(
-        edges_predictions_test_ppr, target, checkChild=True, K=1
-    )
-    isCorrectChildPPRAt5 = is_correct_prediction(
-        edges_predictions_test_ppr, target, checkChild=True, K=5
-    )
-    isCorrectChildPPRAt10 = is_correct_prediction(
-        edges_predictions_test_ppr, target, checkChild=True, K=10
-    )
-    rank_child = rank_of_correct_prediction(edges_predictions_test_ppr, target, checkChild=True)
-    rank_parent = rank_of_correct_prediction(edges_predictions_test_ppr, target, checkChild=False)
-    for sub_target in target:
-        # COSINE SIMILARITY: cos_similarity_untrained(query node, actual parent), cos_similarity_untrained(query node, actual child)
-        index_query = data_prep.test_queries.index(query)
-        true_parent = sub_target[0]
-        true_child = sub_target[1]
-        index_true_parent = nodeId2corpusId[true_parent]
-        index_true_child = nodeId2corpusId[true_child]
+    #   FOR EACH QUERY:
+    for i in range(len(data_prep.test_queries)):
+        print("Evaluating query #", i)
+        query = data_prep.test_queries[i]
+        target = targets[i]
         
-        cos_sim_query_parent = cosine_similarities[index_query * len(corpus_embeddings) + index_true_parent]
-        cos_sim_query_child = cosine_similarities[index_query * len(corpus_embeddings) + index_true_child]
+        # RELEVANCE: isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR
+        isCorrectParentPPRAt1 = is_correct_prediction(
+            edges_predictions_test_ppr, target, checkChild=False, K=1
+        )
+        isCorrectParentPPRAt5 = is_correct_prediction(
+            edges_predictions_test_ppr, target, checkChild=False, K=5
+        )
+        isCorrectParentPPRAt10 = is_correct_prediction(
+            edges_predictions_test_ppr, target, checkChild=False, K=10
+        )
+        isCorrectChildPPRAt1 = is_correct_prediction(
+            edges_predictions_test_ppr, target, checkChild=True, K=1
+        )
+        isCorrectChildPPRAt5 = is_correct_prediction(
+            edges_predictions_test_ppr, target, checkChild=True, K=5
+        )
+        isCorrectChildPPRAt10 = is_correct_prediction(
+            edges_predictions_test_ppr, target, checkChild=True, K=10
+        )
+        rank_child = rank_of_correct_prediction(edges_predictions_test_ppr, target, checkChild=True)
+        rank_parent = rank_of_correct_prediction(edges_predictions_test_ppr, target, checkChild=False)
+        for sub_target in target:
+            # COSINE SIMILARITY: cos_similarity_untrained(query node, actual parent), cos_similarity_untrained(query node, actual child)
+            index_query = data_prep.test_queries.index(query)
+            true_parent = sub_target[0]
+            true_child = sub_target[1]
+            index_true_parent = nodeId2corpusId[true_parent]
+            if true_child == data_prep.pseudo_leaf_node:
+                continue
+            index_true_child = nodeId2corpusId[true_child]
+            
+            cos_sim_query_parent = cosine_similarities[index_query * len(corpus_embeddings) + index_true_parent]
+            cos_sim_query_child = cosine_similarities[index_query * len(corpus_embeddings) + index_true_child]
+            
+            if cos_sim_query_parent < percentile_boundary_value:
+                hit_at_1_below_percentile.append(isCorrectParentPPRAt1)
+                hit_at_5_below_percentile.append(isCorrectParentPPRAt5)
+                hit_at_10_below_percentile.append(isCorrectParentPPRAt10)
+                MR_below_percentile.append(rank_parent)
+            else:
+                hit_at_1_above_percentile.append(isCorrectParentPPRAt1)
+                hit_at_5_above_percentile.append(isCorrectParentPPRAt5)
+                hit_at_10_above_percentile.append(isCorrectParentPPRAt10)
+                MR_above_percentile.append(rank_parent)
+            
+            if cos_sim_query_child < percentile_boundary_value:
+                hit_at_1_below_percentile.append(isCorrectChildPPRAt1)
+                hit_at_5_below_percentile.append(isCorrectChildPPRAt5)
+                hit_at_10_below_percentile.append(isCorrectChildPPRAt10)
+                MR_below_percentile.append(rank_child)
+            else:
+                hit_at_1_above_percentile.append(isCorrectChildPPRAt1)
+                hit_at_5_above_percentile.append(isCorrectChildPPRAt5)
+                hit_at_10_above_percentile.append(isCorrectChildPPRAt10)
+                MR_above_percentile.append(rank_child)
+            
         
-        if cos_sim_query_parent < percentile_80:
-            hit_at_1_below_80th.append(isCorrectParentPPRAt1)
-            hit_at_5_below_80th.append(isCorrectParentPPRAt5)
-            hit_at_10_below_80th.append(isCorrectParentPPRAt10)
-            MR_below_80th.append(rank_parent)
-        else:
-            hit_at_1_above_80th.append(isCorrectParentPPRAt1)
-            hit_at_5_above_80th.append(isCorrectParentPPRAt5)
-            hit_at_10_above_80th.append(isCorrectParentPPRAt10)
-            MR_above_80th.append(rank_parent)
-        
-        if cos_sim_query_child < percentile_80:
-            hit_at_1_below_80th.append(isCorrectChildPPRAt1)
-            hit_at_5_below_80th.append(isCorrectChildPPRAt5)
-            hit_at_10_below_80th.append(isCorrectChildPPRAt10)
-            MR_below_80th.append(rank_child)
-        else:
-            hit_at_1_above_80th.append(isCorrectChildPPRAt1)
-            hit_at_5_above_80th.append(isCorrectChildPPRAt5)
-            hit_at_10_above_80th.append(isCorrectChildPPRAt10)
-            MR_above_80th.append(rank_child)
-        
-    
-hit_at_1_below_80th = np.mean(hit_at_1_below_80th)
-hit_at_5_below_80th = np.mean(hit_at_5_below_80th)
-hit_at_10_below_80th = np.mean(hit_at_10_below_80th)
-hit_at_1_above_80th = np.mean(hit_at_1_above_80th)
-hit_at_5_above_80th = np.mean(hit_at_5_above_80th)
-hit_at_10_above_80th = np.mean(hit_at_10_above_80th)
-MR_below_80th = np.mean(MR_below_80th)
-MR_above_80th = np.mean(MR_above_80th)
+    hit_at_1_below_percentile = np.mean(hit_at_1_below_percentile)
+    hit_at_5_below_percentile = np.mean(hit_at_5_below_percentile)
+    hit_at_10_below_percentile = np.mean(hit_at_10_below_percentile)
+    hit_at_1_above_percentile = np.mean(hit_at_1_above_percentile)
+    hit_at_5_above_percentile = np.mean(hit_at_5_above_percentile)
+    hit_at_10_above_percentile = np.mean(hit_at_10_above_percentile)
+    MR_below_percentile = np.mean(MR_below_percentile)
+    MR_above_percentile = np.mean(MR_above_percentile)
 
-print(f"Hit@1 below 80th percentile: {hit_at_1_below_80th}")
-print(f"Hit@5 below 80th percentile: {hit_at_5_below_80th}")
-print(f"Hit@10 below 80th percentile: {hit_at_10_below_80th}")
-print(f"Hit@1 above 80th percentile: {hit_at_1_above_80th}")
-print(f"Hit@5 above 80th percentile: {hit_at_5_above_80th}")
-print(f"Hit@10 above 80th percentile: {hit_at_10_above_80th}")
-print(f"Mean rank below 80th percentile: {MR_below_80th}")
-print(f"Mean rank above 80th percentile: {MR_above_80th}")
+    print(f"Hit@1 below {percentile}th percentile: {hit_at_1_below_percentile}")
+    print(f"Hit@5 below {percentile}th percentile: {hit_at_5_below_percentile}")
+    print(f"Hit@10 below {percentile}th percentile: {hit_at_10_below_percentile}")
+    print(f"Hit@1 above {percentile}th percentile: {hit_at_1_above_percentile}")
+    print(f"Hit@5 above {percentile}th percentile: {hit_at_5_above_percentile}")
+    print(f"Hit@10 above {percentile}th percentile: {hit_at_10_above_percentile}")
+    print(f"Mean rank below {percentile}th percentile: {MR_below_percentile}")
+    print(f"Mean rank above {percentile}th percentile: {MR_above_percentile}")
