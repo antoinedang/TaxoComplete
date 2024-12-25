@@ -1,0 +1,16 @@
+{
+    "batch_size" : 32,
+    "epochs" : 5,
+	"sampling" : "closest_range_linear",
+    "cossim_mapping_range_percentile": [80, 99.99],
+    "cosine_absolute": "false",
+    "saving_path" : "./data/MAG-PSY/results/",
+    "model_path" : "./data/MAG-PSY/long_tail_linear_psy",
+    "name" : "psychology",
+    "data_path" : "./data/MAG-PSY/",
+    "model_name" : "multi-qa-distilbert-cos-v1",
+    "neg_number" : 20,
+    "partition_pattern":"internal",
+    "alpha":0.1,
+    "seed":47
+}

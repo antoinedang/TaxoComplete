@@ -43,6 +43,7 @@ seed = config["seed"]
 batch_size = config["batch_size"]
 epochs = config["epochs"]
 alpha = config["alpha"]
+super_loss = config.get("super_loss", "false") == "true"
 
 cosine_range = config.get("cossim_mapping_range", [0, 1])
 loss_alpha = float(config.get("loss_alpha", 1))
@@ -117,6 +118,7 @@ train_loss = losses.CosineSimilarityLoss(
     hyperbolic=bool(config.get("hyperbolic", "false") == "true"),
     hyperbolic_curvature=float(config.get("hyperbolic_curvature", 1.0)),
     cosine_absolute=bool(config.get("cosine_absolute", "false") == "true"),
+    super_loss=super_loss,
 )
 if config.get("hyperbolic", "false") == "true":
     optimizer_class = geoopt.optim.RiemannianAdam

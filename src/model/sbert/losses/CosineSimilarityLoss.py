@@ -84,6 +84,7 @@ class CosineSimilarityLoss(nn.Module):
         hyperbolic=False,
         hyperbolic_curvature=1.0,
         cosine_absolute=False,
+        super_loss=False,
     ):
         super(CosineSimilarityLoss, self).__init__()
         self.model = model
@@ -94,8 +95,26 @@ class CosineSimilarityLoss(nn.Module):
         self.hyperbolic = hyperbolic
         self.hyperbolic_curvature = hyperbolic_curvature
         self.cosine_absolute = cosine_absolute
+        self.super_loss = super_loss
+
+    def _super_loss(self, original_loss):
+        if self.fac > 0.0:
+            self.tau = self.fac * origin_loss.mean() + (1.0 - self.fac) * self.tau
+
+        beta = (origin_loss - self.tau) / self.lam
+        gamma = -2.0 / np.exp(1.0)
+        sigma = np.exp(-lambertw(0.5 * np.maximum(beta, gamma))).real
+        sigma = torch.from_numpy(sigma).to(self.device)
+        super_loss = (loss - self.tau) * sigma + self.lam * (torch.log(sigma) ** 2)
+        return torch.mean(super_loss)
 
     def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
+        loss = self.__forward(sentence_features, labels)
+        if self.super_loss:
+            return self._super_loss(loss.detach().cpu().numpy())
+        return loss
+
+    def __forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
         # pdb.set_trace()
         embeddings = [
             self.model(sentence_feature)["sentence_embedding"]

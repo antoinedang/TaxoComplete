@@ -17,7 +17,7 @@ conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
 echo ""
 echo ""
-echo "EVAL UNTRAINED SEMVERB:"
+echo "EVAL UNTRAINED SEMNOUN:"
 python3 src/evaluate.py --config config_files_evaluate/semeval_noun/config_clst20_s47.json --untrained
 echo "ERROR CODE: $?"
 
