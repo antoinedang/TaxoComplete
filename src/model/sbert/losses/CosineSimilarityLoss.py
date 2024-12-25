@@ -2,6 +2,8 @@ import torch
 from torch import nn, Tensor
 from typing import Iterable, Dict, List
 import numpy as np
+import math
+from scipy.special import lambertw
 
 
 def exp_map_hyperboloid(x, c=1.0):
@@ -85,6 +87,9 @@ class CosineSimilarityLoss(nn.Module):
         hyperbolic_curvature=1.0,
         cosine_absolute=False,
         super_loss=False,
+        super_loss_tau=math.log(10),
+        super_loss_lam=1.0,
+        super_loss_fac=0.0,
     ):
         super(CosineSimilarityLoss, self).__init__()
         self.model = model
@@ -96,8 +101,12 @@ class CosineSimilarityLoss(nn.Module):
         self.hyperbolic_curvature = hyperbolic_curvature
         self.cosine_absolute = cosine_absolute
         self.super_loss = super_loss
+        self.tau = super_loss_tau
+        self.lam = super_loss_lam
+        self.fac = super_loss_fac
 
-    def _super_loss(self, original_loss):
+    def _super_loss(self, loss):
+        origin_loss = loss.detach().cpu().numpy()
         if self.fac > 0.0:
             self.tau = self.fac * origin_loss.mean() + (1.0 - self.fac) * self.tau
 
@@ -111,7 +120,7 @@ class CosineSimilarityLoss(nn.Module):
     def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
         loss = self.__forward(sentence_features, labels)
         if self.super_loss:
-            return self._super_loss(loss.detach().cpu().numpy())
+            return self._super_loss(loss)
         return loss
 
     def __forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
