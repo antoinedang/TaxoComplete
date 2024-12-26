@@ -5,4 +5,5 @@ scipy==1.8.0
 mpmath==1.2.1
 pandas==1.5.3
 cupy-cuda11x
+matplotlib
 git+https://github.com/geoopt/geoopt.git

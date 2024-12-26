@@ -113,7 +113,7 @@ class CosineSimilarityLoss(nn.Module):
         beta = (origin_loss - self.tau) / self.lam
         gamma = -2.0 / np.exp(1.0)
         sigma = np.exp(-lambertw(0.5 * np.maximum(beta, gamma))).real
-        sigma = torch.from_numpy(sigma).to(self.device)
+        sigma = torch.from_numpy(np.array(sigma)).to(self.device)
         super_loss = (loss - self.tau) * sigma + self.lam * (torch.log(sigma) ** 2)
         return torch.mean(super_loss)
 
