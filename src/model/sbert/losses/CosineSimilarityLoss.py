@@ -115,6 +115,8 @@ class CosineSimilarityLoss(nn.Module):
         sigma = np.exp(-lambertw(0.5 * np.maximum(beta, gamma))).real
         sigma = torch.from_numpy(np.array(sigma))  # .to(self.device)
         super_loss = (loss - self.tau) * sigma + self.lam * (torch.log(sigma) ** 2)
+        print("sigma", sigma)
+        print("super_loss", torch.mean(super_loss))
         return torch.mean(super_loss)
 
     def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
