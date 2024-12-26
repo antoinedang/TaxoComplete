@@ -22,16 +22,19 @@ python3 src/evaluate.py -c config_files_evaluate/semeval_noun/config_clst20_s47.
 python3 src/long_tail_evaluate.py data/SemEval-Noun/untrained/error_analysis.pkl
 python3 src/plot_cosine_similarities.py data/SemEval-Noun/untrained/error_analysis.pkl
 python3 src/plot_distances.py data/SemEval-Noun/untrained/error_analysis.pkl
+echo "ERROR CODE: $?"
 echo "SEMVERB:"
 python3 src/evaluate.py -c config_files_evaluate/semeval_verb/config_clst20_s47.json --untrained
 python3 src/long_tail_evaluate.py data/SemEval-Verb/untrained/error_analysis.pkl
 python3 src/plot_cosine_similarities.py data/SemEval-Verb/untrained/error_analysis.pkl
 python3 src/plot_distances.py data/SemEval-Verb/untrained/error_analysis.pkl
+echo "ERROR CODE: $?"
 echo "MAG-PSY:"
 python3 src/evaluate.py -c config_files_evaluate/psy/config_clst20_s47.json --untrained
 python3 src/long_tail_evaluate.py data/MAG-PSY/untrained/error_analysis.pkl
 python3 src/plot_cosine_similarities.py data/MAG-PSY/untrained/error_analysis.pkl
 python3 src/plot_distances.py data/MAG-PSY/untrained/error_analysis.pkl
+echo "ERROR CODE: $?"
 echo "MAG-CS-Wiki:"
 python3 src/evaluate.py -c config_files_evaluate/cs/config_clst20_s47.json --untrained
 python3 src/long_tail_evaluate.py data/MAG-CS-Wiki/untrained/error_analysis.pkl
