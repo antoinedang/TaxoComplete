@@ -89,9 +89,9 @@ def is_correct_prediction(edges, target, checkChild, K):
         [
             any(
                 [
-                    edges[i][n][idx] == sub_target[idx]
+                    edges[n][idx] == sub_target[idx]
                     or (
-                        edges[i][n][idx] == data_prep.pseudo_leaf_node
+                        edges[n][idx] == data_prep.pseudo_leaf_node
                         and not (
                             sub_target[idx] in list(data_prep.core_subgraph.nodes())
                         )
@@ -128,28 +128,28 @@ if not os.path.exists(error_analysis_dir + "/evaluations_per_cosine_sim.pkl"):
 
         # RELEVANCE: isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR
         isCorrectParentPPRAt1 = is_correct_prediction(
-            edges_predictions_test_ppr, target, checkChild=False, K=1
+            edges_predictions_test_ppr[i], target, checkChild=False, K=1
         )
         isCorrectParentPPRAt5 = is_correct_prediction(
-            edges_predictions_test_ppr, target, checkChild=False, K=5
+            edges_predictions_test_ppr[i], target, checkChild=False, K=5
         )
         isCorrectParentPPRAt10 = is_correct_prediction(
-            edges_predictions_test_ppr, target, checkChild=False, K=10
+            edges_predictions_test_ppr[i], target, checkChild=False, K=10
         )
         isCorrectChildPPRAt1 = is_correct_prediction(
-            edges_predictions_test_ppr, target, checkChild=True, K=1
+            edges_predictions_test_ppr[i], target, checkChild=True, K=1
         )
         isCorrectChildPPRAt5 = is_correct_prediction(
-            edges_predictions_test_ppr, target, checkChild=True, K=5
+            edges_predictions_test_ppr[i], target, checkChild=True, K=5
         )
         isCorrectChildPPRAt10 = is_correct_prediction(
-            edges_predictions_test_ppr, target, checkChild=True, K=10
+            edges_predictions_test_ppr[i], target, checkChild=True, K=10
         )
         rank_child = rank_of_correct_prediction(
-            edges_predictions_test_ppr, target, checkChild=True
+            edges_predictions_test_ppr[i], target, checkChild=True
         )
         rank_parent = rank_of_correct_prediction(
-            edges_predictions_test_ppr, target, checkChild=False
+            edges_predictions_test_ppr[i], target, checkChild=False
         )
         for sub_target in target:
             # COSINE SIMILARITY: cos_similarity_untrained(query node, actual parent), cos_similarity_untrained(query node, actual child)
@@ -248,7 +248,9 @@ for i in range(10):
         ]
     )
 
-    # print(f"Percentile range: {percentile_lower_bound} - {percentile_upper_bound} ({i*10}-{(i+1)*10}%)")
+    # print(
+    #     f"Percentile range: {percentile_lower_bound} - {percentile_upper_bound} ({i*10}-{(i+1)*10}%) ({len([MR[j] for j in range(len(MR)) if percentile_lower_bound <= cosine_similarity_score[j] <= percentile_upper_bound ])} # of nodes)"
+    # )
     # print(f"Hit@1: {hit_at_1_average}")
     # print(f"Hit@5: {hit_at_5_average}")
     # print(f"Hit@10: {hit_at_10_average}")
@@ -364,7 +366,9 @@ MR_average = np.mean(
     ]
 )
 
-print(f"Percentile range: {percentile_lower_bound} - {percentile_upper_bound} (80-100%)")
+print(
+    f"Percentile range: {percentile_lower_bound} - {percentile_upper_bound} (80-100%)"
+)
 print(f"Hit@1: {hit_at_1_average}")
 print(f"Hit@5: {hit_at_5_average}")
 print(f"Hit@10: {hit_at_10_average}")

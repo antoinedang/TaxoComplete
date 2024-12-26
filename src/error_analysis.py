@@ -102,9 +102,9 @@ def is_correct_prediction(edges, target, checkChild, K):
         [
             any(
                 [
-                    edges[i][n][idx] == sub_target[idx]
+                    edges[n][idx] == sub_target[idx]
                     or (
-                        edges[i][n][idx] == data_prep.pseudo_leaf_node
+                        edges[n][idx] == data_prep.pseudo_leaf_node
                         and not (
                             sub_target[idx] in list(data_prep.core_subgraph.nodes())
                         )
@@ -245,28 +245,28 @@ for i in range(len(data_prep.test_queries)):
 
     # RELEVANCE: isCorrectParent, isCorrectChild, isCorrectParentPPR, isCorrectChildPPR
     isCorrectParentAt1 = is_correct_prediction(
-        edges_predictions_test, target, checkChild=False, K=1
+        edges_predictions_test[i], target, checkChild=False, K=1
     )
     isCorrectParentAt10 = is_correct_prediction(
-        edges_predictions_test, target, checkChild=False, K=10
+        edges_predictions_test[i], target, checkChild=False, K=10
     )
     isCorrectChildAt1 = is_correct_prediction(
-        edges_predictions_test, target, checkChild=True, K=1
+        edges_predictions_test[i], target, checkChild=True, K=1
     )
     isCorrectChildAt10 = is_correct_prediction(
-        edges_predictions_test, target, checkChild=True, K=10
+        edges_predictions_test[i], target, checkChild=True, K=10
     )
     isCorrectParentPPRAt1 = is_correct_prediction(
-        edges_predictions_test_ppr, target, checkChild=False, K=1
+        edges_predictions_test_ppr[i], target, checkChild=False, K=1
     )
     isCorrectParentPPRAt10 = is_correct_prediction(
-        edges_predictions_test_ppr, target, checkChild=False, K=10
+        edges_predictions_test_ppr[i], target, checkChild=False, K=10
     )
     isCorrectChildPPRAt1 = is_correct_prediction(
-        edges_predictions_test_ppr, target, checkChild=True, K=1
+        edges_predictions_test_ppr[i], target, checkChild=True, K=1
     )
     isCorrectChildPPRAt10 = is_correct_prediction(
-        edges_predictions_test_ppr, target, checkChild=True, K=10
+        edges_predictions_test_ppr[i], target, checkChild=True, K=10
     )
 
     # COSINE SIMILARITY: cos_similarity(query node, predicted parent), cos_similarity(query node, predicted child)
