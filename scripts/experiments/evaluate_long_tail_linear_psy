@@ -17,9 +17,10 @@ conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
 echo ""
 echo ""
-echo "EVAL UNTRAINED SEMNOUN:"
-python3 src/long_tail_evaluate.py data/SemEval-Noun/untrained/error_analysis.pkl
-python3 src/plot_cosine_similarities.py data/SemEval-Noun/untrained/error_analysis.pkl
-python3 src/plot_distances.py data/SemEval-Noun/untrained/error_analysis.pkl
+echo "MAG-PSY LONG TAIL LINEAR EVAL:"
+python3 src/evaluate.py -c config_files_evaluate/psy/long_tail_linear.json
+python3 src/long_tail_evaluate.py data/MAG-PSY/long_tail_linear_psy/error_analysis.pkl
+python3 src/plot_cosine_similarities.py data/MAG-PSY/long_tail_linear_psy/error_analysis.pkl
+python3 src/plot_distances.py data/MAG-PSY/long_tail_linear_psy/error_analysis.pkl
 echo "ERROR CODE: $?"
 
