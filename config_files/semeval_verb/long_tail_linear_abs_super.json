@@ -1,0 +1,16 @@
+{
+    "batch_size" : 32,
+    "epochs" : 5,
+	"sampling" : "closest_range_linear",
+    "cossim_mapping_range_percentile": [80, 99.99],
+    "cosine_absolute": "true",
+    "super_loss": "true",
+    "saving_path" : "./data/SemEval-Verb/results/",
+    "name" : "wordnet_verb",
+    "data_path" : "./data/SemEval-Verb/",
+    "model_name" : "multi-qa-distilbert-cos-v1",
+    "neg_number" : 20,
+    "partition_pattern":"internal",
+    "alpha":0.1,
+    "seed":47
+}

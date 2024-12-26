@@ -17,9 +17,6 @@ conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
 echo ""
 echo ""
-echo "EVAL UNTRAINED SEMNOUN:"
-python3 src/long_tail_evaluate.py data/SemEval-Noun/untrained/error_analysis.pkl
-python3 src/plot_cosine_similarities.py data/SemEval-Noun/untrained/error_analysis.pkl
-python3 src/plot_distances.py data/SemEval-Noun/untrained/error_analysis.pkl
+echo "LONG TAIL LINEAR ABS SUPER LOSS SEMVERB:"
+python ./src/train.py --config ./config_files/semeval_verb/long_tail_linear_abs_super.json
 echo "ERROR CODE: $?"
-
