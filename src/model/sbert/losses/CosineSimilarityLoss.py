@@ -106,11 +106,8 @@ class CosineSimilarityLoss(nn.Module):
         self.fac = super_loss_fac
 
     def _super_loss(self, loss):
-        print("loss 2", loss)
-        print("loss detached", loss.detach())
-        print("loss detached cpu", loss.detach().cpu())
         origin_loss = loss.detach().cpu().numpy()
-        print("origin_loss", origin_loss)
+        print("loss s", loss)
         if self.fac > 0.0:
             self.tau = self.fac * origin_loss.mean() + (1.0 - self.fac) * self.tau
 
@@ -122,13 +119,15 @@ class CosineSimilarityLoss(nn.Module):
         return torch.mean(super_loss)
 
     def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
-        loss = self.__forward(sentence_features, labels)
+        loss = self.__forward_impl(sentence_features, labels)
+        print("loss", loss)
         if self.super_loss:
-            print("loss 1", loss)
             return self._super_loss(loss)
         return loss
 
-    def __forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
+    def __forward_impl(
+        self, sentence_features: Iterable[Dict[str, Tensor]], labels: List
+    ):
         # pdb.set_trace()
         embeddings = [
             self.model(sentence_feature)["sentence_embedding"]
