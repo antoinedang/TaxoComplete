@@ -108,8 +108,15 @@ class CosineSimilarityLoss(nn.Module):
     def _super_loss(self, loss):
         origin_loss = loss.detach().cpu().numpy()
         print("loss s", loss)
+        print("loss.detach()", loss.detach())
+        print("loss.detach().cpu()", loss.detach().cpu())
+        print("origin_loss", origin_loss)
+        print("origin_loss mean", origin_loss.mean())
+        print("tau", self.tau)
+        print("fac", self.fac)
         if self.fac > 0.0:
             self.tau = self.fac * origin_loss.mean() + (1.0 - self.fac) * self.tau
+        print("tau 2", self.tau)
 
         beta = (origin_loss - self.tau) / self.lam
         gamma = -2.0 / np.exp(1.0)
@@ -120,7 +127,6 @@ class CosineSimilarityLoss(nn.Module):
 
     def forward(self, sentence_features: Iterable[Dict[str, Tensor]], labels: List):
         loss = self.__forward_impl(sentence_features, labels)
-        print("loss", loss)
         if self.super_loss:
             return self._super_loss(loss)
         return loss

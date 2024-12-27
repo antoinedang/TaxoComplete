@@ -2,6 +2,7 @@
     "batch_size" : 32,
     "epochs" : 5,
 	"sampling" : "closest",
+    "super_loss": "false",
     "saving_path" : "./data/MAG-PSY/results/",
     "name" : "psychology",
     "data_path" : "./data/MAG-PSY/",
