@@ -120,9 +120,14 @@ class CosineSimilarityLoss(nn.Module):
 
         beta = (origin_loss - self.tau) / self.lam
         print("beta", beta)
-        gamma = -2.0 / np.exp(1.0)
+        gamma = -1.0 / np.exp(1.0)
+        gamma = gamma + 1e-4  # avoid numerical issues
         print("gamma", gamma)
-        sigma = np.exp(-lambertw(0.5 * np.maximum(beta, gamma))).real
+        sigma = -lambertw(np.maximum(0.5 * beta, gamma))
+        print("sigma", sigma)
+        sigma = np.exp(sigma)
+        print("sigma", sigma)
+        sigma = sigma.real
         print("sigma", sigma)
         sigma = torch.from_numpy(np.array(sigma))  # .to(self.device)
         print("sigma 2", sigma)
