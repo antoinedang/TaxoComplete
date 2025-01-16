@@ -18,5 +18,9 @@ pip install -r requirements
 echo ""
 echo ""
 echo "SUPERLOSS TAU=0.5 LAM=0.01 FAC=1.0 (SEMEVAL_VERB):"
+rm -rf $SLURM_TMPDIR/superloss_t0.5_l0.01_f1.0_semeval_verb
+mkdir -p $SLURM_TMPDIR/superloss_t0.5_l0.01_f1.0_semeval_verb
+cp -r . $SLURM_TMPDIR/superloss_t0.5_l0.01_f1.0_semeval_verb/
+cd $SLURM_TMPDIR/superloss_t0.5_l0.01_f1.0_semeval_verb/
 python ./src/train.py --config ./config_files/semeval_verb/superloss_t0.5_l0.01_f1.0.json
 echo "ERROR CODE: $?"

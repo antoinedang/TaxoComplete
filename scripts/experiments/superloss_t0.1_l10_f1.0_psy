@@ -18,5 +18,9 @@ pip install -r requirements
 echo ""
 echo ""
 echo "SUPERLOSS TAU=0.1 LAM=10 FAC=1.0 (PSY):"
+rm -rf $SLURM_TMPDIR/superloss_t0.1_l10_f1.0_psy
+mkdir -p $SLURM_TMPDIR/superloss_t0.1_l10_f1.0_psy
+cp -r . $SLURM_TMPDIR/superloss_t0.1_l10_f1.0_psy/
+cd $SLURM_TMPDIR/superloss_t0.1_l10_f1.0_psy/
 python ./src/train.py --config ./config_files/psy/superloss_t0.1_l10_f1.0.json
 echo "ERROR CODE: $?"

@@ -18,5 +18,9 @@ pip install -r requirements
 echo ""
 echo ""
 echo "RANGE LINEAR (0.1 to 0.5) SEMEVAL_VERB:"
+rm -rf $SLURM_TMPDIR/linear_0.1_0.5_semeval_verb
+mkdir -p $SLURM_TMPDIR/linear_0.1_0.5_semeval_verb
+cp -r . $SLURM_TMPDIR/linear_0.1_0.5_semeval_verb/
+cd $SLURM_TMPDIR/linear_0.1_0.5_semeval_verb/
 python ./src/train.py --config ./config_files/semeval_verb/linear_0.1_0.5.json
 echo "ERROR CODE: $?"

@@ -18,5 +18,9 @@ pip install -r requirements
 echo ""
 echo ""
 echo "RANGE LINEAR (0.1 to 0.8) PSY:"
+rm -rf $SLURM_TMPDIR/linear_0.1_0.8_psy
+mkdir -p $SLURM_TMPDIR/linear_0.1_0.8_psy
+cp -r . $SLURM_TMPDIR/linear_0.1_0.8_psy/
+cd $SLURM_TMPDIR/linear_0.1_0.8_psy/
 python ./src/train.py --config ./config_files/psy/linear_0.1_0.8.json
 echo "ERROR CODE: $?"

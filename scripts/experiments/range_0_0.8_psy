@@ -18,5 +18,9 @@ pip install -r requirements
 echo ""
 echo ""
 echo "RANGE  (0 to 0.8) PSY:"
+rm -rf $SLURM_TMPDIR/range_0_0.8_psy
+mkdir -p $SLURM_TMPDIR/range_0_0.8_psy
+cp -r . $SLURM_TMPDIR/range_0_0.8_psy/
+cd $SLURM_TMPDIR/range_0_0.8_psy/
 python ./src/train.py --config ./config_files/psy/range_0_0.8.json
 echo "ERROR CODE: $?"

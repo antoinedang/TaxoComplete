@@ -60,10 +60,20 @@ pip install -r requirements
 echo ""
 echo ""
 echo "{}:"
+rm -rf $SLURM_TMPDIR/{}
+mkdir -p $SLURM_TMPDIR/{}
+cp -r . $SLURM_TMPDIR/{}/
+cd $SLURM_TMPDIR/{}/
 python ./src/train.py --config {}{}
 echo "ERROR CODE: $?"
 """.format(
-        experiment_name, config_dir, config_file_name
+        experiment_name,
+        experiment_file_name,
+        experiment_file_name,
+        experiment_file_name,
+        experiment_file_name,
+        config_dir,
+        config_file_name,
     )
 
     with open("scripts/experiments/" + experiment_file_name, "w") as f:

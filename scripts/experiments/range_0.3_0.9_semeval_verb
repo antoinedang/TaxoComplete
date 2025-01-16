@@ -18,5 +18,9 @@ pip install -r requirements
 echo ""
 echo ""
 echo "RANGE  (0.3 to 0.9) SEMEVAL_VERB:"
+rm -rf $SLURM_TMPDIR/range_0.3_0.9_semeval_verb
+mkdir -p $SLURM_TMPDIR/range_0.3_0.9_semeval_verb
+cp -r . $SLURM_TMPDIR/range_0.3_0.9_semeval_verb/
+cd $SLURM_TMPDIR/range_0.3_0.9_semeval_verb/
 python ./src/train.py --config ./config_files/semeval_verb/range_0.3_0.9.json
 echo "ERROR CODE: $?"
