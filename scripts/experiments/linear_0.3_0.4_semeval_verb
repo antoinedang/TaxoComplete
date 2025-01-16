@@ -20,7 +20,7 @@ echo ""
 echo "RANGE LINEAR (0.3 to 0.4) SEMEVAL_VERB:"
 rm -rf $SLURM_TMPDIR/linear_0.3_0.4_semeval_verb
 mkdir -p $SLURM_TMPDIR/linear_0.3_0.4_semeval_verb
-find . -maxdepth 1 ! -name 'job_output.txt' ! -name 'job_error.txt' ! -name 'sbatch_out.txt' ! -name '.' -exec mv {} $SLURM_TMPDIR/linear_0.3_0.4_semeval_verb/ \;
+find . -maxdepth 1 ! -name 'job_output.txt' ! -name 'job_error.txt' ! -name 'sbatch_out.txt' ! -name '.' ! -name 'cancel.sh' -exec mv {} $SLURM_TMPDIR/linear_0.3_0.4_semeval_verb/ \;
 cd $SLURM_TMPDIR/linear_0.3_0.4_semeval_verb/
 python ./src/train.py --config ./config_files/semeval_verb/linear_0.3_0.4.json
 echo "ERROR CODE: $?"

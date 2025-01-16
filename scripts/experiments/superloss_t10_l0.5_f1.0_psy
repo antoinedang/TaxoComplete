@@ -20,7 +20,7 @@ echo ""
 echo "SUPERLOSS TAU=10 LAM=0.5 FAC=1.0 (PSY):"
 rm -rf $SLURM_TMPDIR/superloss_t10_l0.5_f1.0_psy
 mkdir -p $SLURM_TMPDIR/superloss_t10_l0.5_f1.0_psy
-find . -maxdepth 1 ! -name 'job_output.txt' ! -name 'job_error.txt' ! -name 'sbatch_out.txt' ! -name '.' -exec mv {} $SLURM_TMPDIR/superloss_t10_l0.5_f1.0_psy/ \;
+find . -maxdepth 1 ! -name 'job_output.txt' ! -name 'job_error.txt' ! -name 'sbatch_out.txt' ! -name '.' ! -name 'cancel.sh' -exec mv {} $SLURM_TMPDIR/superloss_t10_l0.5_f1.0_psy/ \;
 cd $SLURM_TMPDIR/superloss_t10_l0.5_f1.0_psy/
 python ./src/train.py --config ./config_files/psy/superloss_t10_l0.5_f1.0.json
 echo "ERROR CODE: $?"

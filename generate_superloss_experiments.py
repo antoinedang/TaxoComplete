@@ -65,7 +65,7 @@ echo ""
 echo "{}:"
 rm -rf $SLURM_TMPDIR/{}
 mkdir -p $SLURM_TMPDIR/{}
-find . -maxdepth 1 ! -name 'job_output.txt' ! -name 'job_error.txt' ! -name 'sbatch_out.txt' ! -name '.' -exec mv {} $SLURM_TMPDIR/{}/ \;
+find . -maxdepth 1 ! -name 'job_output.txt' ! -name 'job_error.txt' ! -name 'sbatch_out.txt' ! -name '.' ! -name 'cancel.sh' -exec mv {} $SLURM_TMPDIR/{}/ \;
 cd $SLURM_TMPDIR/{}/
 python ./src/train.py --config {}{}
 echo "ERROR CODE: $?"

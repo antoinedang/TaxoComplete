@@ -20,7 +20,7 @@ echo ""
 echo "RANGE LINEAR (0.6 to 0.8) PSY:"
 rm -rf $SLURM_TMPDIR/linear_0.6_0.8_psy
 mkdir -p $SLURM_TMPDIR/linear_0.6_0.8_psy
-find . -maxdepth 1 ! -name 'job_output.txt' ! -name 'job_error.txt' ! -name 'sbatch_out.txt' ! -name '.' -exec mv {} $SLURM_TMPDIR/linear_0.6_0.8_psy/ \;
+find . -maxdepth 1 ! -name 'job_output.txt' ! -name 'job_error.txt' ! -name 'sbatch_out.txt' ! -name '.' ! -name 'cancel.sh' -exec mv {} $SLURM_TMPDIR/linear_0.6_0.8_psy/ \;
 cd $SLURM_TMPDIR/linear_0.6_0.8_psy/
 python ./src/train.py --config ./config_files/psy/linear_0.6_0.8.json
 echo "ERROR CODE: $?"
