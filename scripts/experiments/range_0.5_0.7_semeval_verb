@@ -20,7 +20,7 @@ echo ""
 echo "RANGE  (0.5 to 0.7) SEMEVAL_VERB:"
 rm -rf $SLURM_TMPDIR/range_0.5_0.7_semeval_verb
 mkdir -p $SLURM_TMPDIR/range_0.5_0.7_semeval_verb
-cp -r . $SLURM_TMPDIR/range_0.5_0.7_semeval_verb/
+find . -maxdepth 1 ! -name 'job_output.txt' ! -name 'job_error.txt' ! -name 'sbatch_out.txt' ! -name '.' -exec mv {} $SLURM_TMPDIR/range_0.5_0.7_semeval_verb/ \;
 cd $SLURM_TMPDIR/range_0.5_0.7_semeval_verb/
 python ./src/train.py --config ./config_files/semeval_verb/range_0.5_0.7.json
 echo "ERROR CODE: $?"

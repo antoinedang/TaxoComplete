@@ -20,7 +20,7 @@ echo ""
 echo "SUPERLOSS TAU=0.1 LAM=0.5 FAC=100 (SEMEVAL_VERB):"
 rm -rf $SLURM_TMPDIR/superloss_t0.1_l0.5_f100_semeval_verb
 mkdir -p $SLURM_TMPDIR/superloss_t0.1_l0.5_f100_semeval_verb
-cp -r . $SLURM_TMPDIR/superloss_t0.1_l0.5_f100_semeval_verb/
+find . -maxdepth 1 ! -name 'job_output.txt' ! -name 'job_error.txt' ! -name 'sbatch_out.txt' ! -name '.' -exec mv {} $SLURM_TMPDIR/superloss_t0.1_l0.5_f100_semeval_verb/ \;
 cd $SLURM_TMPDIR/superloss_t0.1_l0.5_f100_semeval_verb/
 python ./src/train.py --config ./config_files/semeval_verb/superloss_t0.1_l0.5_f100.json
 echo "ERROR CODE: $?"
