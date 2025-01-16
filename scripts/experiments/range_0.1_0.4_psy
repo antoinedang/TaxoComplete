@@ -1,0 +1,22 @@
+#!/bin/bash
+#SBATCH --job-name=taxo
+#SBATCH --output=job_output.txt
+#SBATCH --error=job_error.txt
+#SBATCH --ntasks=1
+#SBATCH --time=1800:00
+#SBATCH --mem=100Gb
+
+source ~/.bashrc
+module load miniconda/3
+module load cuda/11.1
+conda create -n taxocomplete python=3.9
+conda activate taxocomplete
+/cvmfs/ai.mila.quebec/apps/x86_64/debian/miniconda/3/bin/python -m pip install --upgrade pip
+pip install torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2+cu118 -f https://download.pytorch.org/whl/torch_stable.html
+conda install -c dglteam dgl-cuda11.1
+pip install -r requirements
+echo ""
+echo ""
+echo "RANGE  (0.1 to 0.4) PSY:"
+python ./src/train.py --config ./config_files/psy/range_0.1_0.4.json
+echo "ERROR CODE: $?"
