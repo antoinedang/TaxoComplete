@@ -27,8 +27,16 @@ for experiment in $experiments; do
   cd "$HOME/experiments/$experiment" 2>/dev/null && ./cancel.sh 2>/dev/null && echo "Cancelling previous $experiment job..." && sleep 5
   cd $HOME
   echo "Copying 'TaxoComplete/' to 'experiments/$experiment'..."
-  rm -rf "experiments/$experiment"
-  cp -r TaxoComplete "experiments/$experiment"
+
+  COPIED_SUCCESSFULLY=0
+  while [ $COPIED_SUCCESSFULLY -eq 0 ]; do
+    rm -rf "experiments/$experiment"
+    cp -r TaxoComplete "experiments/$experiment" && COPIED_SUCCESSFULLY=1
+    if [ $COPIED_SUCCESSFULLY -eq 0 ]; then
+      echo "Error: Failed to copy 'TaxoComplete/' to 'experiments/$experiment'. Retrying..."
+      sleep 5
+    fi
+  done
   
   echo "Starting experiment '$experiment'"
   cd "experiments/$experiment"
