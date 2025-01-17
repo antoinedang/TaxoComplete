@@ -31,7 +31,7 @@ for experiment in $experiments; do
   COPIED_SUCCESSFULLY=0
   while [ $COPIED_SUCCESSFULLY -eq 0 ]; do
     rm -rf "experiments/$experiment"
-    cp -r TaxoComplete "experiments/$experiment" && COPIED_SUCCESSFULLY=1
+    cp -r TaxoComplete "experiments/$experiment" 2>/dev/null && COPIED_SUCCESSFULLY=1
     if [ $COPIED_SUCCESSFULLY -eq 0 ]; then
       echo "Error: Failed to copy 'TaxoComplete/' to 'experiments/$experiment'. Retrying..."
       sleep 5
