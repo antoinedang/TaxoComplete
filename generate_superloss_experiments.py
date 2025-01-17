@@ -60,6 +60,8 @@ conda activate taxocomplete
 pip install torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2+cu118 -f https://download.pytorch.org/whl/torch_stable.html
 conda install -c dglteam dgl-cuda11.1
 pip install -r requirements
+mkdir -p $SCRATCH/sentence-transformers
+export SENTENCE_TRANSFORMERS_HOME=$SCRATCH/sentence-transformers
 echo ""
 echo ""
 echo "{}:"
@@ -89,9 +91,9 @@ datasets = [
     ("wordnet_verb", "SemEval-Verb", "semeval_verb"),
 ]
 
-tau_values = [0.01, 0.1, 0.5, 1.0, 10]
-lam_values = [0.01, 0.1, 0.5, 1.0, 10]
-fac_values = [0.01, 0.1, 0.5, 1.0, 10, 100]
+tau_values = [0.0]
+lam_values = [0.01, 0.1, 1.0, 10]
+fac_values = [0.01, 0.1, 0.5, 0.9, 1.0]
 
 for dataset_name, dataset_folder, dataset_config_dir in datasets:
     for tau in tau_values:

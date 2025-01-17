@@ -11,7 +11,8 @@ def make_config(
     "batch_size" : 32,
     "epochs" : 5,
     "sampling" : "{}",
-    "cossim_mapping_range": [{}, {}],
+    "cossim_mapping_range_percentile": [{}, {}],
+    "cosine_absolute": "false",
     "saving_path" : "./data/{}/results/",
     "name" : "{}",
     "data_path" : "./data/{}/",
@@ -90,43 +91,61 @@ datasets = [
 
 sampling_types = ["closest_range", "closest_range_linear"]
 
-cosine_mapping_range_values = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+cosine_mapping_range_values = [
+    (10, 30),
+    (30, 90),
+    (10, 40),
+    (40, 90),
+    (10, 50),
+    (50, 90),
+    (10, 60),
+    (60, 90),
+    (10, 70),
+    (70, 90),
+]
 
 for dataset_name, dataset_folder, dataset_config_dir in datasets:
     for sampling_type in sampling_types:
-        for lower_bound in cosine_mapping_range_values:
-            for upper_bound in cosine_mapping_range_values:
-                if lower_bound < upper_bound:
-                    config_dir = "./config_files/{}/".format(dataset_config_dir)
-                    config_file_name = "{}_{}_{}.json".format(
-                        "range" if sampling_type == "closest_range" else "linear",
-                        lower_bound,
-                        upper_bound,
-                    )
-                    make_config(
-                        config_dir,
-                        config_file_name,
-                        sampling_type,
-                        lower_bound,
-                        upper_bound,
-                        dataset_name,
-                        dataset_folder,
-                    )
-                    experiment_file_name = "{}_{}_{}_{}".format(
-                        "range" if sampling_type == "closest_range" else "linear",
-                        lower_bound,
-                        upper_bound,
-                        dataset_config_dir,
-                    )
-                    experiment_name = "RANGE {} ({} to {}) {}".format(
-                        "" if sampling_type == "closest_range" else "LINEAR",
-                        lower_bound,
-                        upper_bound,
-                        dataset_config_dir.upper(),
-                    )
-                    make_experiment_script(
-                        experiment_file_name,
-                        config_dir,
-                        config_file_name,
-                        experiment_name,
-                    )
+        for lower_bound, upper_bound in cosine_mapping_range_values:
+            if lower_bound < upper_bound:
+                config_dir = "./config_files/{}/".format(dataset_config_dir)
+                config_file_name = "{}_{}_{}.json".format(
+                    (
+                        "percent_range"
+                        if sampling_type == "closest_range"
+                        else "percent_linear"
+                    ),
+                    lower_bound,
+                    upper_bound,
+                )
+                make_config(
+                    config_dir,
+                    config_file_name,
+                    sampling_type,
+                    lower_bound,
+                    upper_bound,
+                    dataset_name,
+                    dataset_folder,
+                )
+                experiment_file_name = "{}_{}_{}_{}".format(
+                    (
+                        "percent_range"
+                        if sampling_type == "closest_range"
+                        else "percent_linear"
+                    ),
+                    lower_bound,
+                    upper_bound,
+                    dataset_config_dir,
+                )
+                experiment_name = "PERCENT RANGE {} ({} to {}) {}".format(
+                    "" if sampling_type == "closest_range" else "LINEAR",
+                    lower_bound,
+                    upper_bound,
+                    dataset_config_dir.upper(),
+                )
+                make_experiment_script(
+                    experiment_file_name,
+                    config_dir,
+                    config_file_name,
+                    experiment_name,
+                )
