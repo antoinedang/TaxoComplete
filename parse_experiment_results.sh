@@ -14,7 +14,7 @@ for file in ../experiments/*/job_output.txt; do
     END {
         if (last) {
             split(last, values, ",")
-            print fname, values[4], values[5], values[6], values[7]
+            print fname, values[7], values[4], values[5], values[6]
         }
     }
     ' "$file"
