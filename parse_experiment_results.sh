@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "experiment_name,MR,recall@1,recall@5,recall@10"
+echo "experiment_name,MR,recall@1,recall@5,recall@10" > experiment_results.csv
 
 # Process each file
 for file in ../experiments/*/job_output.txt; do
@@ -17,5 +17,5 @@ for file in ../experiments/*/job_output.txt; do
             print fname, values[7], values[4], values[5], values[6]
         }
     }
-    ' "$file"
+    ' "$file" >> experiment_results.csv
 done
