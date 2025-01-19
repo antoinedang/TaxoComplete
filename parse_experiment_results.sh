@@ -1,6 +1,10 @@
 #!/bin/bash
 
-echo "experiment_name,MR,recall@1,recall@5,recall@10" > experiment_results.csv
+output_file="experiment_results.csv"
+
+if [ ! -f "$output_file" ]; then
+	echo "experiment_name,MR,recall@1,recall@5,recall@10" > $output_file
+fi
 
 # Process each file
 for file in ../experiments/*/job_output.txt; do
@@ -17,5 +21,18 @@ for file in ../experiments/*/job_output.txt; do
             print fname, values[7], values[4], values[5], values[6]
         }
     }
-    ' "$file" >> experiment_results.csv
+    ' "$file" >> $output_file
 done
+
+temp_output_file="temp_experiment_results.csv"
+
+head -n 1 "$output_file" > "$temp_output_file"
+
+# Use awk to filter unique rows based on the first column
+awk -F, 'NR==1 { next } !seen[$1]++ { print $0 }' "$output_file" >> "$temp_output_file"
+
+cat $temp_output_file > $output_file
+
+rm $temp_output_file
+
+echo "Experiment results have been saved to $output_file"
