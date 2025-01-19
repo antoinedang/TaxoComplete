@@ -1,4 +1,4 @@
-experiment_name,recall@1,recall@5,recall@10,MR
+experiment_name,MR,recall@1,recall@5,recall@10
 percent_linear_10_60_psy,576.912,0.120,0.312,0.413
 percent_linear_10_70_psy,282.082,0.112,0.311,0.406
 percent_linear_30_90_psy,218.636,0.129,0.350,0.450

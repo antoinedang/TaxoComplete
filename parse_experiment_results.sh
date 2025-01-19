@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "experiment_name,recall@1,recall@5,recall@10,MR"
+echo "experiment_name,MR,recall@1,recall@5,recall@10"
 
 # Process each file
 for file in ../experiments/*/job_output.txt; do
