@@ -14,9 +14,10 @@ tail -n +2 "$csv_file" | while IFS=',' read -r experiment_name MR recall1 recall
     echo "Deleted: $file_path"
   fi
 
-  find /path/to/target/folder -type f -exec bash -c '[[ "$(basename "{}")" == "target_filename" ]] && echo "Deleted: {}"' \;
+  find ./config_files -type f -exec bash -c '[[ "$(basename "{}")" == "$0" ]] && echo Deleted: "{}"' "$experiment_name.json" \;
   
-  find /path/to/target/folder -type f -exec bash -c '[[ "$(basename "{}")" == "target_filename" ]] && rm -f "{}"' \;
+  find ./config_files -type f -exec bash -c '[[ "$(basename "{}")" == "$0" ]] && rm -f "{}"' "$experiment_name.json" \;
+
   
 done
 
