@@ -46,7 +46,7 @@ sampling_method = config["sampling"]
 neg_number = config["neg_number"]
 partition_pattern = config["partition_pattern"]
 seed = config["seed"]
-
+compute_positive_label = config.get("compute_positive_label", "false") == "true"
 cosine_range = config.get("cossim_mapping_range", [0, 1])
 
 
@@ -63,6 +63,7 @@ data_prep = st.Dataset(
     neg_number,
     seed,
     cosine_range=cosine_range,
+    compute_positive_label=compute_positive_label,
 )
 model_name = config["model_name"]
 

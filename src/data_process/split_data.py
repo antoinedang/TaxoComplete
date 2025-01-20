@@ -12,12 +12,21 @@ mp.pretty = True
 
 
 class Dataset:
-    def __init__(self, graph_dataset, sampling_method, neg_number, seed, cosine_range):
+    def __init__(
+        self,
+        graph_dataset,
+        sampling_method,
+        neg_number,
+        seed,
+        cosine_range,
+        compute_positive_label=False,
+    ):
         helpers.set_seed(seed)
         self.cosine_range = cosine_range
         full_graph = graph_dataset.taxonomy
         train_node_ids = graph_dataset.train_node_ids
         roots = graph_dataset.root
+        self.compute_positive_label = compute_positive_label
         if len(roots) > 1:
             self.root = max(full_graph.nodes) + 1
             for r in roots:
@@ -273,6 +282,121 @@ class Dataset:
                 )
         return train_levels
 
+    def _compute_label(
+        self,
+        sampling_method,
+        core_subgraph_un,
+        node,
+        negn,
+        max_graph_distance,
+        min_graph_distance,
+        default,
+    ):
+        if sampling_method == "closest":
+            label_to_assign = 1 / (
+                nx.shortest_path_length(core_subgraph_un, node, negn)
+            )
+        elif sampling_method == "binary_range":
+            if nx.shortest_path_length(core_subgraph_un, node, negn) <= 1.0:
+                label_to_assign = self.cosine_range[1]
+            else:
+                label_to_assign = self.cosine_range[0]
+        elif sampling_method == "closest_lca":
+            lca = nx.lowest_common_ancestor(
+                self.core_subgraph, node, negn, default=self.root
+            )
+            label_to_assign = (
+                2
+                * nx.shortest_path_length(core_subgraph_un, self.root, lca)
+                / (
+                    nx.shortest_path_length(core_subgraph_un, self.root, negn)
+                    + nx.shortest_path_length(core_subgraph_un, self.root, node)
+                )
+            )
+        elif sampling_method == "closest_lca_mapped":
+            lca = nx.lowest_common_ancestor(
+                self.core_subgraph, node, negn, default=self.root
+            )
+            label_to_assign = (
+                2
+                * nx.shortest_path_length(core_subgraph_un, self.root, lca)
+                / (
+                    nx.shortest_path_length(core_subgraph_un, self.root, negn)
+                    + nx.shortest_path_length(core_subgraph_un, self.root, node)
+                )
+            )
+            mapped_label_to_assign = (
+                self.cosine_range[1] - self.cosine_range[0]
+            ) * label_to_assign  # scale range from length of 1 to the correct length
+            mapped_label_to_assign = (
+                mapped_label_to_assign + self.cosine_range[0]
+            )  # shift range to start at min
+            label_to_assign = mapped_label_to_assign
+        elif sampling_method == "closest_range":
+            label_to_assign = 1 / (
+                nx.shortest_path_length(core_subgraph_un, node, negn)
+            )
+            mapped_label_to_assign = (
+                self.cosine_range[1] - self.cosine_range[0]
+            ) * label_to_assign  # scale range from length of 1 to the correct length
+            mapped_label_to_assign = (
+                mapped_label_to_assign + self.cosine_range[0]
+            )  # shift range to start at min
+            label_to_assign = mapped_label_to_assign
+        elif sampling_method == "closest_range_linear":
+            label_to_assign = (
+                max_graph_distance
+                - nx.shortest_path_length(core_subgraph_un, node, negn)
+            ) / (max_graph_distance - min_graph_distance)
+            label_to_assign = (
+                label_to_assign * (self.cosine_range[1] - self.cosine_range[0])
+                + self.cosine_range[0]
+            )
+        elif sampling_method == "closest_distance":
+            label_to_assign = nx.shortest_path_length(core_subgraph_un, node, negn)
+        elif sampling_method == "closest_linear":
+            label_to_assign = max(
+                -0.9,
+                1 - (0.1 * nx.shortest_path_length(core_subgraph_un, node, negn)),
+            )
+        elif sampling_method == "closest_epsilon":
+            label_to_assign = 1 / (
+                nx.shortest_path_length(core_subgraph_un, node, negn) + 0.1
+            )
+        elif sampling_method == "closest_sign":
+            if nx.has_path(self.core_subgraph, negn, node):
+                label_to_assign = 1 / (
+                    nx.shortest_path_length(core_subgraph_un, negn, node)
+                )
+            else:
+                label_to_assign = -1 / (
+                    nx.shortest_path_length(core_subgraph_un, negn, node)
+                )
+        elif sampling_method == "closest_sign_square":
+            if nx.has_path(self.core_subgraph, negn, node):
+                label_to_assign = 1 / (
+                    nx.shortest_path_length(core_subgraph_un, negn, node) ** 2
+                )
+            else:
+                label_to_assign = -1 / (
+                    nx.shortest_path_length(core_subgraph_un, negn, node) ** 2
+                )
+        elif sampling_method == "closest_square":
+            label_to_assign = 1 / (
+                nx.shortest_path_length(core_subgraph_un, node, negn) ** 2
+            )
+        elif sampling_method == "CSCH":
+            label_to_assign = float(
+                csch(nx.shortest_path_length(core_subgraph_un, node, negn))
+            )
+        elif sampling_method == "sqrt":
+            label_to_assign = float(
+                1 / (sqrt(nx.shortest_path_length(core_subgraph_un, node, negn)))
+            )
+        else:
+            label_to_assign = default
+        return label_to_assign
+
     def _construct_training(
         self,
         sampled_nodes,
@@ -299,11 +423,27 @@ class Dataset:
                 parent_def = self.definitions[
                     parent_node[random.randint(0, len(parent_node) - 1)]
                 ]["summary"]
+                if self.compute_positive_label:
+                    label_to_assign = self._compute_label(
+                        sampling_method,
+                        core_subgraph_un,
+                        node,
+                        posn,
+                        max_graph_distance,
+                        min_graph_distance,
+                        default=1.0,
+                    )
+                else:
+                    label_to_assign = 1.0
                 train_examples.append(
                     InputExample(
                         guid=str(node) + "_" + str(posn),
                         texts=[node_def, posn_def, parent_def],
-                        label=[1.0, trainInputLevel[node], trainInputLevel[posn]],
+                        label=[
+                            label_to_assign,
+                            trainInputLevel[node],
+                            trainInputLevel[posn],
+                        ],
                     )
                 )
             neg_node = neg_sample[node]
@@ -312,109 +452,15 @@ class Dataset:
                 parent_def = self.definitions[
                     parent_node[random.randint(0, len(parent_node) - 1)]
                 ]["summary"]
-                if sampling_method == "closest":
-                    label_to_assign = 1 / (
-                        nx.shortest_path_length(core_subgraph_un, node, negn)
-                    )
-                elif sampling_method == "closest_lca":
-                    lca = nx.lowest_common_ancestor(
-                        self.core_subgraph, node, negn, default=self.root
-                    )
-                    label_to_assign = (
-                        2
-                        * nx.shortest_path_length(core_subgraph_un, self.root, lca)
-                        / (
-                            nx.shortest_path_length(core_subgraph_un, self.root, negn)
-                            + nx.shortest_path_length(core_subgraph_un, self.root, node)
-                        )
-                    )
-                elif sampling_method == "closest_lca_mapped":
-                    lca = nx.lowest_common_ancestor(
-                        self.core_subgraph, node, negn, default=self.root
-                    )
-                    label_to_assign = (
-                        2
-                        * nx.shortest_path_length(core_subgraph_un, self.root, lca)
-                        / (
-                            nx.shortest_path_length(core_subgraph_un, self.root, negn)
-                            + nx.shortest_path_length(core_subgraph_un, self.root, node)
-                        )
-                    )
-                    mapped_label_to_assign = (
-                        self.cosine_range[1] - self.cosine_range[0]
-                    ) * label_to_assign  # scale range from length of 1 to the correct length
-                    mapped_label_to_assign = (
-                        mapped_label_to_assign + self.cosine_range[0]
-                    )  # shift range to start at min
-                    label_to_assign = mapped_label_to_assign
-                elif sampling_method == "closest_range":
-                    label_to_assign = 1 / (
-                        nx.shortest_path_length(core_subgraph_un, node, negn)
-                    )
-                    mapped_label_to_assign = (
-                        self.cosine_range[1] - self.cosine_range[0]
-                    ) * label_to_assign  # scale range from length of 1 to the correct length
-                    mapped_label_to_assign = (
-                        mapped_label_to_assign + self.cosine_range[0]
-                    )  # shift range to start at min
-                    label_to_assign = mapped_label_to_assign
-                elif sampling_method == "closest_range_linear":
-                    label_to_assign = (
-                        max_graph_distance
-                        - nx.shortest_path_length(core_subgraph_un, node, negn)
-                    ) / (max_graph_distance - min_graph_distance)
-                    label_to_assign = (
-                        label_to_assign * (self.cosine_range[1] - self.cosine_range[0])
-                        + self.cosine_range[0]
-                    )
-                elif sampling_method == "closest_distance":
-                    label_to_assign = nx.shortest_path_length(
-                        core_subgraph_un, node, negn
-                    )
-                elif sampling_method == "closest_linear":
-                    label_to_assign = max(
-                        -0.9,
-                        1
-                        - (0.1 * nx.shortest_path_length(core_subgraph_un, node, negn)),
-                    )
-                elif sampling_method == "closest_epsilon":
-                    label_to_assign = 1 / (
-                        nx.shortest_path_length(core_subgraph_un, node, negn) + 0.1
-                    )
-                elif sampling_method == "closest_sign":
-                    if nx.has_path(self.core_subgraph, negn, node):
-                        label_to_assign = 1 / (
-                            nx.shortest_path_length(core_subgraph_un, negn, node)
-                        )
-                    else:
-                        label_to_assign = -1 / (
-                            nx.shortest_path_length(core_subgraph_un, negn, node)
-                        )
-                elif sampling_method == "closest_sign_square":
-                    if nx.has_path(self.core_subgraph, negn, node):
-                        label_to_assign = 1 / (
-                            nx.shortest_path_length(core_subgraph_un, negn, node) ** 2
-                        )
-                    else:
-                        label_to_assign = -1 / (
-                            nx.shortest_path_length(core_subgraph_un, negn, node) ** 2
-                        )
-                elif sampling_method == "closest_square":
-                    label_to_assign = 1 / (
-                        nx.shortest_path_length(core_subgraph_un, node, negn) ** 2
-                    )
-                elif sampling_method == "CSCH":
-                    label_to_assign = float(
-                        csch(nx.shortest_path_length(core_subgraph_un, node, negn))
-                    )
-                elif sampling_method == "sqrt":
-                    label_to_assign = float(
-                        1
-                        / (sqrt(nx.shortest_path_length(core_subgraph_un, node, negn)))
-                    )
-                else:
-                    label_to_assign = 0.0
-
+                label_to_assign = self._compute_label(
+                    sampling_method,
+                    core_subgraph_un,
+                    node,
+                    posn,
+                    max_graph_distance,
+                    min_graph_distance,
+                    default=0.0,
+                )
                 train_examples.append(
                     InputExample(
                         guid=str(node) + "_" + str(negn),

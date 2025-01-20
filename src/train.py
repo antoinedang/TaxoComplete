@@ -51,6 +51,7 @@ super_loss_fac = float(config.get("super_loss_fac", 0.0))
 cosine_range = config.get("cossim_mapping_range", [0, 1])
 loss_alpha = float(config.get("loss_alpha", 1))
 loss_beta = float(config.get("loss_beta", 0))
+compute_positive_label = config.get("compute_positive_label", "false") == "true"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 target_device = torch.device(device)
@@ -64,6 +65,7 @@ data_prep = st.Dataset(
     neg_number,
     seed,
     cosine_range=cosine_range,
+    compute_positive_label=compute_positive_label,
 )
 
 model_name = config["model_name"]
@@ -92,6 +94,7 @@ if config.get("cossim_mapping_range_percentile", None) is not None:
         neg_number,
         seed,
         cosine_range=cosine_range,
+        compute_positive_label=compute_positive_label,
     )
 
 g = torch.Generator()
