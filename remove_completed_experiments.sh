@@ -15,5 +15,8 @@ tail -n +2 "$csv_file" | while IFS=',' read -r experiment_name MR recall1 recall
   else
     echo "File not found: $file_path"
   fi
+  
+  find ./config_files -type f -name "$experiment_name.json" -exec rm -f {} +
+  
 done
 
