@@ -12,9 +12,9 @@ tail -n +2 "$csv_file" | while IFS=',' read -r experiment_name MR recall1 recall
   if [ -f "$file_path" ]; then
     rm "$file_path"
     echo "Deleted: $file_path"
-  else
-    echo "File not found: $file_path"
   fi
+
+  find ./config_files -type f -name "$experiment_name.json" -exec echo "Deleted: {}" \;
   
   find ./config_files -type f -name "$experiment_name.json" -exec rm -f {} +
   
