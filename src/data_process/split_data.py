@@ -292,6 +292,11 @@ class Dataset:
         min_graph_distance,
         default,
     ):
+        if node == self.pseudo_leaf_node:
+            node = negn
+        if negn == self.pseudo_leaf_node:
+            negn = node
+
         if sampling_method == "closest":
             label_to_assign = 1 / (
                 nx.shortest_path_length(core_subgraph_un, node, negn)
