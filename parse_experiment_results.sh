@@ -4,6 +4,8 @@ output_file="experiment_results.csv"
 
 if [ ! -f "$output_file" ]; then
 	echo "experiment_name,MR,recall@1,recall@5,recall@10" > $output_file
+    echo "original,psy,560.6,0.17,0.392,0.488" >> $output_file
+    echo "original,semeval_verb,589.3,0.123,0.316,0.421" >> $output_file
 fi
 
 # Process each file
