@@ -82,7 +82,7 @@ echo "ERROR CODE: $?"
         config_file_name,
     )
 
-    with open("scripts/experiments/" + experiment_file_name, "w") as f:
+    with open("scripts/experiments/" + experiment_file_name, "w+") as f:
         f.write(experiment_script)
 
 
@@ -115,7 +115,7 @@ for dataset_name, dataset_folder, dataset_config_dir in datasets:
                     lam,
                     fac,
                     dataset_config_dir,
-                )
+                ).replace(".", "")
                 experiment_name = "SUPERLOSS TAU={} LAM={} FAC={} ({})".format(
                     tau,
                     lam,

@@ -80,7 +80,7 @@ echo "ERROR CODE: $?"
         config_file_name,
     )
 
-    with open("scripts/experiments/" + experiment_file_name, "w") as f:
+    with open("scripts/experiments/" + experiment_file_name, "w+") as f:
         f.write(experiment_script)
 
 
@@ -136,7 +136,7 @@ for dataset_name, dataset_folder, dataset_config_dir in datasets:
                     lower_bound,
                     upper_bound,
                     dataset_config_dir,
-                )
+                ).replace(".", "")
                 experiment_name = "PERCENT RANGE {} ({} to {}) {}".format(
                     "" if sampling_type == "closest_range" else "LINEAR",
                     lower_bound,
