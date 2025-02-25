@@ -26,15 +26,4 @@ for file in ../experiments/*/job_output.txt; do
     ' "$file" >> $output_file
 done
 
-temp_output_file="temp_experiment_results.csv"
-
-head -n 1 "$output_file" > "$temp_output_file"
-
-# Use awk to filter unique rows based on the first column
-awk -F, 'NR==1 { next } !seen[$1]++ { print $0 }' "$output_file" >> "$temp_output_file"
-
-cat $temp_output_file > $output_file
-
-rm $temp_output_file
-
 echo "Experiment results have been saved to $output_file"

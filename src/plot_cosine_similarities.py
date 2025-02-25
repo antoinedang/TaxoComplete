@@ -60,6 +60,7 @@ def get_cosine_similarity(embedding1, embedding2):
     else:
         return torch.cosine_similarity(embedding1, embedding2, dim=0)
 
+
 if not os.path.exists(error_analysis_dir + "/cosine_similarities.pkl"):
     cosine_similarities = []
 
@@ -85,24 +86,29 @@ else:
 plt.figure(figsize=(10, 6))
 num_bins = 100
 
-bin_edges = np.linspace(min(cosine_similarities), max(cosine_similarities), num_bins + 1)
+bin_edges = np.linspace(
+    min(cosine_similarities), max(cosine_similarities), num_bins + 1
+)
 counts, _ = np.histogram(cosine_similarities, bins=bin_edges)
 bin_ranges = [f"{bin_edges[i]:.3f} to {bin_edges[i+1]:.3f}" for i in range(num_bins)]
-hist_data = pd.DataFrame({
-    "Bin Range": bin_ranges,
-    "Count": counts
-})
-hist_data.to_csv(error_analysis_dir + '/cosine_similarity_bins.csv', index=False)
+hist_data = pd.DataFrame({"Bin Range": bin_ranges, "Count": counts})
+hist_data.to_csv(error_analysis_dir + "/cosine_similarity_bins.csv", index=False)
+
+percentile_lines_to_draw = [10, 20, 30, 40, 50, 60, 70, 80, 99.99]
 
 # calculate value from 0 to 1 that 80% of cosine similarities are less than
 cosine_similarities_sorted = np.sort(cosine_similarities)
-percentile_80 = np.percentile(cosine_similarities_sorted, 80)
-count_above_80 = len([x for x in cosine_similarities if np.abs(x) > percentile_80])
-top_percentile = np.percentile(cosine_similarities_sorted, 99.99)
 
 plt.hist(cosine_similarities, bins=bin_edges)
-plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f})".format(percentile_80))
-plt.axvline(top_percentile, color='g', linestyle='--', label="99.99th percentile ({:.3f})".format(top_percentile))
+for percentile in percentile_lines_to_draw:
+    percentile_value = np.percentile(cosine_similarities_sorted, percentile)
+    plt.axvline(
+        percentile_value,
+        linestyle="--",
+        color="r",
+        label="{}th percentile ({:.3f})".format(percentile, percentile_value),
+    )
+
 # change x axis range
 plt.xlim(-1, 1)
 plt.xlabel("Cosine similarity")
@@ -112,22 +118,26 @@ plt.legend()
 plt.savefig(plot_filename)
 
 
-bin_edges = np.linspace(min(np.abs(cosine_similarities)), max(np.abs(cosine_similarities)), num_bins + 1)
+bin_edges = np.linspace(
+    min(np.abs(cosine_similarities)), max(np.abs(cosine_similarities)), num_bins + 1
+)
 
 # calculate value from 0 to 1 that 80% of cosine similarities are less than
 cosine_similarities_sorted = np.sort(np.abs(cosine_similarities))
-percentile_80 = np.percentile(cosine_similarities_sorted, 80)
-count_above_80 = len([x for x in cosine_similarities if np.abs(x) > percentile_80])
-top_percentile = np.percentile(cosine_similarities_sorted, 99.99)
-
 
 
 # clear plot
 plt.clf()
 
 plt.hist(np.abs(cosine_similarities), bins=bin_edges)
-plt.axvline(percentile_80, color='r', linestyle='--', label="80th percentile ({:.3f})".format(percentile_80))
-plt.axvline(top_percentile, color='g', linestyle='--', label="99.99th percentile ({:.3f})".format(top_percentile))
+for percentile in percentile_lines_to_draw:
+    percentile_value = np.percentile(cosine_similarities_sorted, percentile)
+    plt.axvline(
+        percentile_value,
+        linestyle="--",
+        color="r",
+        label="{}th percentile ({:.3f})".format(percentile, percentile_value),
+    )
 # change x axis range
 plt.xlim(0, 1)
 plt.xlabel("Cosine similarity")
