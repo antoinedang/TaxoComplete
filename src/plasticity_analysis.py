@@ -8,6 +8,36 @@ import io
 import numpy as np
 
 
+def _compute_label(
+    sampling_method,
+    max_graph_distance,
+    min_graph_distance,
+    node_dist,
+    cosine_range=(0, 1),
+):
+
+    if sampling_method == "closest":
+        label_to_assign = 1 / (node_dist)
+    elif sampling_method == "closest_range":
+        label_to_assign = 1 / (node_dist)
+        mapped_label_to_assign = (
+            cosine_range[1] - cosine_range[0]
+        ) * label_to_assign  # scale range from length of 1 to the correct length
+        mapped_label_to_assign = (
+            mapped_label_to_assign + cosine_range[0]
+        )  # shift range to start at min
+        label_to_assign = mapped_label_to_assign
+    elif sampling_method == "closest_range_linear":
+        label_to_assign = (
+            max_graph_distance - node_dist
+        ) / (max_graph_distance - min_graph_distance)
+        label_to_assign = (
+            label_to_assign * (cosine_range[1] - cosine_range[0]) + cosine_range[0]
+        )
+
+    return label_to_assign
+
+
 class CPU_Unpickler(pickle.Unpickler):
     def find_class(self, module, name):
         if module == "torch.storage" and name == "_load_from_bytes":
@@ -26,122 +56,107 @@ args.add_argument(
 args = args.parse_args()
 
 error_analysis_dir = os.path.dirname(os.path.dirname(args.filename))
-plot_filename = error_analysis_dir + "/graph_distance_distributions.png"
 
-if not os.path.exists(error_analysis_dir + "/distances.pkl"):
-    with open(args.filename, "rb") as f:
-        (
-            taxonomy,
-            data_prep,
-            query_embeddings,
-            targets,
-            all_predictions,
-            all_predictions_ppr,
-            edges_predictions_test,
-            edges_predictions_test_ppr,
-            corpus_embeddings,
-            nodeId2corpusId,
-            preds,
-        ) = CPU_Unpickler(f).load()
+with open(args.filename, "rb") as f:
+    (
+        taxonomy,
+        data_prep,
+        query_embeddings,
+        targets,
+        all_predictions,
+        all_predictions_ppr,
+        edges_predictions_test,
+        edges_predictions_test_ppr,
+        corpus_embeddings,
+        nodeId2corpusId,
+        preds,
+    ) = CPU_Unpickler(f).load()
 
-    core_subgraph_undirected = data_prep.core_subgraph.to_undirected()
-    core_subgraph_undirected.remove_node(data_prep.pseudo_leaf_node)
+corpusId2nodeId = {v: k for k, v in nodeId2corpusId.items()}
 
-    # get distances between all pairs of nodes in the graph
-    print("Computing graph distances...")
-    all_distances = dict(nx.all_pairs_shortest_path_length(core_subgraph_undirected))
-    print("Computing lowest common ancestors...")
-    lca_pairs = []
-    for i in range(len(data_prep.test_queries)):
-        for n in core_subgraph_undirected.nodes:
-            if n != data_prep.corpusId2nodeId[i]:
-                lca_pairs.append((data_prep.corpusId2nodeId[i], n))
-    all_lcas = dict(nx.all_pairs_lowest_common_ancestor(data_prep.core_subgraph, pairs=lca_pairs))
-    distances = []
-    lca_labels = []
-    test_query_node_ids = [
-        data_prep.corpusId2nodeId[i] for i in range(len(data_prep.test_queries))
-    ]
-    root = data_prep.root
-    for i in range(len(data_prep.test_queries)):
-        print(f"Query {i+1}/{len(data_prep.test_queries)}")
-        for n in core_subgraph_undirected.nodes:
-            if n != data_prep.corpusId2nodeId[i]:
-                lca_query_node = all_lcas[(data_prep.corpusId2nodeId[i], n)]
-                lca_labels.append(
-                    2
-                    * all_distances[root][lca_query_node]
-                    / (
-                        all_distances[root][data_prep.corpusId2nodeId[i]]
-                        + all_distances[root][n]
-                    )
-                )
-                distances.append(all_distances[data_prep.corpusId2nodeId[i]][n])
-
-    # MAKE A SCATTER PLOT OF THE DISTANCES
-    plt.figure(figsize=(10, 6))
-    plt.hist(distances, bins=50)
-    with open(error_analysis_dir + "/distances.pkl", "wb") as f:
-        pickle.dump(distances, f)
-else:
-    with open(error_analysis_dir + "/distances.pkl", "rb") as f:
-        distances = pickle.load(f)
-# change x axis range
-plt.xlabel("Graph Distance")
-plt.ylabel("# Node Pairs")
-plt.title("Pairwise distances between nodes in taxonomy")
-plt.savefig(plot_filename)
+core_subgraph_undirected = data_prep.core_subgraph.to_undirected()
+core_subgraph_undirected.remove_node(data_prep.pseudo_leaf_node)
 
 
-def scaled_label(x, lower, upper):
-    return (upper - lower) * (1 / x) + lower
+def get_embedding(node_id):
+    if node_id == data_prep.pseudo_leaf_node:
+        return None
+    else:
+        return corpus_embeddings[nodeId2corpusId[node_id]]
 
 
+def get_cosine_similarity(embedding1, embedding2):
+    if embedding1 is None or embedding2 is None:
+        return "N/A"
+    else:
+        return torch.cosine_similarity(embedding1, embedding2, dim=0)
+
+
+train_node_pairs = [
+    (int(x.guid.split("_")[0]), int(x.guid.split("_")[1])) for x in data_prep.trainInput
+]
+
+cosine_similarities = []
+try:
+    for i in range(len(train_node_pairs)):
+        print(f"Query {i+1}/{len(train_node_pairs)}")
+        node, negn = train_node_pairs[i]
+        query_embedding = get_embedding(node)
+        corpus_embedding = get_embedding(negn)
+        cos_sim = get_cosine_similarity(query_embedding, corpus_embedding)
+        if cos_sim != "N/A":
+            cosine_similarities.append(float(cos_sim))
+        else:
+            print("NA")
+except Exception as e:
+    print(e)
+
+plot_filename = error_analysis_dir + "/mse_distributions.png"
+core_subgraph_un = core_subgraph_undirected
 max_graph_distance = nx.diameter(core_subgraph_undirected)
 min_graph_distance = 1
+pseudo_leaf_node = data_prep.pseudo_leaf_node
+label_mses = {}
+label_configs = [
+    ("closest", "")
+]
 
+for sampling_method in ["closest_range", "closest_range_linear"]:
+    for cosine_range in [(0, 1), (0.161, 0.627), (-0.9, 0.9), (0.101, 0.161), (0, 0.014)]:
+        label_configs.append((sampling_method, cosine_range))
 
-def linear_scaled_label(x, lower, upper):
-    label_to_assign = (max_graph_distance - x) / (
-        max_graph_distance - min_graph_distance
-    )
-    label_to_assign = label_to_assign * (upper - lower) + lower
-    return label_to_assign
-
-
-for label_name, labeling_fn in [
-    ("original", lambda d: 1 / d),
-    ("epsilon", lambda d: 1 / (d + 0.1)),
-    ("linear", lambda d: max(-0.9, 1 - (0.1 * d))),
-    ("boundary", lambda d: scaled_label(d, 0, 0.9)),
-    ("full_boundary", lambda d: scaled_label(d, -0.9, 0.9)),
-    ("min_max", lambda d: scaled_label(d, -0.1875, 0.5625)),
-    ("min_max_mistake", lambda d: scaled_label(d, 0.1875, 0.9375)),
-    ("linear_scale", lambda d: linear_scaled_label(d, -0.1875, 0.5625)),
-    ("lca", lambda d: linear_scaled_label(d, -0.1875, 0.5625)),
-]:
-    label_plot_filename = error_analysis_dir + f"/{label_name}_label_distributions.png"
-    print(f"Computing {label_name} labels...")
-    if os.path.exists(error_analysis_dir + f"/{label_name}_labels.pkl"):
-        with open(error_analysis_dir + f"/{label_name}_labels.pkl", "rb") as f:
-            labels = pickle.load(f)
+for sampling_method, cosine_range in label_configs:
+    label_mses[sampling_method + "_" + str(cosine_range)] = []
+    
+for i in range(len(cosine_similarities)):
+    print(f"Computing data sample #", i, "of", len(cosine_similarities))
+    cosine_similarity, nodes = list(zip(cosine_similarities, train_node_pairs))[i]
+    node, negn = nodes
+    if node == pseudo_leaf_node:
+        node_dist = nx.shortest_path_length(core_subgraph_un, negn, negn)
+    elif negn == pseudo_leaf_node:
+        node_dist = nx.shortest_path_length(core_subgraph_un, node, node)
     else:
-        if label_name == "lca":
-            labels = lca_labels
-        else:
-            labels = [labeling_fn(d) for d in distances]
-        with open(error_analysis_dir + f"/{label_name}_labels.pkl", "wb") as f:
-            pickle.dump(labels, f)
-    # labels.append(labeling_fn(min(distances)-0.9))
-    # labels.append(labeling_fn(max(distances)+1))
+        node_dist = nx.shortest_path_length(core_subgraph_un, node, negn)
+    for sampling_method, cosine_range in label_configs:
+        label = _compute_label(
+            sampling_method,
+            max_graph_distance,
+            min_graph_distance,
+            node_dist,
+            cosine_range=cosine_range,
+        )
+        label_mses[sampling_method + "_" + str(cosine_range)].append(
+            (label - cosine_similarity) ** 2
+        )
+
+for label_name, errors in label_mses.items():
+    label_plot_filename = error_analysis_dir + f"/{label_name}_mse_distributions.png"
     plt.figure(figsize=(10, 6))
-    plt.hist(labels, bins=50)
-    # change x axis range
-    plt.xlim(-1, 1)
-    plt.xlabel("Label")
+    plt.hist(errors, bins=50)
+    plt.xlabel("MSE")
     plt.ylabel("# Node Pairs")
     # make y axis log scale
     plt.yscale("log")
-    plt.title(f"Labels between nodes in taxonomy ({label_name} label fn)")
+    plt.title(f"MSEs on pre-trained model with {label_name} labelling fn")
     plt.savefig(label_plot_filename)
-    
