@@ -28,9 +28,9 @@ def _compute_label(
         )  # shift range to start at min
         label_to_assign = mapped_label_to_assign
     elif sampling_method == "closest_range_linear":
-        label_to_assign = (
-            max_graph_distance - node_dist
-        ) / (max_graph_distance - min_graph_distance)
+        label_to_assign = (max_graph_distance - node_dist) / (
+            max_graph_distance - min_graph_distance
+        )
         label_to_assign = (
             label_to_assign * (cosine_range[1] - cosine_range[0]) + cosine_range[0]
         )
@@ -117,17 +117,21 @@ max_graph_distance = nx.diameter(core_subgraph_undirected)
 min_graph_distance = 1
 pseudo_leaf_node = data_prep.pseudo_leaf_node
 label_mses = {}
-label_configs = [
-    ("closest", "")
-]
+label_configs = [("closest", "")]
 
 for sampling_method in ["closest_range", "closest_range_linear"]:
-    for cosine_range in [(0, 1), (0.161, 0.627), (-0.9, 0.9), (0.101, 0.161), (0, 0.014)]:
+    for cosine_range in [
+        (0, 1),
+        (0.161, 0.627),
+        (-0.9, 0.9),
+        (0.101, 0.161),
+        (0, 0.014),
+    ]:
         label_configs.append((sampling_method, cosine_range))
 
 for sampling_method, cosine_range in label_configs:
     label_mses[sampling_method + "_" + str(cosine_range)] = []
-    
+
 for i in range(len(cosine_similarities)):
     print(f"Computing data sample #", i, "of", len(cosine_similarities))
     cosine_similarity, nodes = list(zip(cosine_similarities, train_node_pairs))[i]
@@ -154,9 +158,15 @@ for label_name, errors in label_mses.items():
     label_plot_filename = error_analysis_dir + f"/{label_name}_mse_distributions.png"
     plt.figure(figsize=(10, 6))
     plt.hist(errors, bins=50)
+    mean_error = np.mean(errors)
+    plt.axvline(mean_error, color='red', linestyle='dotted', linewidth=2, label=f"Mean: {mean_error:.5f}")
     plt.xlabel("MSE")
     plt.ylabel("# Node Pairs")
-    # make y axis log scale
     plt.yscale("log")
+    # make x axis limited to 0-1 range
+    plt.xlim(0, 1)
+    # make y axis limited to 0-10^5 range (log)
+    plt.ylim(0, 10**5)
+    plt.legend()
     plt.title(f"MSEs on pre-trained model with {label_name} labelling fn")
     plt.savefig(label_plot_filename)
